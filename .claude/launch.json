@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "room",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["tools/serve.mjs", "--port", "8094"],
+      "port": 8094
+    },
+    {
+      "name": "hallway",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["../hallway/tools/serve.mjs", "--root", "../hallway/public", "--port", "8088", "--name", "hallway"],
+      "port": 8088
+    }
+  ]
+}
