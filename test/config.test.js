@@ -54,9 +54,9 @@ test('its window is in a wall a window can be in, and the sky outside it is turn
   assert.ok(Number.isFinite(ROOM.skyYaw) && Math.abs(ROOM.skyYaw) <= 2 * Math.PI);
 });
 
-test("its dev server's port is its own: clear of the hallway's, outside's, the shared session's and music's", () => {
+test("its dev server's port is its own: clear of the hallway's, outside's, the shared session's, music's, the template's and art's", () => {
   assert.ok(Number.isInteger(ROOM.port) && ROOM.port >= 1024 && ROOM.port <= 65535);
-  assert.ok(![8088, 8089, 8090, 8091, 8092, 8093].includes(ROOM.port), `${ROOM.port} is another site's`);
+  assert.ok(![8088, 8089, 8090, 8091, 8092, 8093, 8094, 8096].includes(ROOM.port), `${ROOM.port} is another site's`);
 });
 
 test('the page says what config.js says: its title, its description and its address, for link previews too', () => {

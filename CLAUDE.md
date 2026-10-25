@@ -4,36 +4,39 @@ Guidance for Claude Code in this repository.
 
 ## What this is
 
-An empty WebXR room behind one of the Hallway's doors, made to be copied (three.js 0.186, plain ES
-modules, no bundler or build step): a floor, four walls, a ceiling with lamps, a window onto
-common's afternoon sky, the doorway back to the Hallway, and the control panel beside it. Rooms
-(`art`, `video`, …) are made from it, so it holds everything a room needs and nothing a particular
-room has; README's "Making a room from this template" is the checklist. It follows the Hallway
-(https://ariamokr.github.io/hallway/, AriaMoKr/hallway, a checkout at `../hallway`) and outside
-(AriaMoKr/outside, `../outside`, the closest model: much of the code here is outside's or the
-hallway's, said so at the top of each such file). `public/` is the whole site. The user asked for
-the hallway to be left alone, so change `../hallway` only when asked.
+video: an empty WebXR room behind one of the Hallway's doors, soon a room to watch videos in
+(three.js 0.186, plain ES modules, no bundler or build step). For now it is still empty, as
+AriaMoKr/RoomTemplateEmpty made it (a checkout at `../RoomTemplateEmpty`): a floor, four walls, a
+ceiling with lamps, a window in the right-hand wall onto common's afternoon sky, the doorway back
+to the Hallway, and the control panel beside it. Only `public/js/config.js`, the page's title and
+link-preview tags, package.json, the pictures and these docs are its own so far; the rest is the
+template's code, which follows the Hallway (https://ariamokr.github.io/hallway/, AriaMoKr/hallway,
+a checkout at `../hallway`) and outside (AriaMoKr/outside, `../outside`), said so at the top of each
+such file. `public/` is the whole site. The user asked for the hallway to be left alone, so change
+`../hallway` only when asked; its door to here comes in the Hallway's own round (README, "The
+Hallway's door", is the entry to give it).
 
-Published at https://ariamokr.github.io/RoomTemplateEmpty/ from `main` of AriaMoKr/RoomTemplateEmpty
-(a template repository) by `.github/workflows/pages.yml`.
+Published at https://ariamokr.github.io/video/ from `main` of AriaMoKr/video by
+`.github/workflows/pages.yml`.
 
 ## Commands
 
 ```bash
 npm install          # postinstall: common's tools/vendor.mjs copies what vendor.json lists into public/vendor/ (gitignored)
-npm start            # tools/serve.mjs (common's) on config.js's port, 8094
+npm start            # tools/serve.mjs (common's) on config.js's port, 8098
 npm test             # node --test "test/*.test.js"
 npm run preview      # tools/preview.mjs: public/hallway-preview.jpg and public/social.jpg (headless Chrome)
 ```
 
 Node 22 or newer; CI runs Node 24 (common's Pages workflow). It runs under MSYS2 UCRT64 here
-(`MSYSTEM=UCRT64 /c/msys64/usr/bin/bash -lc 'cd /c/git/my/claude/RoomTemplateEmpty && …'`).
+(`MSYSTEM=UCRT64 /c/msys64/usr/bin/bash -lc 'cd /c/git/my/claude/video && …'`).
 
 ## Layout
 
-- `config.js`: the one module a copy changes (`ROOM`: id, title, description, sign, url, size,
-  colors, window, skyYaw, port, glow) and `hallwayDoor()`, the Hallway's door entry it implies.
-  `index.html` and `package.json` repeat some of it; `test/config.test.js` keeps them the same.
+- `config.js`: the one module a copy of the template changes (`ROOM`: id `video`, title, description,
+  sign, url, size, colors, window `right`, skyYaw -π/2, port 8098, glow `#6cb8e0`) and
+  `hallwayDoor()`, the Hallway's door entry it implies. `index.html` and `package.json` repeat some
+  of it; `test/config.test.js` keeps them the same.
 - `room.js`: pure (no three, tested in Node). The layout from the config (`layoutRoom`: the doorway,
   shrunk to fit the link's size, the window, the panel, the lamps, the spawn), `doorSpawn`,
   `clampWalk` (the walls, `MARGIN` from them; the doorway between its jambs to its back),
@@ -88,4 +91,6 @@ Node 22 or newer; CI runs Node 24 (common's Pages workflow). It runs under MSYS2
   nav, access with the vignette, fade, gamepad, portal, sky, and the tools `serve.mjs`,
   `vendor.mjs`, `chrome.mjs`, and the Pages workflow) and AriaMoKr/layersharedsession (`v0.3.0`).
   Change them there, then move the tag here and `npm install`.
-- `.claude/launch.json`: `room` (8094) and `hallway` (`../hallway/public` on 8088).
+- A fix to the template's code belongs in RoomTemplateEmpty too: there is no link back to it (a
+  repository made from a template shares no history with it), so carry such fixes across by hand.
+- `.claude/launch.json`: `room` (8098) and `hallway` (`../hallway/public` on 8088).
