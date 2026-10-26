@@ -49,6 +49,12 @@ class Element {
     }
   }
 
+  replaceChildren(...nodes) {
+    this._text = '';
+    this.children = [];
+    this.append(...nodes);
+  }
+
   remove() {
     if (!this.parentNode) return;
     this.parentNode.children = this.parentNode.children.filter((c) => c !== this);

@@ -25,8 +25,9 @@ As in the Hallway:
 | Phone | drag | tap the floor | tap the doorway | the **Wave** button |
 | Headset | your head | left stick walks (or aims a teleport), right stick turns, trigger at the floor teleports | trigger (or pinch) at the doorway, or step through it | squeeze a grip |
 | Gamepad | right stick | left stick (click it in to hurry) | aim the dot at the doorway and press A, or walk into it | the **Wave** button |
+| TV remote (below, "On a TV") | ←/→ turn | ↑/↓ | the dot on the doorway and OK, or walk into it; or Back | **Wave** in the card (Menu) |
 
-The walls stop you. **Fullscreen** and **Enter VR** are at the bottom right. The **control panel**
+The walls stop you. **Fullscreen** and **Enter VR** are at the bottom right (not on a TV). The **control panel**
 by the doorway holds Enter or exit VR, how to move and turn in VR (Smooth or Teleport, Snap or
 Smooth), the comfort settings below, and Start or Leave shared session. The card at the top left
 (the page's navigation) has the same choices as real controls under **Settings**, for a keyboard or
@@ -73,10 +74,46 @@ the Hallway, the doorway shows its glow and the name of where it leads.
 
 The Hallway's shared session ([AriaMoKr/layersharedsession](https://github.com/AriaMoKr/layersharedsession),
 peer to peer over WebRTC) comes in here too. Come in from the Hallway in a session and you join the
-same room here, as `video`; the others in here are drawn by the layer's avatars. **Start shared
-session**, on the panel or in the card, starts one here; **Copy invite link** copies its address,
-and **Wave** (or a grip in VR) waves to everyone in it. The doorway back carries the session into
-the Hallway.
+same room here, as `video`; the others in here are drawn by the layer's avatars.
+**Start shared session**, on the panel or in the card, starts one here; **Copy invite link** copies
+its address (on a TV the card shows it, to open on a phone or a computer), **Wave** (or a grip in
+VR) waves to everyone in it, and the card has your name in it, to change. The doorway back carries
+the session into the Hallway.
+
+## On a TV
+
+In the Hallway's Android TV app ([AriaMoKr/HallwayApp](https://github.com/AriaMoKr/HallwayApp): the
+site full screen in a WebView whose user agent ends ` HallwayTV/<version>`), or in any browser with
+`?tv=emulate`, the room is walked with the TV's remote, as common's README has it ("The TV app"),
+through its `tv.js`:
+
+- The arrows walk and turn. OK uses what the dot in the middle of the view is on: the doorway, a
+  button on the panel, or the floor (it walks there).
+- **Menu** (or holding Back) moves the focus into the card. There, up and down go from control to
+  control, left and right go through a choice, and OK chooses. The card holds Start or Leave shared
+  session; in a session, Wave, your name, and the invite link as text (there is nothing to copy it
+  to); and Settings, with every button on the panel. **Back** walks again.
+- Back while walking goes back a page, to the room's door in the Hallway.
+- There is no Fullscreen or Enter VR. The card and the hint are the 10-foot view (`html.tv` in
+  `style.css`): the page is 960 × 540 at a pixel ratio of 2, with larger text, focus rings that show
+  from across the room, and the TV's safe margins.
+
+A room made from this template keeps the remote working if:
+
+- **What it adds in 3D works with OK.** Anything a click or a tap uses, OK uses too, when
+  `controls.js`'s `_use` handles it. Anything used only with a letter key, the mouse or a control in
+  3D is also a real control in the card, where the remote reaches it.
+- **It reads keys through `keyOf(e)`** (common's `tv.js`). The remote's OK, and keys sent with
+  `adb shell input keyevent`, come with no `code`.
+- **Back undoes its own step first.** If the room has something to step back from (sitting down, a
+  picture taken up, a text opened), Back undoes it: that goes in `main.js`'s `stepBack`, which
+  returns true when it took a step. Otherwise the app goes back a page.
+- **Nothing needs a keyboard, a pointer or a headset alone**, and there are no local-file controls.
+- **It stays within the frame budget.** On the TV it was measured on (a Sony BRAVIA 4K VH21:
+  Android 12, a Mali-G52, WebView 155), the empty room holds 60 fps at 1080p at a pixel ratio of 2:
+  241 frames, none dropped, the 95th percentile at 16.8 ms. That full frame is the budget the
+  room's contents can spend. Check it with HallwayApp's `tools/tv-check.mjs --url <the room's
+  address>` (a debug build), and keep it at 60.
 
 ## Running it
 
@@ -90,8 +127,10 @@ npm run preview   # public/hallway-preview.jpg and public/social.jpg, in headles
 ```
 
 `public/` is the whole site: any static server can serve it once `npm install` has filled
-`public/vendor/`. `?xr=emulate` installs Meta's IWER emulator (a virtual Quest 3). For a Quest over
-adb, `adb reverse tcp:8098 tcp:8098` and start the server on IPv4 (`npm start -- --host 127.0.0.1`).
+`public/vendor/`. `?xr=emulate` installs Meta's IWER emulator (a virtual Quest 3), and `?tv=emulate`
+shows the TV's page (Escape stands in for Back in the card, and `hallwayTV.menu()` in the console
+for Menu). For a Quest or the TV over adb, `adb reverse tcp:8098 tcp:8098` and start the server on
+IPv4 (`npm start -- --host 127.0.0.1`).
 
 To try the way in and out locally, serve the Hallway's checkout as well (on 8088) and open the room
 as its door would:
@@ -142,11 +181,19 @@ by its README's "Making a room from this template": `public/js/config.js` is thi
 `video`, the window in the right-hand wall, port 8098, the glow `#6cb8e0`), and the rest of the code
 is still the template's. The videos come later, in the rest of `public/js/`.
 
+The template's fixes come here by merge (the remote `template` is AriaMoKr/RoomTemplateEmpty, and
+the two histories join at its `3504bd5`, which this repository's first commit copies):
+
+```bash
+git fetch template
+git merge template/main
+```
+
 ## Publishing
 
 `.github/workflows/pages.yml` publishes `public/` to GitHub Pages on every push to `main`, after
 the tests, through the sites' workflow in [AriaMoKr/common](https://github.com/AriaMoKr/common)
-(`v0.5.0`, on Node 24). Every URL in the page is relative, so it works under any repository's path.
+(`v0.6.0`, on Node 24). Every URL in the page is relative, so it works under any repository's path.
 
 ## License
 

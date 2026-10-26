@@ -6,7 +6,10 @@
 // page's <main>, with a hint on how to move, the Wave, Copy invite link, Fullscreen and Enter VR
 // buttons, the dot a gamepad aims with, and short messages, said politely. So everything the room
 // offers in 3D is a control here too: the doorway is the link, the panel's buttons are Settings,
-// the session's button and Enter VR.
+// the session's button and Enter VR. In a shared session the card also has the visitor's name.
+// On a TV (common's tv.js) the remote reaches only the card, so Wave is in it, and there is nothing
+// to copy a link to: the invite link is shown to type on another device. Fullscreen and Enter VR
+// are not offered there (main.js).
 
 function el(tag, attrs = {}, ...children) {
   const e = document.createElement(tag);
@@ -19,10 +22,14 @@ function el(tag, attrs = {}, ...children) {
   return e;
 }
 
+// tv: walking with a remote, and a line for TalkBack, which keeps the arrows (the view is described
+// by the hint); tv-card: in the card. The hallway's.
 const HINTS = {
   touch: 'Drag to look · tap the floor to walk there · tap the doorway to go back',
   mouse: 'Drag to look around · WASD or arrows to walk · click the floor to walk there',
   gamepad: 'Right stick to look · left stick to walk · A on the doorway goes back',
+  tv: 'Arrows: walk and turn · OK: the doorway or the panel in the middle · Menu or hold Back: settings and the shared session\nWith TalkBack: channel up and down walk, rewind and fast-forward turn',
+  'tv-card': 'Up, down: from control to control · left, right: a choice · OK: choose · Back: walk again',
 };
 
 export class Overlay {
@@ -32,10 +39,12 @@ export class Overlay {
    * @param {object} o
    * @param {() => string} o.href the address the way back opens now (it carries the shared session)
    * @param {() => void} o.onLeave called when its link is followed
+   * @param {boolean} o.tv the TV app's page (common's tv.js tvMode)
    */
-  constructor(room, way, { href = () => way.url, onLeave = () => {} } = {}) {
+  constructor(room, way, { href = () => way.url, onLeave = () => {}, tv = false } = {}) {
     this.root = document.getElementById('overlay');
     this.view = document.getElementById('view-overlay');
+    this.tv = tv;
     this.href = href;
     this.back = el('a', { class: 'way-back', href: href(), title: way.title }, way.label);
     this.back.addEventListener('click', () => onLeave());
@@ -45,8 +54,13 @@ export class Overlay {
     /** (change) accessibility settings changed (common/access.js), such as { motion: 'reduce' } or { seated: true }. */
     this.onAccess = () => {};
     this.onWave = () => {};
+    /** (name) when the visitor renames themself; returns the name kept. */
+    this.onName = (name) => name;
     this.session = el('button', { class: 'chip', type: 'button' }, 'Start shared session');
     this.session.addEventListener('click', () => this.onSession());
+    // Wave: a pill at the foot of the view, or on a TV in the card, beside the session's button.
+    this.wave = el('button', { class: tv ? 'chip' : 'pill', type: 'button', hidden: '' }, 'Wave');
+    this.wave.addEventListener('click', () => this.onWave());
     this.settingsToggle = el('button', { class: 'chip', type: 'button', 'aria-expanded': 'false', 'aria-controls': 'settings' }, 'Settings');
     this.choices = new Map(); // 'move:smooth' → its radio button, 'vignette' → its checkbox
     const choice = (key, legend, options, apply) => el('fieldset', {}, el('legend', {}, legend), ...options.map(([value, label]) => {
@@ -73,23 +87,34 @@ export class Overlay {
       this.settings.hidden = !open;
       this.settingsToggle.setAttribute('aria-expanded', String(open));
     });
-    this.status = el('p', { class: 'together', hidden: '' });
+    // In a shared session: how it's going, the visitor's name in it, and on a TV the invite link.
+    this.status = el('p', { class: 'together-status' });
+    this.myName = el('input', { class: 'my-name', type: 'text', maxlength: '24', autocomplete: 'off', spellcheck: 'false' });
+    this.myName.addEventListener('change', () => {
+      this.myName.value = this.onName(this.myName.value);
+    });
+    this.myName.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') this.myName.blur();
+    });
+    this.inviteText = tv ? el('p', { class: 'invite-text' }) : null;
+    this.together = el('div', { class: 'together', hidden: '' },
+      this.status,
+      el('label', { class: 'me' }, el('span', {}, 'Your name'), this.myName),
+      ...(this.inviteText ? [this.inviteText] : []));
     this.card = el('nav', { class: 'card', 'aria-label': room.title },
       el('header', {}, el('h1', { class: 'brand' }, room.title), this.back),
       el('p', { class: 'tagline' }, room.description),
       this.inRoom = el('section', { class: 'in-room', 'aria-label': 'In the room' },
-        el('div', { class: 'actions' }, this.session, this.settingsToggle),
-        this.status,
+        el('div', { class: 'actions' }, this.session, ...(tv ? [this.wave] : []), this.settingsToggle),
+        this.together,
         this.settings));
-    this.hint = el('p', { class: 'hint' });
+    this.hint = el('p', { class: 'hint', id: 'hint' });
     this.fullscreen = el('button', { class: 'pill', type: 'button', hidden: '' }, 'Fullscreen');
     this.vr = el('button', { class: 'pill vr', type: 'button', hidden: '' }, 'Enter VR');
     this.invite = el('button', { class: 'pill invite', type: 'button', hidden: '' }, 'Copy invite link');
     this.invite.addEventListener('click', () => this._copyInvite());
     this._inviteLink = '';
-    this.wave = el('button', { class: 'pill', type: 'button', hidden: '' }, 'Wave');
-    this.wave.addEventListener('click', () => this.onWave());
-    this.buttons = el('div', { class: 'buttons' }, this.wave, this.invite, this.fullscreen, this.vr);
+    this.buttons = el('div', { class: 'buttons' }, ...(tv ? [] : [this.wave]), this.invite, this.fullscreen, this.vr);
     this.dot = el('div', { class: 'aim', hidden: '', 'aria-hidden': 'true' });
     this.toasts = el('div', { class: 'toasts', role: 'status', 'aria-live': 'polite' });
     this.root.append(this.card);
@@ -103,7 +128,7 @@ export class Overlay {
     addEventListener('resize', () => this._placeHint());
   }
 
-  /** @param {'mouse'|'touch'|'gamepad'} how */
+  /** @param {'mouse'|'touch'|'gamepad'|'tv'|'tv-card'} how */
   setHint(how, seconds = 12) {
     this._how = how;
     this.hint.classList.remove('gone');
@@ -155,17 +180,26 @@ export class Overlay {
     for (const [id, input] of this.choices) if (input.checked !== on.has(id)) input.checked = on.has(id);
   }
 
-  /** In a shared session (together.js active), or not: how it's going (presence.js statusText) and the Wave button. */
-  setTogether(active, status = '') {
-    this.wave.hidden = this.status.hidden = !active;
+  /**
+   * In a shared session (together.js active), or not: how it's going (presence.js statusText), the
+   * visitor's name (together.js self), and the Wave button.
+   */
+  setTogether(active, status = '', self = null) {
+    this.wave.hidden = this.together.hidden = !active;
     const text = active ? `Together: ${status}` : '';
     if (this.status.textContent !== text) this.status.textContent = text;
+    // Not while it is being typed in.
+    if (self && document.activeElement !== this.myName && this.myName.value !== self.name) this.myName.value = self.name;
     this._placeHint();
   }
 
-  /** The shared session's invite link (together.js), or '' when not in one: hides the button. */
+  /** The shared session's invite link (together.js), or '' when not in one: hides the button. On a TV, the link to type elsewhere. */
   setInvite(link) {
     this._inviteLink = link;
+    if (this.inviteText) {
+      if (link) this.inviteText.replaceChildren('To join from a phone or a computer, open ', el('span', { class: 'invite-link' }, link.replace(/^https?:\/\//, '')));
+      return;
+    }
     this.invite.hidden = !link;
     this._placeHint();
   }

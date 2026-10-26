@@ -4,6 +4,12 @@
 // its dev server's port, and its doorway's glow. index.html says the title and the description
 // again, for link previews (a test keeps them the same). Pure, for the page, the tests and the
 // tools.
+//
+// What a room adds stays out of here, in the rest of public/js/. One thing to know about: on a TV
+// (README, "On a TV"), the remote's Back while walking goes back a page, to the room's door in the
+// Hallway, unless the room has a step back of its own first (stand up, put a picture back, close a
+// text). An empty room has none; a room with one takes it in main.js's stepBack, which returns true
+// when it took one.
 
 export const ROOM = {
   /** Its door's id in the Hallway (?from=<id> leads back to it) and its page in a shared session: 1–32 of a–z, 0–9 and '-'. */

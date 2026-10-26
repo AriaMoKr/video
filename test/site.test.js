@@ -116,6 +116,58 @@ test('every button of the control panel in 3D is a control on the page too, doin
   }
 });
 
+test("on a TV the remote reaches it all in the card: the session, Wave and the name in one, and Settings; the invite is text", async () => {
+  const remove = installDom();
+  try {
+    const { Overlay } = await import('../public/js/overlay.js');
+    const way = { url: 'https://ariamokr.github.io/hallway/?from=x', label: '← Hallway', title: 'Back to the Hallway' };
+    const o = new Overlay(ROOM, way, { tv: true });
+    const inCard = (e) => o.card.findAll((c) => c === e).length === 1;
+    // common's tv.js Remote has the card (#overlay) for its root: everything is in it, nothing at the foot of the view.
+    assert.equal(o.root, document.getElementById('overlay'));
+    assert.ok(inCard(o.session) && inCard(o.wave) && inCard(o.settingsToggle) && inCard(o.myName));
+    for (const input of o.choices.values()) assert.ok(inCard(input));
+    assert.ok(!o.buttons.children.includes(o.wave));
+    // In a session: Wave and the name, which is the one the session keeps.
+    o.setTogether(true, 'just you here', { name: 'Fox', color: '#ffaa00' });
+    assert.equal(o.wave.hidden, false);
+    assert.equal(o.together.hidden, false);
+    assert.equal(o.myName.value, 'Fox');
+    o.onName = (name) => name.trim() || 'Fox';
+    o.myName.value = '  Otter ';
+    o.myName.fire('change');
+    assert.equal(o.myName.value, 'Otter');
+    // Nothing to copy a link to: it is shown, to open on another device.
+    o.setInvite('https://ariamokr.github.io/RoomTemplateEmpty/?room=k3vd-q8hn');
+    assert.equal(o.invite.hidden, true);
+    assert.ok(inCard(o.inviteText));
+    assert.equal(o.inviteText.textContent, 'To join from a phone or a computer, open ariamokr.github.io/RoomTemplateEmpty/?room=k3vd-q8hn');
+    o.setTogether(false);
+    assert.equal(o.wave.hidden, true);
+    assert.equal(o.together.hidden, true);
+    // The hint, which describes the view to TalkBack (main.js: aria-describedby).
+    assert.equal(o.hint.getAttribute('id'), 'hint');
+    o.setHint('tv');
+    assert.match(o.hint.textContent, /^Arrows: walk and turn · OK: .* · Menu or hold Back: /);
+    o.setHint('tv-card');
+    assert.match(o.hint.textContent, /Back: walk again$/);
+  } finally {
+    remove();
+  }
+  // Not on a TV: Wave and Copy invite link are pills at the foot of the view, and there is no invite text.
+  const again = installDom();
+  try {
+    const { Overlay } = await import('../public/js/overlay.js');
+    const o = new Overlay(ROOM, { url: 'https://ariamokr.github.io/hallway/', label: '← Hallway', title: 'Back to the Hallway' });
+    assert.ok(o.buttons.children.includes(o.wave) && o.buttons.children.includes(o.invite));
+    assert.equal(o.inviteText, null);
+    o.setInvite('https://ariamokr.github.io/RoomTemplateEmpty/?room=k3vd-q8hn');
+    assert.equal(o.invite.hidden, false);
+  } finally {
+    again();
+  }
+});
+
 /** A JPEG's width and height, from its start-of-frame marker. */
 function jpegSize(file) {
   const b = readFileSync(file);

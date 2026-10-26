@@ -9,11 +9,14 @@
 //   headset: point and pull the trigger (or pinch) at the floor, the doorway or the panel; the left
 //            stick walks (move 'smooth') or aims a teleport (move 'teleport'), the right one turns
 //            in steps (turn 'snap') or smoothly (turn 'smooth'); or walk through the doorway
+//   TV:      the remote's arrows walk and turn, and OK uses the middle of the view, as a gamepad's
+//            A does (common's tv.js; main.js gives it useMiddle, and sets aimMiddle)
 // The walls stop the viewer (room.js clampWalk). The viewer's body is `rig` (yaw only); the camera
 // is its head (pitch on a screen, the headset's pose in VR). Per frame nothing is allocated.
 import * as THREE from 'three';
 import { EYE, castRay, clampWalk, panelButtonAt } from './room.js';
 import { firstPad, readPad } from 'common/gamepad.js';
+import { keyOf } from 'common/tv.js';
 
 const LOOK = 0.0045; // radians per pixel dragged
 const WALK = 1.9, RUN = 3.8, XR_WALK = 1.8; // metres per second
@@ -80,6 +83,8 @@ export class Controls {
     this._pads = 0; // connected; none, and nothing is polled
     /** Whether a gamepad is connected. */
     this.hasPad = false;
+    /** The middle of the view is the pointer whatever is used (a TV, whose remote has none: common's tv.js). */
+    this.aimMiddle = false;
     this.auto = null; // a walk under way: { points: [[x, z], …], i, face: yaw|null, speed }
     this._down = null;
     this._mouse = null;
@@ -240,14 +245,14 @@ export class Controls {
       this._move(p.x + (-sin * f + cos * r) * step, p.z + (-cos * f - sin * r) * step);
     }
     // Buttons act once per press.
-    if (s.use && !this._padUse) this._useMiddle();
+    if (s.use && !this._padUse) this.useMiddle();
     if (s.back && !this._padBack) this.onPadBack();
     this._padUse = s.use;
     this._padBack = s.back;
   }
 
-  /** A on a gamepad: what the middle of the view is on, as a click there would. */
-  _useMiddle() {
+  /** A on a gamepad, or OK on a TV's remote: what the middle of the view is on, as a click there would. */
+  useMiddle() {
     this.camera.updateWorldMatrix(true, false);
     this._use(this._pickNdc(0, 0), 'screen');
   }
@@ -298,7 +303,7 @@ export class Controls {
 
   _updateHover() {
     let hit = null;
-    const aim = this.padActive;
+    const aim = this.padActive || this.aimMiddle;
     if (aim || (this._mouse && !this._down)) {
       if (aim) this.camera.updateWorldMatrix(true, false);
       hit = aim ? this._pickNdc(0, 0) : this._pickScreen(this._mouse.x, this._mouse.y);
@@ -367,16 +372,19 @@ export class Controls {
       // The page's own controls keep their keys: a radio button its arrows, and a button or a link
       // the Space or Enter that presses it.
       if (e.target?.closest?.('input, textarea, select, [contenteditable]')) return;
-      if ((e.code === 'Space' || e.code === 'Enter' || e.code === 'NumpadEnter') && e.target?.closest?.('button, a[href]')) return;
-      const k = KEYS[e.code];
+      // A TV remote's keys come without a code (common's tv.js keyOf): their key names them.
+      const name = keyOf(e);
+      if ((name === 'Space' || name === ' ' || name === 'Enter' || name === 'NumpadEnter') && e.target?.closest?.('button, a[href]')) return;
+      const k = KEYS[name];
       if (!k) return;
-      if (e.code.startsWith('Arrow')) e.preventDefault();
+      // The arrows are walking's, not the TV's spatial navigation (or a page scroll).
+      if (name.startsWith('Arrow')) e.preventDefault();
       this.keys.add(k);
       if (k !== 'run') this.auto = null;
       this.onActivity();
     });
     window.addEventListener('keyup', (e) => {
-      const k = KEYS[e.code];
+      const k = KEYS[keyOf(e)];
       if (k) this.keys.delete(k);
     });
     window.addEventListener('blur', () => this.keys.clear());
