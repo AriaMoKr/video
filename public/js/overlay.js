@@ -132,6 +132,7 @@ export class Overlay {
   setHint(how, seconds = 12) {
     this._how = how;
     this.hint.classList.remove('gone');
+    this.hint.removeAttribute('aria-hidden');
     this.hint.textContent = HINTS[how];
     this._placeHint();
     clearTimeout(this._hintTimer);
@@ -162,8 +163,14 @@ export class Overlay {
     } else s.bottom = `${innerHeight - top + 8}px`;
   }
 
+  /**
+   * The hint fades. On a TV it also leaves the reading order, or TalkBack would stop on an empty
+   * spot; it stays the view's description (main.js: aria-describedby), which a hidden element
+   * named that way still gives.
+   */
   hideHint() {
     this.hint.classList.add('gone');
+    if (this.tv) this.hint.setAttribute('aria-hidden', 'true');
   }
 
   /** In a shared session (or paused in one, going through the door), or not: its button leaves, or starts one. */

@@ -151,6 +151,14 @@ test("on a TV the remote reaches it all in the card: the session, Wave and the n
     assert.match(o.hint.textContent, /^Arrows: walk and turn · OK: .* · Menu or hold Back: /);
     o.setHint('tv-card');
     assert.match(o.hint.textContent, /Back: walk again$/);
+    // Faded, it leaves the reading order (TalkBack would stop on an empty spot), keeping its words
+    // for the view's description; shown again, it is back in it.
+    o.hideHint();
+    assert.ok(o.hint.classList.contains('gone'));
+    assert.equal(o.hint.getAttribute('aria-hidden'), 'true');
+    assert.match(o.hint.textContent, /Back: walk again$/);
+    o.setHint('tv');
+    assert.equal(o.hint.getAttribute('aria-hidden'), null);
   } finally {
     remove();
   }
@@ -163,6 +171,10 @@ test("on a TV the remote reaches it all in the card: the session, Wave and the n
     assert.equal(o.inviteText, null);
     o.setInvite('https://ariamokr.github.io/RoomTemplateEmpty/?room=k3vd-q8hn');
     assert.equal(o.invite.hidden, false);
+    // Off a TV, a faded hint stays in the reading order: a screen reader can still find the keys.
+    o.setHint('mouse');
+    o.hideHint();
+    assert.equal(o.hint.getAttribute('aria-hidden'), null);
   } finally {
     again();
   }

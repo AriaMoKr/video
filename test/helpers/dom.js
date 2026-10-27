@@ -35,6 +35,11 @@ class Element {
     else this.attributes.set(name, String(value));
   }
 
+  removeAttribute(name) {
+    if (name === 'hidden') this.hidden = false;
+    else this.attributes.delete(name);
+  }
+
   getAttribute(name) {
     return name === 'hidden' ? (this.hidden ? '' : null) : this.attributes.get(name) ?? null;
   }

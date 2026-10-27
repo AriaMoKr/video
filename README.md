@@ -89,14 +89,19 @@ through its `tv.js`:
 
 - The arrows walk and turn. OK uses what the dot in the middle of the view is on: the doorway, a
   button on the panel, or the floor (it walks there).
-- **Menu** (or holding Back) moves the focus into the card. There, up and down go from control to
-  control, left and right go through a choice, and OK chooses. The card holds Start or Leave shared
-  session; in a session, Wave, your name, and the invite link as text (there is nothing to copy it
-  to); and Settings, with every button on the panel. **Back** walks again.
+- **Menu** (or holding Back) moves the focus into the card, starting at **← Hallway**. There, up
+  and down go from control to control, left and right go through a choice, and OK chooses. The card
+  holds Start or Leave shared session; in a session, Wave, your name, and the invite link as text
+  (there is nothing to copy it to); and Settings, with every button on the panel. **Back** walks
+  again.
+- Stepping onto your name keeps the TV's keyboard down, so the arrows go on past it. OK brings the
+  keyboard up to type, and Enter keeps the name.
 - Back while walking goes back a page, to the room's door in the Hallway.
 - There is no Fullscreen or Enter VR. The card and the hint are the 10-foot view (`html.tv` in
   `style.css`): the page is 960 × 540 at a pixel ratio of 2, with larger text, focus rings that show
   from across the room, and the TV's safe margins.
+- The hint is also the view's description, which TalkBack reads. Once it has faded, it leaves the
+  reading order, so TalkBack doesn't stop on an empty spot.
 
 A room made from this template keeps the remote working if:
 
@@ -108,6 +113,8 @@ A room made from this template keeps the remote working if:
 - **Back undoes its own step first.** If the room has something to step back from (sitting down, a
   picture taken up, a text opened), Back undoes it: that goes in `main.js`'s `stepBack`, which
   returns true when it took a step. Otherwise the app goes back a page.
+- **A text box needs nothing of its own.** Common's remote keeps the TV's keyboard down while it
+  steps onto a box and past it, and brings it up on OK. Don't give a box `inputmode="none"`.
 - **Nothing needs a keyboard, a pointer or a headset alone**, and there are no local-file controls.
 - **It stays within the frame budget.** On the TV it was measured on (a Sony BRAVIA 4K VH21:
   Android 12, a Mali-G52, WebView 155), the empty room holds 60 fps at 1080p at a pixel ratio of 2:
@@ -193,7 +200,7 @@ git merge template/main
 
 `.github/workflows/pages.yml` publishes `public/` to GitHub Pages on every push to `main`, after
 the tests, through the sites' workflow in [AriaMoKr/common](https://github.com/AriaMoKr/common)
-(`v0.6.0`, on Node 24). Every URL in the page is relative, so it works under any repository's path.
+(`v0.6.1`, on Node 24). Every URL in the page is relative, so it works under any repository's path.
 
 ## License
 

@@ -64,7 +64,8 @@ Node 22 or newer; CI runs Node 24 (common's Pages workflow). It runs under MSYS2
   radio buttons and checkboxes), the hint (`#hint`, kept clear of the buttons, `_placeHint`), Wave,
   Copy invite link, Fullscreen, Enter VR, the aiming dot, and toasts (`role="status"`, polite). With
   `tv`, Wave is in the card and the invite is text there (`inviteText`), and the hints are the
-  remote's (`tv`, `tv-card`). `presence.js`: the session's status and notices in words.
+  remote's (`tv`, `tv-card`). On a TV, a faded hint is `aria-hidden` (out of TalkBack's reading
+  order) but stays the canvas's description (`aria-describedby`). `presence.js`: the session's status and notices in words.
 - `preview.js`: the two pictures (`renderPreview`, hung as the hallway hangs its doorways', and
   `renderSocial`, from `socialView`).
 - `main.js`: the visit and the way back (common's `door.js`; `<id>.visit` in sessionStorage),
@@ -103,7 +104,7 @@ Node 22 or newer; CI runs Node 24 (common's Pages workflow). It runs under MSYS2
   (a localhost URL goes over adb reverse); the empty room holds 60 fps at 1080p at a pixel ratio of
   2, the budget a room's contents can spend. Other sessions may use the same TV: don't restart its
   app under them.
-- Shared packages, pinned by tag in package.json: AriaMoKr/common (`v0.6.0`: the door contract,
+- Shared packages, pinned by tag in package.json: AriaMoKr/common (`v0.6.1`: the door contract,
   nav, access with the vignette, fade, gamepad, portal, sky, tv, and the tools `serve.mjs`,
   `vendor.mjs`, `chrome.mjs`, and the Pages workflow) and AriaMoKr/layersharedsession (`v0.3.0`).
   Change them there, then move the tag here and `npm install`.
