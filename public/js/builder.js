@@ -58,7 +58,12 @@ export class Builder {
     return this;
   }
 
-  /** An axis-aligned box from min to max; `skip` names faces left out ('+x', '-y', …). */
+  /**
+   * An axis-aligned box from min to max; `skip` names faces left out ('+x', '-y', …).
+   * @param {number[]} min
+   * @param {number[]} max
+   * @param {{ skip?: string[], seg?: number, albedo?: number[] }} [o] `seg` and `albedo` as quad's
+   */
   box(min, max, { skip = [], seg = 0.6, albedo } = {}) {
     const [x0, y0, z0] = min, [x1, y1, z1] = max;
     const dx = x1 - x0, dy = y1 - y0, dz = z1 - z0;

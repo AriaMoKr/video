@@ -36,10 +36,10 @@ export class Overlay {
   /**
    * @param {{ title: string, description: string }} room config.js's ROOM
    * @param {{ url: string, label: string, title: string }} way the way back (common/door.js wayBack)
-   * @param {object} o
-   * @param {() => string} o.href the address the way back opens now (it carries the shared session)
-   * @param {() => void} o.onLeave called when its link is followed
-   * @param {boolean} o.tv the TV app's page (common's tv.js tvMode)
+   * @param {object} [o]
+   * @param {() => string} [o.href] the address the way back opens now (it carries the shared session)
+   * @param {() => void} [o.onLeave] called when its link is followed
+   * @param {boolean} [o.tv] the TV app's page (common's tv.js tvMode)
    */
   constructor(room, way, { href = () => way.url, onLeave = () => {}, tv = false } = {}) {
     this.root = document.getElementById('overlay');
@@ -49,9 +49,9 @@ export class Overlay {
     this.back = el('a', { class: 'way-back', href: href(), title: way.title }, way.label);
     this.back.addEventListener('click', () => onLeave());
     this.onSession = () => {};
-    /** (key, value) a movement choice for VR: 'move' 'smooth' or 'teleport', 'turn' 'snap' or 'smooth'. */
+    /** (key, value) a movement choice for VR: 'move' 'smooth' or 'teleport', 'turn' 'snap' or 'smooth'. @type {(key: string, value: string) => void} */
     this.onNav = () => {};
-    /** (change) accessibility settings changed (common/access.js), such as { motion: 'reduce' } or { seated: true }. */
+    /** (change) accessibility settings changed (common/access.js), such as { motion: 'reduce' } or { seated: true }. @type {(change: Partial<import('common/access.js').Access>) => void} */
     this.onAccess = () => {};
     this.onWave = () => {};
     /** (name) when the visitor renames themself; returns the name kept. */

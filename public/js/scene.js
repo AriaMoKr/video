@@ -43,6 +43,7 @@ function wallFrame(L, wall) {
     right: [[0, 0, 1], [-1, 0, 0], [L.x1, 0, 0]],
   }[wall];
   const by = (da, dy, dd) => [A[0] * da + D[0] * dd, dy, A[2] * da + D[2] * dd];
+  /** @returns {[number, number, number]} */
   const at = (a, y, d) => {
     const v = by(a, y, d);
     return [base[0] + v[0], v[1], base[2] + v[2]];
@@ -57,6 +58,7 @@ function wallFrame(L, wall) {
  * @param {number} o.skyYaw how the sky turns outside the window (config.js)
  * @param {string} o.glow the doorway's colour, '#rrggbb'
  * @param {string} o.name where the doorway leads, for its picture until the view has loaded
+ * @param {number} [o.anisotropy] the textures' anisotropic filtering, 1 (none) up to the renderer's most
  */
 export function buildRoom(L, { colors, skyYaw, glow, name, anisotropy = 1 }) {
   const group = new THREE.Group();

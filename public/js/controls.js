@@ -62,11 +62,11 @@ export class Controls {
     /** The sticks' smooth movement (m/s) and turning (rad/s) this frame in VR, for the vignette; 0 for snaps and teleports. */
     this.moveSpeed = 0;
     this.turnRate = 0;
-    /** (how) when the doorway is chosen: how is 'screen' or 'xr'. */
+    /** (how) when the doorway is chosen: how is 'screen' or 'xr'. @type {(how: 'screen' | 'xr') => void} */
     this.onDoor = () => {};
-    /** (button id) when a button of the control panel is pressed. */
+    /** (button id) when a button of the control panel is pressed. @type {(id: string) => void} */
     this.onPanel = () => {};
-    /** (hand) when a controller's grip is squeezed in VR (main.js: a wave in the shared session). */
+    /** (hand) when a controller's grip is squeezed in VR (main.js: a wave in the shared session). @type {(hand: object) => void} */
     this.onSqueeze = () => {};
     /** (move) for a teleport: main.js blinks the view around move(), which puts the viewer there. */
     this.onTeleport = (move) => move();
@@ -74,7 +74,7 @@ export class Controls {
     this.onActivity = () => {};
     /** A gamepad was used last: the middle of the view is what it points at (main.js shows a dot there). */
     this.padActive = false;
-    /** (on) when the gamepad takes over or hands back; when its B or Back is pressed (main.js leaves fullscreen). */
+    /** (on) when the gamepad takes over or hands back; when its B or Back is pressed (main.js leaves fullscreen). @type {(on: boolean) => void} */
     this.onPadActive = () => {};
     this.onPadBack = () => {};
     this._pad = readPad({ axes: [], buttons: [] });
@@ -371,10 +371,10 @@ export class Controls {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
       // The page's own controls keep their keys: a radio button its arrows, and a button or a link
       // the Space or Enter that presses it.
-      if (e.target?.closest?.('input, textarea, select, [contenteditable]')) return;
+      if (/** @type {Element} */ (e.target)?.closest?.('input, textarea, select, [contenteditable]')) return;
       // A TV remote's keys come without a code (common's tv.js keyOf): their key names them.
       const name = keyOf(e);
-      if ((name === 'Space' || name === ' ' || name === 'Enter' || name === 'NumpadEnter') && e.target?.closest?.('button, a[href]')) return;
+      if ((name === 'Space' || name === ' ' || name === 'Enter' || name === 'NumpadEnter') && /** @type {Element} */ (e.target)?.closest?.('button, a[href]')) return;
       const k = KEYS[name];
       if (!k) return;
       // The arrows are walking's, not the TV's spatial navigation (or a page scroll).

@@ -11,6 +11,7 @@
 // text). An empty room has none; a room with one takes it in main.js's stepBack, which returns true
 // when it took one.
 
+/** @satisfies {{ window: 'left' | 'right' | 'far', [key: string]: unknown }} the walls layoutRoom (room.js) takes */
 export const ROOM = {
   /** Its door's id in the Hallway (?from=<id> leads back to it) and its page in a shared session: 1–32 of a–z, 0–9 and '-'. */
   id: 'video',

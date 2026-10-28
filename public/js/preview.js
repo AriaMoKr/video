@@ -77,7 +77,13 @@ function renderShot(renderer, scene, camera, shot, width, height, hide) {
   }
 }
 
-/** The hallway's picture of the room, in a canvas. */
+/**
+ * The hallway's picture of the room, in a canvas.
+ * @param {THREE.WebGLRenderer} renderer
+ * @param {THREE.Scene} scene
+ * @param {THREE.Camera} camera
+ * @param {{ hide?: THREE.Object3D[], from?: { x: number, y: number, z: number }, view?: typeof PREVIEW }} [o] what to leave out (as renderShot's), where it is taken from (previewView's), and its size and hanging
+ */
 export function renderPreview(renderer, scene, camera, { hide = [], from, view = PREVIEW } = {}) {
   const f = previewView(view, from);
   const near = 0.05;

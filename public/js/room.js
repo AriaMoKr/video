@@ -28,6 +28,7 @@ export const PANEL = { gap: 0.5, y: 1.4, width: 0.56, height: 0.84, depth: 0.03 
  * vignette, seated), then the shared session.
  */
 export const PANEL_PX = { width: 512, height: 768 };
+/** @type {[id: string, x0: number, y0: number, x1: number, y1: number][]} */
 export const PANEL_BUTTONS = [
   ['vr', 32, 74, 480, 136],
   ['move:teleport', 160, 160, 314, 218],
