@@ -2,18 +2,52 @@
 
 **https://ariamokr.github.io/video/**
 
-An empty room behind one of the [Hallway](https://ariamokr.github.io/hallway/)'s doors, soon a room
-to watch videos in. For now it is empty, as [RoomTemplateEmpty](https://github.com/AriaMoKr/RoomTemplateEmpty)
-made it: a floor, four walls, a ceiling with its lamps, a window onto the afternoon sky in the
-right-hand wall, and the doorway back to the Hallway. Walk it in VR on a Meta Quest, on a desktop or
-on a phone. There is nothing to install.
+A room behind one of the [Hallway](https://ariamokr.github.io/hallway/)'s doors to watch old TV in,
+alone or together: public-domain shows from archive.org's
+[Classic TV](https://archive.org/details/classic_tv) collection, on tapes on the shelves, played on
+the room's screens. The room can be a video store, a den, a screening room or a gallery of TV sets.
+Watch in VR on a Meta Quest, on a desktop or on a phone. There is nothing to install.
 
-![The room as one comes in through the door](public/hallway-preview.jpg)
+![The video store as one comes in through the door](public/hallway-preview.jpg)
 
 Behind you as you come in is the doorway you came through, glowing sky blue, with the Hallway seen
 through it. Walk back through it (or click or tap it, or point at it in VR and pull the trigger) and
-you are back in the Hallway, in front of this room's door. Beside it, on the wall, is the control
-panel.
+you are back in the Hallway, in front of this room's door. On the wall either side of it are two panels:
+facing the doorway, the control panel on the left, and the room's own on the right (which room it
+is, and what is showing). The room itself is [RoomTemplateEmpty](https://github.com/AriaMoKr/RoomTemplateEmpty)'s: a
+floor, four walls, a ceiling with its lamps and a window onto the afternoon sky in the right-hand
+wall.
+
+## The four rooms
+
+The same room, furnished four ways. Choose one on the room's panel by the doorway, or under
+**Room** in the card at the top left. The choice is kept in this browser (`localStorage`, under
+`video.room`), and `?mode=store` (or `den`, `screening`, `gallery`) in the address picks one for
+that visit. The first visit is the video store.
+
+| Room | What is in it |
+|---|---|
+| **Video store** | Every tape face out on shelves down the left wall, a bay to each decade under its sign, a counter by the doorway, and a TV and a couch at the back. |
+| **Den** | A console TV against the far wall, a sofa and a coffee table on a rug, and the tapes on shelves. |
+| **Screening room** | A screen across the far wall over a low stage, three rows of seats on either side of an aisle, and the tapes by the doorway on both sides. While a show plays, the lights go down and the window's curtains close. |
+| **Decades gallery** | A TV set from each decade, styled for its time, each showing that decade's shows (a still from each in turn). Using one plays what it shows. |
+
+## Watching
+
+- **Choose a tape**: click or tap it, point at it in VR and pull the trigger, or put the dot on it
+  and press A (a gamepad) or OK (a TV remote). The room's screen plays it, with its name and the
+  time on the room's panel. The card's **Episodes** lists every episode by decade too, for a
+  keyboard or a screen reader.
+- **Under the screen** is a bar of buttons: Play or Pause, Next, Captions, Stop. The room's panel
+  and the card have the same.
+- **Sit down** on a seat (the couch, the sofa, a seat in the screening room) the same way: you sit
+  at a seated height, facing the screen. Walking stands you up again beside it.
+- **Captions** come from archive.org's speech to text, where an item has it (40 of the 42
+  episodes), drawn under the screen. They are off until you turn them on, and the choice is kept
+  with the room's (an episode without them says so).
+- **If the video can't reach the screen** (the archive proxy, below, can't be reached), it plays on
+  the page in a box with its own controls and captions instead, straight from archive.org. That
+  can't be done in VR, so there it says so.
 
 ## Moving about
 
@@ -27,7 +61,7 @@ As in the Hallway:
 | Gamepad | right stick | left stick (click it in to hurry) | aim the dot at the doorway and press A, or walk into it | the **Wave** button |
 | TV remote (below, "On a TV") | ←/→ turn | ↑/↓ | the dot on the doorway and OK, or walk into it; or Back | **Wave** in the card (Menu) |
 
-The walls stop you. **Fullscreen** and **Enter VR** are at the bottom right (not on a TV). The **control panel**
+The walls and the furniture stop you. **Fullscreen** and **Enter VR** are at the bottom right (not on a TV). The **control panel**
 by the doorway holds Enter or exit VR, how to move and turn in VR (Smooth or Teleport, Snap or
 Smooth), the comfort settings below, and Start or Leave shared session. The card at the top left
 (the page's navigation) has the same choices as real controls under **Settings**, for a keyboard or
@@ -80,6 +114,10 @@ its address (on a TV the card shows it, to open on a phone or a computer), **Wav
 VR) waves to everyone in it, and the card has your name in it, to change. The doorway back carries
 the session into the Hallway.
 
+In a session everyone is in the same room and watches the same show: choosing a room, a tape, Play,
+Pause, Next or Stop changes it for everyone, and whoever joins later starts where the others are.
+Each player streams the video itself, so the time can drift a second or two apart.
+
 ## On a TV
 
 In the Hallway's Android TV app ([AriaMoKr/HallwayApp](https://github.com/AriaMoKr/HallwayApp): the
@@ -88,15 +126,16 @@ site full screen in a WebView whose user agent ends ` HallwayTV/<version>`), or 
 through its `tv.js`:
 
 - The arrows walk and turn. OK uses what the dot in the middle of the view is on: the doorway, a
-  button on the panel, or the floor (it walks there).
+  tape, a seat, a button on a panel or under a screen, or the floor (it walks there).
 - **Menu** (or holding Back) moves the focus into the card, starting at **← Hallway**. There, up
   and down go from control to control, left and right go through a choice, and OK chooses. The card
-  holds Start or Leave shared session; in a session, Wave, your name, and the invite link as text
-  (there is nothing to copy it to); and Settings, with every button on the panel. **Back** walks
-  again.
+  holds the room (its four choices), Play, Next, Captions, Stop and the episodes; Start or Leave
+  shared session; in a session, Wave, your name, and the invite link as text (there is nothing to
+  copy it to); and Settings, with every button on the panel. **Back** walks again.
 - Stepping onto your name keeps the TV's keyboard down, so the arrows go on past it. OK brings the
   keyboard up to type, and Enter keeps the name.
-- Back while walking goes back a page, to the room's door in the Hallway.
+- Back while walking first stops the show playing, then stands you up if you are sitting, and
+  then goes back a page, to the room's door in the Hallway.
 - There is no Fullscreen or Enter VR. The card and the hint are the 10-foot view (`html.tv` in
   `style.css`): the page is 960 × 540 at a pixel ratio of 2, with larger text, focus rings that show
   from across the room, and the TV's safe margins.
@@ -119,8 +158,47 @@ A room made from this template keeps the remote working if:
 - **It stays within the frame budget.** On the TV it was measured on (a Sony BRAVIA 4K VH21:
   Android 12, a Mali-G52, WebView 155), the empty room holds 60 fps at 1080p at a pixel ratio of 2:
   241 frames, none dropped, the 95th percentile at 16.8 ms. That full frame is the budget the
-  room's contents can spend. Check it with HallwayApp's `tools/tv-check.mjs --url <the room's
+  room's contents can spend (the furnished rooms are not yet measured there). Check it with HallwayApp's `tools/tv-check.mjs --url <the room's
   address>` (a debug build), and keep it at 60.
+
+## The shows
+
+42 episodes of 30 shows, from the 1940s to the 1970s, chosen by hand from
+[Classic TV](https://archive.org/details/classic_tv). Its users upload the items, so the room takes
+only those marked public domain, and of those only shows known to have lapsed into it and fit for
+the whole family. That is why the decades stop at the 1970s: the collection's most watched include
+shows still under copyright, and most of what is marked public domain from the 1980s and 1990s is
+not.
+
+`tools/picks.js` lists them (the item, the show, the episode's title, the year), and
+`node tools/catalogue.mjs` writes `public/catalogue/` from it and from archive.org's metadata: the
+page's `episodes.json`, a still of each (on its tape and its set), and its captions. These are
+committed (1.7 MB), so the page never searches archive.org. Only the videos come from archive.org,
+streamed as they play. Run the tool again after changing the picks.
+
+## The archive proxy
+
+archive.org's video servers send no CORS headers. Without them a video can play on the page, but it
+can't be drawn into WebGL, so it can't be on the room's screens or in VR. The archive proxy
+(`tools/archive-proxy/worker.js`) is a Cloudflare Worker that relays the videos with those headers,
+at https://video-archive-proxy.vrlbry.workers.dev/ (`config.js`'s `videoProxy`). It runs on the
+same Cloudflare account as vrlbry's zim proxy, and they share its free plan's 100,000 requests a
+day (a viewing takes a handful, one per seek). It relays only:
+
+- the video files of items in archive.org's `classic_tv` collection (or one of its decades) that
+  are marked public domain, which it checks in each item's metadata, and
+- for the pages of `ariamokr.github.io` and this machine (`ALLOWED_ORIGINS` in `wrangler.toml`).
+
+It logs each request without the visitor's address or user agent. To deploy it, with a Cloudflare
+account (`npx wrangler login` once):
+
+```bash
+cd tools/archive-proxy && npx wrangler deploy
+```
+
+To try it without Cloudflare, `node tools/archive-proxy/serve.mjs` runs it on
+http://127.0.0.1:8099/, and `?videoproxy=http://127.0.0.1:8099/` in the room's address uses it
+(`?videoproxy=none` plays on the page).
 
 ## Running it
 
@@ -129,7 +207,7 @@ You need Node.js 22 or newer.
 ```bash
 npm install       # three.js, common, the shared-session layer, Trystero and IWER, copied into public/vendor/ by common's tools/vendor.mjs from vendor.json
 npm start         # http://localhost:8098/
-npm test          # node --test: the config, where you may walk, the way back's address, the vendor list, the page, and tsc's check of public/js/
+npm test          # node --test: the config, where you may walk, the four rooms, the catalogue, the archive proxy, the way back's address, the vendor list, the page, and tsc's check of public/js/
 npm run types     # tsc's check alone
 npm run preview   # public/hallway-preview.jpg and public/social.jpg, in headless Chrome
 ```
@@ -158,10 +236,11 @@ http://localhost:8098/?from=hallway&back=http%3A%2F%2Flocalhost%3A8088%2F%3Ffrom
 `npm run preview` (`tools/preview.mjs`) renders two pictures in headless Chrome, and they are
 committed:
 
-- `public/hallway-preview.jpg`, 2048 × 1024: the room from where one arrives, at eye height, facing
-  in, hung as the Hallway hangs its doorways' pictures. The Hallway's doorway to here shows it.
-- `public/social.jpg`, 1280 × 640: the room from across it, looking back at the doorway and the
-  window. The page's `og:image` and `twitter:image` show it, and so does the repository's social
+- `public/hallway-preview.jpg`, 2048 × 1024: the video store from where one arrives, at eye
+  height, facing in, hung as the Hallway hangs its doorways' pictures. The Hallway's doorway to
+  here shows it.
+- `public/social.jpg`, 1280 × 640: the video store from its couch, looking back at the doorway and
+  the window. The page's `og:image` and `twitter:image` show it, and so does the repository's social
   preview on GitHub.
 
 Render them again whenever the room changes. Chrome starts through common's `tools/chrome.mjs`, on a
@@ -180,7 +259,7 @@ for word.
 {
   id: 'video',
   title: 'video',
-  subtitle: "An empty room behind the Hallway's door, soon a room to watch videos in. Walk it in VR on a Meta Quest, on a desktop or on a phone.",
+  subtitle: "Watch old TV together: public-domain shows from archive.org's Classic TV, in a video store, a den, a screening room or a gallery of sets. In VR, on a desktop or on a phone.",
   sign: 'Screening Room',
   url: 'https://ariamokr.github.io/video/',
   preview: 'https://ariamokr.github.io/video/hallway-preview.jpg',
@@ -192,8 +271,10 @@ for word.
 
 The repository was made from [AriaMoKr/RoomTemplateEmpty](https://github.com/AriaMoKr/RoomTemplateEmpty)
 by its README's "Making a room from this template": `public/js/config.js` is this room's (id
-`video`, the window in the right-hand wall, port 8098, the glow `#6cb8e0`), and the rest of the code
-is still the template's. The videos come later, in the rest of `public/js/`.
+`video`, the window in the right-hand wall, port 8098, the glow `#6cb8e0`). The four rooms and the
+shows are in modules of its own (`modes.js`, `furniture.js`, `covers.js`, `roompanel.js`,
+`player.js`, `catalogue.js`), and the template's `controls.js`, `overlay.js`, `scene.js`, `main.js`
+and `style.css` have this room's additions, which a merge keeps.
 
 The template's fixes come here by merge (the remote `template` is AriaMoKr/RoomTemplateEmpty, and
 the two histories join at its `3504bd5`, which this repository's first commit copies):
@@ -208,6 +289,7 @@ git merge template/main
 `.github/workflows/pages.yml` publishes `public/` to GitHub Pages on every push to `main`, after
 the tests (tsc's check among them), through the sites' workflow in
 [AriaMoKr/common](https://github.com/AriaMoKr/common) (`v0.6.2`, on Node 24). Every URL in the page is relative, so it works under any repository's path.
+The archive proxy is not published with it: deploy it by hand when `tools/archive-proxy/` changes.
 
 ## License
 

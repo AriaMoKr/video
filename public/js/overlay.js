@@ -1,15 +1,21 @@
 // The page around the 3D view (not shown in a headset), as outside's and the hallway's. The card is
 // the page's <nav>: the room's name, the way back to the hallway as a real link (for keyboards,
-// screen readers and browsers without WebGL), its description, Start / Leave shared session (and,
-// in one, how it's going), and Settings, the control panel's choices: motion (common/access.js, for
-// a screen too), how to move and turn in VR, the comfort vignette and seated mode. The view is the
-// page's <main>, with a hint on how to move, the Wave, Copy invite link, Fullscreen and Enter VR
-// buttons, the dot a gamepad aims with, and short messages, said politely. So everything the room
-// offers in 3D is a control here too: the doorway is the link, the panel's buttons are Settings,
-// the session's button and Enter VR. In a shared session the card also has the visitor's name.
-// On a TV (common's tv.js) the remote reaches only the card, so Wave is in it, and there is nothing
-// to copy a link to: the invite link is shown to type on another device. Fullscreen and Enter VR
-// are not offered there (main.js).
+// screen readers and browsers without WebGL), its description, what the room is (its four modes,
+// modes.js) and what is showing in it (the episode, a link to it on archive.org, how it's going,
+// and Play / Pause, Next, Captions and Stop, with every episode on the shelves in a list to choose
+// from), Start / Leave shared session (and, in one, how it's going), and Settings, the control
+// panel's choices: motion (common/access.js, for a screen too), how to move and turn in VR, the
+// comfort vignette and seated mode. The view is the page's <main>, with a hint on how to move, the
+// Wave, Copy invite link, Fullscreen and Enter VR buttons, the dot a gamepad aims with, the name of
+// what is pointed at, and short messages, said politely. So everything the room offers in 3D is a
+// control here too: the doorway is the link, the room's panel and the bars under the screens are
+// the modes and the player's buttons, the tapes and the sets are the episodes, the control panel's
+// buttons are Settings, the session's button and Enter VR. In a shared session the card also has
+// the visitor's name. On a TV (common's tv.js) the remote reaches only the card, so Wave is in it,
+// and there is nothing to copy a link to: the invite link is shown to type on another device.
+// Fullscreen and Enter VR are not offered there (main.js).
+import { DECADES, episodeName } from './catalogue.js';
+import { MODES, MODE_NAMES } from './modes.js';
 
 function el(tag, attrs = {}, ...children) {
   const e = document.createElement(tag);
@@ -25,10 +31,10 @@ function el(tag, attrs = {}, ...children) {
 // tv: walking with a remote, and a line for TalkBack, which keeps the arrows (the view is described
 // by the hint); tv-card: in the card. The hallway's.
 const HINTS = {
-  touch: 'Drag to look · tap the floor to walk there · tap the doorway to go back',
-  mouse: 'Drag to look around · WASD or arrows to walk · click the floor to walk there',
-  gamepad: 'Right stick to look · left stick to walk · A on the doorway goes back',
-  tv: 'Arrows: walk and turn · OK: the doorway or the panel in the middle · Menu or hold Back: settings and the shared session\nWith TalkBack: channel up and down walk, rewind and fast-forward turn',
+  touch: 'Drag to look · tap the floor to walk there · tap a tape to watch it, a seat to sit',
+  mouse: 'Drag to look around · WASD or arrows to walk · click the floor to walk there, a tape to watch it',
+  gamepad: 'Right stick to look · left stick to walk · A on a tape plays it, on a seat sits',
+  tv: 'Arrows: walk and turn · OK: what is in the middle (a tape, a screen, a seat, a panel) · Back: stop, stand up · Menu or hold Back: the room, the episodes and settings\nWith TalkBack: channel up and down walk, rewind and fast-forward turn',
   'tv-card': 'Up, down: from control to control · left, right: a choice · OK: choose · Back: walk again',
 };
 
@@ -56,6 +62,12 @@ export class Overlay {
     this.onWave = () => {};
     /** (name) when the visitor renames themself; returns the name kept. */
     this.onName = (name) => name;
+    /** (mode) a mode of the room chosen (modes.js MODES). @type {(mode: string) => void} */
+    this.onMode = () => {};
+    /** (action) a button of the player: 'play' (or pause), 'next', 'captions' or 'stop'. @type {(action: string) => void} */
+    this.onPlayer = () => {};
+    /** (i) an episode chosen from the list (its index in the catalogue). @type {(i: number) => void} */
+    this.onEpisode = () => {};
     this.session = el('button', { class: 'chip', type: 'button' }, 'Start shared session');
     this.session.addEventListener('click', () => this.onSession());
     // Wave: a pill at the foot of the view, or on a TV in the card, beside the session's button.
@@ -101,10 +113,47 @@ export class Overlay {
       this.status,
       el('label', { class: 'me' }, el('span', {}, 'Your name'), this.myName),
       ...(this.inviteText ? [this.inviteText] : []));
+    // The room's modes, and what is showing: the room panel's and the bars' buttons.
+    /** @type {Map<string, HTMLInputElement>} */
+    this.modeChoices = new Map();
+    this.modes = el('fieldset', { class: 'modes' }, el('legend', {}, 'Room'), ...MODES.map((mode) => {
+      const input = el('input', { type: 'radio', name: 'mode', value: mode });
+      input.addEventListener('change', () => {
+        if (input.checked) this.onMode(mode);
+      });
+      this.modeChoices.set(mode, input);
+      return el('label', {}, input, MODE_NAMES[mode]);
+    }));
+    this.now = el('p', { class: 'now' });
+    this._now = '';
+    const action = (name, label, attrs = {}) => {
+      const b = el('button', { class: 'chip', type: 'button', ...attrs }, label);
+      b.addEventListener('click', () => this.onPlayer(name));
+      return b;
+    };
+    this.play = action('play', 'Play');
+    this.next = action('next', 'Next');
+    this.captions = action('captions', 'Captions', { 'aria-pressed': 'false' });
+    this.stop = action('stop', 'Stop');
+    this.episodesToggle = el('button', { class: 'chip', type: 'button', 'aria-expanded': 'false', 'aria-controls': 'episodes' }, 'Episodes');
+    this.episodes = el('div', { class: 'episodes', id: 'episodes', hidden: '' });
+    this.episodesToggle.addEventListener('click', () => {
+      const open = this.episodes.hidden;
+      this.episodes.hidden = !open;
+      this.episodesToggle.setAttribute('aria-expanded', String(open));
+    });
+    /** The episodes' buttons, in the catalogue's order. @type {HTMLButtonElement[]} */
+    this.episodeButtons = [];
+    this.showing = el('section', { class: 'showing', 'aria-label': 'Now showing' },
+      this.modes,
+      this.now,
+      el('div', { class: 'actions' }, this.play, this.next, this.captions, this.stop, this.episodesToggle),
+      this.episodes);
     this.card = el('nav', { class: 'card', 'aria-label': room.title },
       el('header', {}, el('h1', { class: 'brand' }, room.title), this.back),
       el('p', { class: 'tagline' }, room.description),
       this.inRoom = el('section', { class: 'in-room', 'aria-label': 'In the room' },
+        this.showing,
         el('div', { class: 'actions' }, this.session, ...(tv ? [this.wave] : []), this.settingsToggle),
         this.together,
         this.settings));
@@ -116,9 +165,13 @@ export class Overlay {
     this._inviteLink = '';
     this.buttons = el('div', { class: 'buttons' }, ...(tv ? [] : [this.wave]), this.invite, this.fullscreen, this.vr);
     this.dot = el('div', { class: 'aim', hidden: '', 'aria-hidden': 'true' });
+    // What is pointed at, by its name (a tape's episode, a screen, a seat): a mouse's, or the dot's. The card has it all in words.
+    this.label = el('div', { class: 'aim-label', hidden: '', 'aria-hidden': 'true' });
+    this._label = '';
+    this._at = [NaN, NaN];
     this.toasts = el('div', { class: 'toasts', role: 'status', 'aria-live': 'polite' });
     this.root.append(this.card);
-    this.view.append(this.hint, this.buttons, this.dot, this.toasts);
+    this.view.append(this.hint, this.buttons, this.dot, this.label, this.toasts);
     // The card stops above the buttons, however many rows they wrap to (style.css, --buttons).
     new ResizeObserver(() => {
       document.documentElement.style.setProperty('--buttons', `${this.buttons.offsetHeight}px`);
@@ -171,6 +224,76 @@ export class Overlay {
   hideHint() {
     this.hint.classList.add('gone');
     if (this.tv) this.hint.setAttribute('aria-hidden', 'true');
+  }
+
+  /** The room's mode (modes.js), checked in its choices. */
+  setMode(mode) {
+    for (const [m, input] of this.modeChoices) if (input.checked !== (m === mode)) input.checked = m === mode;
+  }
+
+  /** The episodes to choose from (catalogue.js), by decade, as on the shelves. */
+  setEpisodes(episodes) {
+    this.episodeButtons = [];
+    const groups = DECADES.map((decade) => {
+      const items = [];
+      episodes.forEach((e, i) => {
+        if (e.decade !== decade) return;
+        const b = el('button', { class: 'episode', type: 'button' }, episodeName(e));
+        b.addEventListener('click', () => this.onEpisode(i));
+        this.episodeButtons[i] = b;
+        items.push(el('li', {}, b));
+      });
+      return items.length ? el('section', { 'aria-label': decade }, el('h2', { class: 'decade' }, decade), el('ul', {}, ...items)) : null;
+    }).filter(Boolean);
+    this.episodes.replaceChildren(...groups);
+  }
+
+  /**
+   * What is showing: the episode (its index, or -1), its name and its page on archive.org, how it
+   * is going (status, and the time as "3:12 / 24:00"), whether it plays, and the captions (on or
+   * off for every episode: the status says when one has none).
+   * @param {{ episode: number, name: string | null, link: string | null, status: string, time: string, playing: boolean, captions: boolean, hasCaptions: boolean, hint: string }} s
+   */
+  setShowing(s) {
+    const key = [s.episode, s.status, s.time, s.hint].join('|');
+    if (key !== this._now) {
+      this._now = key;
+      if (s.name && s.link) {
+        const a = el('a', { href: s.link, target: '_blank', rel: 'noopener' }, s.name);
+        this.now.replaceChildren(a, ` · ${s.status}${s.time ? ` · ${s.time}` : ''}`);
+      } else this.now.replaceChildren(s.hint);
+    }
+    const play = s.playing ? 'Pause' : 'Play';
+    if (this.play.textContent !== play) this.play.textContent = play;
+    const pressed = String(s.captions);
+    if (this.captions.getAttribute('aria-pressed') !== pressed) this.captions.setAttribute('aria-pressed', pressed);
+    if (this.stop.hidden !== s.episode < 0) this.stop.hidden = s.episode < 0;
+    this.episodeButtons.forEach((b, i) => {
+      const current = i === s.episode ? 'true' : null;
+      if (b.getAttribute('aria-current') !== current) {
+        if (current) b.setAttribute('aria-current', current);
+        else b.removeAttribute('aria-current');
+      }
+    });
+  }
+
+  /** The name of what is pointed at, by the mouse at (x, y) or at the dot (x null), or nothing (''). */
+  setLabel(text, x = null, y = null) {
+    if (text !== this._label) {
+      this._label = text;
+      this.label.textContent = text;
+      this.label.hidden = !text;
+    }
+    // Moved only when the pointer has (it is asked every frame).
+    if (!text || (x === this._at[0] && y === this._at[1])) return;
+    this._at[0] = x;
+    this._at[1] = y;
+    // Right of the pointer, or left of it in the right part of the view, so it stays on the screen.
+    const flip = x !== null && x > innerWidth * 0.55;
+    this.label.style.left = x === null ? '50%' : `${Math.round(flip ? x - 14 : x + 18)}px`;
+    this.label.style.top = y === null ? 'calc(50% + 22px)' : `${Math.round(y + 20)}px`;
+    this.label.classList.toggle('centred', x === null);
+    this.label.classList.toggle('flip', flip);
   }
 
   /** In a shared session (or paused in one, going through the door), or not: its button leaves, or starts one. */

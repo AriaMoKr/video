@@ -1,8 +1,8 @@
 {
   "name": "video",
   "version": "0.1.0",
-  "description": "An empty WebXR room behind one of the Hallway's doors, soon a room to watch videos in: a floor, four walls, a ceiling, a window onto the afternoon sky, and the doorway back. In VR, on a desktop or on a phone.",
-  "keywords": ["webxr", "virtual-reality", "threejs", "meta-quest", "video"],
+  "description": "A WebXR room behind one of the Hallway's doors to watch old television in, together: public-domain shows from archive.org's Classic TV collection, in a video store, a den, a screening room or a gallery of each decade's sets. In VR, on a desktop, a phone or a TV.",
+  "keywords": ["webxr", "virtual-reality", "threejs", "meta-quest", "video", "archive-org", "classic-tv"],
   "homepage": "https://ariamokr.github.io/video/",
   "repository": {
     "type": "git",

@@ -1,0 +1,16 @@
+# The archive proxy (worker.js): archive.org's classic TV episodes, with CORS, for the room's
+# screens. Deploy with a Cloudflare account: `npx wrangler login`, then `npx wrangler deploy` in
+# this folder. It answers at https://video-archive-proxy.<your workers.dev subdomain>.workers.dev/
+# (here vrlbry's: https://video-archive-proxy.vrlbry.workers.dev/), which config.js names.
+name = "video-archive-proxy"
+main = "worker.js"
+compatibility_date = "2026-09-01"
+workers_dev = true
+
+[vars]
+# The pages that may read through it (worker.js allowOrigin): the Pages sites (all share this
+# origin) and this machine's servers, any port, for trying. "*" would allow any site.
+ALLOWED_ORIGINS = "https://ariamokr.github.io, http://localhost:*, http://127.0.0.1:*"
+
+[observability]
+enabled = true

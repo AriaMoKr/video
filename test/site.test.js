@@ -9,6 +9,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ROOM, hallwayDoor } from '../public/js/config.js';
 import { PANEL_BUTTONS } from '../public/js/room.js';
+import { BAR_BUTTONS, MODES, ROOM_PANEL_BUTTONS } from '../public/js/modes.js';
 import { installDom } from './helpers/dom.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..', 'public');
@@ -111,6 +112,68 @@ test('every button of the control panel in 3D is a control on the page too, doin
     assert.ok(o.card.textContent.includes(ROOM.title) && o.card.textContent.includes(ROOM.description));
     assert.equal(o.toasts.getAttribute('role'), 'status');
     assert.equal(o.toasts.getAttribute('aria-live'), 'polite');
+  } finally {
+    remove();
+  }
+});
+
+test("every button of the room's panel and of the bars under the screens is a control on the page, and every tape an episode in the card", async () => {
+  const remove = installDom();
+  try {
+    const { Overlay } = await import('../public/js/overlay.js');
+    const o = new Overlay(ROOM, { url: 'https://ariamokr.github.io/hallway/', label: '← Hallway', title: 'Back to the Hallway' });
+    const did = [];
+    o.onMode = (m) => did.push(`mode:${m}`);
+    o.onPlayer = (a) => did.push(a);
+    o.onEpisode = (i) => did.push(`episode:${i}`);
+    const buttons = { play: o.play, next: o.next, captions: o.captions, stop: o.stop };
+    for (const [id] of [...ROOM_PANEL_BUTTONS, ...BAR_BUTTONS]) {
+      did.length = 0;
+      const [, what, mode] = id.split(':');
+      if (what === 'mode') {
+        const input = o.modeChoices.get(mode);
+        assert.ok(input, `no choice on the page for ${id}`);
+        input.checked = true;
+        input.fire('change');
+        assert.deepEqual(did, [`mode:${mode}`], id);
+      } else {
+        assert.ok(buttons[what], `no button on the page for ${id}`);
+        buttons[what].fire('click');
+        assert.deepEqual(did, [what], id);
+      }
+    }
+    assert.deepEqual([...o.modeChoices.keys()], [...MODES]);
+    o.setMode('den');
+    assert.deepEqual([...o.modeChoices].filter(([, i]) => i.checked).map(([m]) => m), ['den']);
+    // The episodes, by decade, each a button; the one showing is marked, and its page linked.
+    const episodes = [
+      { id: 'a', show: 'A', title: 'One', decade: '1950s', year: 1951 },
+      { id: 'b', show: 'B', title: 'Two', decade: '1940s', year: null },
+    ];
+    o.setEpisodes(episodes);
+    assert.equal(o.episodeButtons.length, 2);
+    assert.equal(o.episodes.textContent, '1940sB: Two (1940s)1950sA: One (1951)');
+    did.length = 0;
+    o.episodeButtons[1].fire('click');
+    assert.deepEqual(did, ['episode:1']);
+    assert.equal(o.episodesToggle.getAttribute('aria-expanded'), 'false');
+    o.episodesToggle.fire('click');
+    assert.equal(o.episodes.hidden, false);
+    assert.equal(o.episodesToggle.getAttribute('aria-expanded'), 'true');
+    o.setShowing({ episode: 0, name: 'A: One (1951)', link: 'https://archive.org/details/a', status: 'Playing', time: '0:10 / 25:00', playing: true, captions: true, hasCaptions: true, hint: 'Choose' });
+    assert.equal(o.play.textContent, 'Pause');
+    assert.equal(o.captions.getAttribute('aria-pressed'), 'true');
+    assert.equal(o.episodeButtons[0].getAttribute('aria-current'), 'true');
+    assert.equal(o.episodeButtons[1].getAttribute('aria-current'), null);
+    assert.equal(o.now.children[0].getAttribute('href'), 'https://archive.org/details/a');
+    assert.equal(o.now.children[0].textContent, 'A: One (1951)');
+    assert.ok(o.now.textContent.includes(' · Playing · 0:10 / 25:00'));
+    assert.equal(o.stop.hidden, false);
+    o.setShowing({ episode: -1, name: null, link: null, status: 'Stopped', time: '', playing: false, captions: false, hasCaptions: false, hint: 'Choose a tape' });
+    assert.equal(o.now.textContent, 'Choose a tape');
+    assert.equal(o.play.textContent, 'Play');
+    assert.equal(o.stop.hidden, true);
+    assert.equal(o.episodeButtons[0].getAttribute('aria-current'), null);
   } finally {
     remove();
   }

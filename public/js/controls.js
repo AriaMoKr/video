@@ -6,15 +6,19 @@
 //   gamepad: as in vrlbry, it takes over when used and the mouse takes it back: the left stick
 //            walks, the right one looks, A uses what the middle of the view is on (common's
 //            gamepad.js)
-//   headset: point and pull the trigger (or pinch) at the floor, the doorway or the panel; the left
+//   headset: point and pull the trigger (or pinch) at the floor, the doorway or a panel; the left
 //            stick walks (move 'smooth') or aims a teleport (move 'teleport'), the right one turns
 //            in steps (turn 'snap') or smoothly (turn 'smooth'); or walk through the doorway
 //   TV:      the remote's arrows walk and turn, and OK uses the middle of the view, as a gamepad's
 //            A does (common's tv.js; main.js gives it useMiddle, and sets aimMiddle)
-// The walls stop the viewer (room.js clampWalk). The viewer's body is `rig` (yaw only); the camera
-// is its head (pitch on a screen, the headset's pose in VR). Per frame nothing is allocated.
+// In every mode of the room (modes.js) the same goes for its things: a tape, a screen, the bar under
+// it, the room's panel, and a seat, which sits the viewer down facing the screen (moving stands
+// them up again). The walls and the furniture stop the viewer (modes.js clampWalk). The viewer's
+// body is `rig` (yaw only); the camera is its head (pitch on a screen, the headset's pose in VR).
+// Per frame nothing is allocated.
 import * as THREE from 'three';
-import { EYE, castRay, clampWalk, panelButtonAt } from './room.js';
+import { EYE, panelButtonAt } from './room.js';
+import { SEATED_EYE, barButtonAt, castRay, clampWalk, roomPanelButtonAt } from './modes.js';
 import { firstPad, readPad } from 'common/gamepad.js';
 import { keyOf } from 'common/tv.js';
 
@@ -49,9 +53,14 @@ export class Controls {
     this.yaw = 0;
     this.pitch = 0;
     this.keys = new Set();
-    this.hover = null; // what is pointed at that could be used: 'door', or a panel button's id
+    this.hover = null; // what is pointed at that could be used: 'door', a panel button's id, or a thing's use ('tape:3', 'seat:0', …)
     this.hoverDoor = false;
     this.hoverPanel = null; // the control panel's button pointed at
+    /** What kind of thing the usable one pointed at is (castRay's kind: 'tape', 'roompanel', …), and its id there, or null. */
+    this.hoverKind = null;
+    this.hoverId = null;
+    /** The seat sat on (modes.js Seat), or null. */
+    this.seat = null;
     /** VR navigation (common/nav.js, under hallway.nav): move 'smooth' | 'teleport', turn 'snap' | 'smooth'. */
     this.move = 'smooth';
     this.turn = 'snap';
@@ -66,6 +75,8 @@ export class Controls {
     this.onDoor = () => {};
     /** (button id) when a button of the control panel is pressed. @type {(id: string) => void} */
     this.onPanel = () => {};
+    /** (use, how) when one of the room's things is used: a tape ('tape:3'), a screen ('screen:main'), a seat ('seat:0'), or a button of the room's panel or a bar ('room:play', 'bar:next'). @type {(use: string, how: 'screen' | 'xr') => void} */
+    this.onThing = () => {};
     /** (hand) when a controller's grip is squeezed in VR (main.js: a wave in the shared session). @type {(hand: object) => void} */
     this.onSqueeze = () => {};
     /** (move) for a teleport: main.js blinks the view around move(), which puts the viewer there. */
@@ -91,7 +102,7 @@ export class Controls {
     this._cursor = '';
     this._raycaster = new THREE.Raycaster();
     this._ndc = new THREE.Vector2();
-    this._hit = { t: 0, kind: '', x: 0, y: 0, z: 0, nx: 0, ny: 0, nz: 0, u: 0, v: 0, walkable: false };
+    this._hit = { t: 0, kind: '', id: null, use: null, x: 0, y: 0, z: 0, nx: 0, ny: 0, nz: 0, u: 0, v: 0, walkable: false };
     this._head = new THREE.Vector3();
     this._dir = new THREE.Vector3();
     this._origin = new THREE.Vector3();
@@ -108,6 +119,8 @@ export class Controls {
 
   /** Puts the viewer at (x, z) facing yaw (and pitch). */
   setPose(x, z, yaw, pitch = 0) {
+    this.seat = null;
+    if (!this.renderer.xr.isPresenting) this.camera.position.y = EYE;
     this.rig.position.set(x, this.renderer.xr.isPresenting ? this.eyeLift : 0, z);
     this.yaw = yaw;
     this.pitch = clamp(pitch, -PITCH, PITCH);
@@ -125,16 +138,73 @@ export class Controls {
   /** Raises the rig this far above the floor in VR (common/access.js eyeLift: 0.45 m in seated mode, else 0), at once; on a screen the eye height stays. */
   setEyeLift(lift) {
     this.eyeLift = lift;
-    if (this.renderer.xr.isPresenting) this.rig.position.y = lift;
+    if (this.renderer.xr.isPresenting) this.rig.position.y = this._riseXR();
+  }
+
+  /** In VR, the rig's height: seated mode's lift, less the drop to a seat's eye when sitting. */
+  _riseXR() {
+    return this.eyeLift - (this.seat ? EYE - SEATED_EYE : 0);
+  }
+
+  /**
+   * Sits on a seat (modes.js): there, facing the way it faces and looking down by `pitch` (at the
+   * screen), the eye at SEATED_EYE; in VR the headset as high above the seat as a seated head is.
+   */
+  sit(seat, pitch = 0) {
+    this.auto = null;
+    this.seat = seat;
+    if (this.renderer.xr.isPresenting) {
+      this.rig.updateMatrixWorld();
+      this._turnAboutHead(wrapAngle(seat.yaw - this._headYaw()));
+      this.rig.updateMatrixWorld();
+      this._placeHead(seat.x, seat.z);
+      this.rig.position.y = this._riseXR();
+      return;
+    }
+    this.rig.position.set(seat.x, 0, seat.z);
+    this.camera.position.y = SEATED_EYE;
+    this.yaw = seat.yaw;
+    this.pitch = clamp(pitch, -PITCH, PITCH);
+    this._apply();
+  }
+
+  /** Stands up from the seat, if sitting, beside it (its `out`). Returns whether one was sat on. */
+  stand() {
+    const s = this.seat;
+    if (!s) return false;
+    this.seat = null;
+    const c = clampWalk(this.layout, s.out[0], s.out[1], s.out[0], s.out[1], this._clamped);
+    if (this.renderer.xr.isPresenting) {
+      this.rig.position.y = this._riseXR();
+      this.rig.updateMatrixWorld();
+      this._placeHead(c.x, c.z);
+    } else {
+      this.camera.position.y = EYE;
+      this.rig.position.x = c.x;
+      this.rig.position.z = c.z;
+    }
+    return true;
+  }
+
+  /** Puts the viewer out of the furniture's way, if they are in it (the room was furnished anew round them). */
+  settle() {
+    this.auto = null;
+    if (this.renderer.xr.isPresenting) {
+      this.rig.updateMatrixWorld();
+      this.camera.getWorldPosition(this._head);
+      this._moveHead(this._head.x, this._head.z);
+    } else this._move(this.rig.position.x, this.rig.position.z);
   }
 
   /** Walks to a point on the floor; with less motion, it is there at once. */
   walkTo(x, z) {
+    this.stand();
     this._startWalk([[x, z]], null);
   }
 
   /** Walks up to the doorway and through it. */
   walkInto() {
+    this.stand();
     const p = this.rig.position;
     const jamb = this.layout.door.width / 2 - 0.25;
     const front = [clamp(p.x, -jamb, jamb), -1.0];
@@ -200,6 +270,7 @@ export class Controls {
     const f = (k.has('forward') ? 1 : 0) - (k.has('back') ? 1 : 0);
     const s = (k.has('right') ? 1 : 0) - (k.has('left') ? 1 : 0);
     if (!f && !s) return;
+    this.stand();
     const step = ((k.has('run') ? RUN : WALK) * dt) / Math.hypot(f, s);
     const sin = Math.sin(this.yaw), cos = Math.cos(this.yaw);
     // Forward is (-sin, -cos); right is (cos, -sin).
@@ -238,6 +309,7 @@ export class Controls {
       this.pitch = clamp(this.pitch - s.lookY * PAD_PITCH * dt, -PITCH, PITCH);
     }
     if (moving) {
+      this.stand();
       const step = (s.run ? RUN : WALK) * dt;
       const sin = Math.sin(this.yaw), cos = Math.cos(this.yaw);
       const f = -s.moveY, r = s.moveX;
@@ -294,11 +366,13 @@ export class Controls {
     return castRay(this.layout, o.x, o.y, o.z, d.x, d.y, d.z, this._hit);
   }
 
-  /** What could be used where a hit is: 'door', a panel button's id, or null. */
+  /** What could be used where a hit is: 'door', a panel's or a bar's button, a thing's use (modes.js castRay), or null. */
   _usable(hit) {
     if (!hit) return null;
     if (hit.kind === 'panel') return panelButtonAt(hit.u, hit.v);
-    return hit.kind === 'door' ? 'door' : null;
+    if (hit.kind === 'roompanel') return roomPanelButtonAt(hit.u, hit.v);
+    if (hit.kind === 'bar') return barButtonAt(hit.u, hit.v);
+    return hit.kind === 'door' ? 'door' : hit.use ?? null;
   }
 
   _updateHover() {
@@ -317,9 +391,11 @@ export class Controls {
     this.hover = usable;
     this.hoverDoor = usable === 'door';
     this.hoverPanel = hit?.kind === 'panel' ? usable : null;
+    this.hoverKind = usable ? hit.kind : null;
+    this.hoverId = usable ? hit.id : null;
   }
 
-  /** Uses what a hit is on: the doorway, a panel button, or the floor (walks there, or in VR teleports). */
+  /** Uses what a hit is on: the doorway, a panel button, one of the room's things, or the floor (walks there, or in VR teleports). */
   _use(hit, how) {
     if (!hit) return;
     if (hit.kind === 'door') this.onDoor(how);
@@ -327,6 +403,9 @@ export class Controls {
     else if (hit.kind === 'floor' && hit.walkable) {
       if (how === 'xr') this._teleport(hit.x, hit.z);
       else this.walkTo(hit.x, hit.z);
+    } else {
+      const use = this._usable(hit);
+      if (use) this.onThing(use, how);
     }
   }
 
@@ -439,7 +518,7 @@ export class Controls {
       this._recenter = 2;
       this.auto = null;
       this.keys.clear();
-      this.rig.position.y = this.eyeLift;
+      this.rig.position.y = this._riseXR();
     });
     this.renderer.xr.addEventListener('sessionend', () => this._onSessionEnd());
   }
@@ -461,7 +540,14 @@ export class Controls {
     this.rig.rotation.y = this.yaw;
   }
 
-  /** Moves the rig so the head goes to (x, z), or as near as the walls allow. */
+  /** Moves the rig so the head is at (x, z), wherever that is (a seat). */
+  _placeHead(x, z) {
+    this.camera.getWorldPosition(this._head);
+    this.rig.position.x += x - this._head.x;
+    this.rig.position.z += z - this._head.z;
+  }
+
+  /** Moves the rig so the head goes to (x, z), or as near as the walls and the furniture allow. */
   _moveHead(x, z) {
     this.camera.getWorldPosition(this._head);
     const c = clampWalk(this.layout, this._head.x, this._head.z, x, z, this._clamped);
@@ -474,7 +560,8 @@ export class Controls {
     if (this._recenter > 0 && --this._recenter === 0) {
       this._turnAboutHead(wrapAngle(this._entry.yaw - this._headYaw()));
       this.rig.updateMatrixWorld();
-      this._moveHead(this._entry.x, this._entry.z);
+      if (this.seat) this._placeHead(this.seat.x, this.seat.z);
+      else this._moveHead(this._entry.x, this._entry.z);
     }
     // The sticks: the right one turns, the left one walks or aims a teleport.
     for (const h of this.hands) {
@@ -540,6 +627,7 @@ export class Controls {
   /** Left stick, move 'smooth': walk the way the head faces. */
   _walkStick(ax, ay, dt) {
     if (Math.hypot(ax, ay) <= 0.15) return;
+    if (this.stand()) this.rig.updateMatrixWorld();
     this.camera.getWorldDirection(this._dir);
     let fx = this._dir.x, fz = this._dir.z;
     const fl = Math.hypot(fx, fz) || 1;
@@ -563,7 +651,10 @@ export class Controls {
   }
 
   _teleport(x, z) {
-    this.onTeleport(() => this._moveHead(x, z));
+    this.onTeleport(() => {
+      if (this.stand()) this.rig.updateMatrixWorld();
+      this._moveHead(x, z);
+    });
   }
 
   _press(id) {
@@ -576,7 +667,8 @@ export class Controls {
   }
 
   _onSessionEnd() {
-    // Carry on from where the headset was, facing the way it faced.
+    // Carry on from where the headset was, facing the way it faced (and sitting, if sat).
+    const seat = this.seat;
     this.camera.getWorldPosition(this._head);
     const yaw = this._headYaw();
     const c = clampWalk(this.layout, this._head.x, this._head.z, this._head.x, this._head.z, this._clamped);
@@ -589,6 +681,7 @@ export class Controls {
     }
     this._setHover(null, null);
     this.setPose(c.x, c.z, yaw);
+    if (seat) this.sit(seat);
   }
 }
 

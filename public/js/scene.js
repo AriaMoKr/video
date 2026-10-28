@@ -223,8 +223,21 @@ export function buildRoom(L, { colors, skyYaw, glow, name, anisotropy = 1 }) {
     return null;
   }
 
+  // What the lights going down dims (setDim): everything baked, the lamps, and the panel a little.
+  const dims = ['floor', 'walls', 'ceiling', 'trim'].map((n) => /** @type {THREE.MeshBasicMaterial} */ (/** @type {THREE.Mesh} */ (group.getObjectByName(n)).material));
+  const panelColor = panel.mesh.material.color.clone();
+
   return {
     group, portal, panel, glass, loadView,
+    /** The room's light, for what is added to it (furniture.js) to be lit the same: bake.js's env, and the corners' occlusion. */
+    lighting, occlusion, lightColor,
+    /** The lights at k, as bright as it looks (1: as baked; less while a show plays in the screening room). */
+    setDim(k) {
+      const lin = k ** 2.2; // the colours are linear: k is how it looks
+      for (const m of dims) m.color.setScalar(lin);
+      domes.material.color.copy(globe).multiplyScalar((0.25 + 0.75 * k) ** 2.2);
+      panel.mesh.material.color.copy(panelColor).multiplyScalar(Math.max(k, 0.6) ** 2.2);
+    },
     /** Per frame: the veil drifts, and the doorway brightens when pointed at or stood near. */
     update(time, dt, head, hover) {
       const near = head.z > -1.6 && Math.abs(head.x) < 1.4;

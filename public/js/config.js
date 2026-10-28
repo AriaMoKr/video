@@ -18,7 +18,7 @@ export const ROOM = {
   /** Its name: the page's <title> and the card's heading. */
   title: 'video',
   /** The page's <meta name="description">, word for word: the Hallway's plaque by its door shows it. */
-  description: "An empty room behind the Hallway's door, soon a room to watch videos in. Walk it in VR on a Meta Quest, on a desktop or on a phone.",
+  description: "Watch old TV together: public-domain shows from archive.org's Classic TV, in a video store, a den, a screening room or a gallery of sets. In VR, on a desktop or on a phone.",
   /** What kind of place it is, on the sign over its door in the Hallway. */
   sign: 'Screening Room',
   /** Where it is published, on GitHub Pages: https://ariamokr.github.io/<repository>/. */
@@ -40,6 +40,12 @@ export const ROOM = {
   port: 8098,
   /** The doorway's glow when the Hallway's link gives none: the colour of this room's door there. */
   glow: '#6cb8e0',
+  /**
+   * video's own: the archive proxy (tools/archive-proxy/, a Cloudflare Worker), which relays
+   * archive.org's classic TV videos with the CORS headers a 3D screen needs (catalogue.js videoUrl;
+   * ?videoproxy= tries another, ?videoproxy=none plays them on the page).
+   */
+  videoProxy: 'https://video-archive-proxy.vrlbry.workers.dev/',
 };
 
 /** The colours' form, and the ids'. */

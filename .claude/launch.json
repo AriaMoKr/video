@@ -8,6 +8,12 @@
       "port": 8098
     },
     {
+      "name": "archive-proxy",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["tools/archive-proxy/serve.mjs", "--port", "8099"],
+      "port": 8099
+    },
+    {
       "name": "hallway",
       "runtimeExecutable": "node",
       "runtimeArgs": ["../hallway/tools/serve.mjs", "--root", "../hallway/public", "--port", "8088", "--name", "hallway"],
