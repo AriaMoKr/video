@@ -1,6 +1,7 @@
 // The page's modules type-checked as they are served (tsconfig.json: from their JSDoc, nothing
-// built), as common's test/types.test.js runs tsc: a failure shows tsc's own output. TypeScript is
-// a devDependency here, so not finding it fails rather than skips.
+// built), and the files that pass `strict` checked with it (tsconfig.strict.json), as common's
+// test/types.test.js runs tsc: a failure shows tsc's own output. TypeScript is a devDependency
+// here, so not finding it fails rather than skips.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
@@ -10,7 +11,8 @@ import { fileURLToPath } from 'node:url';
 
 const here = join(dirname(fileURLToPath(import.meta.url)), '..');
 
-test('public/js/ type-checks: tsc -p tsconfig.json finds nothing', () => {
+/** tsc on a project, failing with what it found. */
+function check(project) {
   let tsc;
   try {
     tsc = createRequire(import.meta.url).resolve('typescript/bin/tsc');
@@ -18,8 +20,12 @@ test('public/js/ type-checks: tsc -p tsconfig.json finds nothing', () => {
     assert.fail('TypeScript is not installed: npm install');
   }
   try {
-    execFileSync(process.execPath, [tsc, '-p', 'tsconfig.json', '--pretty', 'false'], { cwd: here, encoding: 'utf8' });
+    execFileSync(process.execPath, [tsc, '-p', project, '--pretty', 'false'], { cwd: here, encoding: 'utf8' });
   } catch (e) {
-    assert.fail(`tsc -p tsconfig.json\n${e.stdout}${e.stderr}`);
+    assert.fail(`tsc -p ${project}\n${e.stdout}${e.stderr}`);
   }
-});
+}
+
+test('public/js/ type-checks: tsc -p tsconfig.json finds nothing', () => check('tsconfig.json'));
+
+test('the files that pass strict still do: tsc -p tsconfig.strict.json finds nothing', () => check('tsconfig.strict.json'));

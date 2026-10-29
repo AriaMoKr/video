@@ -3,17 +3,19 @@
 // screen readers and browsers without WebGL), its description, what the room is (its four modes,
 // modes.js) and what is showing in it (the episode, a link to it on archive.org, how it's going,
 // and Play / Pause, Next, Captions and Stop, with every episode on the shelves in a list to choose
-// from), Start / Leave shared session (and, in one, how it's going), and Settings, the control
-// panel's choices: motion (common/access.js, for a screen too), how to move and turn in VR, the
-// comfort vignette and seated mode. The view is the page's <main>, with a hint on how to move, the
-// Wave, Copy invite link, Fullscreen and Enter VR buttons, the dot a gamepad aims with, the name of
-// what is pointed at, and short messages, said politely. So everything the room offers in 3D is a
-// control here too: the doorway is the link, the room's panel and the bars under the screens are
-// the modes and the player's buttons, the tapes and the sets are the episodes, the control panel's
-// buttons are Settings, the session's button and Enter VR. In a shared session the card also has
-// the visitor's name. On a TV (common's tv.js) the remote reaches only the card, so Wave is in it,
-// and there is nothing to copy a link to: the invite link is shown to type on another device.
-// Fullscreen and Enter VR are not offered there (main.js).
+// from), what hangs on its walls (each one that leads somewhere a link there, the rest buttons
+// that walk up to them), Start / Leave shared session (and, in one, how it's going), and Settings,
+// the control panel's choices: motion (common/access.js, for a screen too), how to move and turn in
+// VR, the comfort vignette and seated mode. The view is the page's <main>, with a hint on how to
+// move, the Wave, Copy invite link, Fullscreen and Enter VR buttons, the dot a gamepad aims with,
+// the name of what is pointed at, and short messages, said politely. So everything the room offers
+// in 3D is a control here too: the doorway is the link, the room's panel and the bars under the
+// screens are the modes and the player's buttons, the tapes and the sets are the episodes, the
+// control panel's buttons are Settings, the session's button and Enter VR, and the pieces on the
+// walls are On the walls. In a shared session the card also has the visitor's name. On a TV
+// (common's tv.js) the remote reaches only the card, so Wave is in it, and there is nothing to copy
+// a link to: the invite link is shown to type on another device. Fullscreen and Enter VR are not
+// offered there (main.js).
 import { DECADES, episodeName } from './catalogue.js';
 import { MODES, MODE_NAMES } from './modes.js';
 
@@ -37,23 +39,55 @@ const HINTS = {
   tv: 'Arrows: walk and turn · OK: what is in the middle (a tape, a screen, a seat, a panel) · Back: stop, stand up · Menu or hold Back: the room, the episodes and settings\nWith TalkBack: channel up and down walk, rewind and fast-forward turn',
   'tv-card': 'Up, down: from control to control · left, right: a choice · OK: choose · Back: walk again',
 };
+// With something on the walls (config.js's pieces), each names the pictures too: here beside
+// video's tapes and seats.
+const PIECE_HINTS = {
+  ...HINTS,
+  touch: 'Drag to look · tap the floor to walk there · tap a tape to watch it, a seat to sit, or a picture',
+  mouse: 'Drag to look around · WASD or arrows to walk · click the floor to walk there, a tape to watch it, or a picture',
+  gamepad: 'Right stick to look · left stick to walk · A on a tape plays it, on a seat sits, on a picture goes to it',
+  tv: 'Arrows: walk and turn · OK: what is in the middle (a tape, a screen, a seat, a picture, a panel) · Back: stop, stand up · Menu or hold Back: the room, the episodes and settings\nWith TalkBack: channel up and down walk, rewind and fast-forward turn',
+};
 
 export class Overlay {
   /**
-   * @param {{ title: string, description: string }} room config.js's ROOM
+   * @param {{ title: string, description: string, pieces?: import('./config.js').Piece[] }} room config.js's ROOM
    * @param {{ url: string, label: string, title: string }} way the way back (common/door.js wayBack)
    * @param {object} [o]
    * @param {() => string} [o.href] the address the way back opens now (it carries the shared session)
-   * @param {() => void} [o.onLeave] called when its link is followed
+   * @param {(i: number) => string} [o.pieceHref] the address piece i's link opens now (likewise)
+   * @param {(i: number) => void} [o.onLeave] called when a link is followed: the way back's (-1), or piece i's
    * @param {boolean} [o.tv] the TV app's page (common's tv.js tvMode)
    */
-  constructor(room, way, { href = () => way.url, onLeave = () => {}, tv = false } = {}) {
+  constructor(room, way, { href = () => way.url, pieceHref = () => '#', onLeave = () => {}, tv = false } = {}) {
     this.root = document.getElementById('overlay');
     this.view = document.getElementById('view-overlay');
     this.tv = tv;
     this.href = href;
+    this.pieceHref = pieceHref;
     this.back = el('a', { class: 'way-back', href: href(), title: way.title }, way.label);
-    this.back.addEventListener('click', () => onLeave());
+    this.back.addEventListener('click', () => onLeave(-1));
+    /** (i) a piece without a link chosen in On the walls: walk up to it. @type {(i: number) => void} */
+    this.onPiece = () => {};
+    // What hangs on the walls, with what each is: a link where it leads, else a button.
+    /** @type {[number, HTMLAnchorElement][]} */
+    this.pieceLinks = [];
+    const pieces = room.pieces ?? [];
+    this.walls = pieces.length ? el('section', { class: 'walls', 'aria-labelledby': 'walls-heading' },
+      el('h2', { id: 'walls-heading' }, 'On the walls'),
+      el('ul', {}, ...pieces.map((p, i) => {
+        const about = `piece-${p.id}-about`;
+        let use;
+        if (p.link) {
+          use = el('a', { class: 'piece', href: pieceHref(i), 'aria-describedby': about }, p.title);
+          use.addEventListener('click', () => onLeave(i));
+          this.pieceLinks.push([i, use]);
+        } else {
+          use = el('button', { class: 'piece', type: 'button', title: 'Walk up to it', 'aria-describedby': about }, p.title);
+          use.addEventListener('click', () => this.onPiece(i));
+        }
+        return el('li', {}, use, el('span', { class: 'about', id: about }, p.description));
+      }))) : null;
     this.onSession = () => {};
     /** (key, value) a movement choice for VR: 'move' 'smooth' or 'teleport', 'turn' 'snap' or 'smooth'. @type {(key: string, value: string) => void} */
     this.onNav = () => {};
@@ -152,6 +186,7 @@ export class Overlay {
     this.card = el('nav', { class: 'card', 'aria-label': room.title },
       el('header', {}, el('h1', { class: 'brand' }, room.title), this.back),
       el('p', { class: 'tagline' }, room.description),
+      ...(this.walls ? [this.walls] : []),
       this.inRoom = el('section', { class: 'in-room', 'aria-label': 'In the room' },
         this.showing,
         el('div', { class: 'actions' }, this.session, ...(tv ? [this.wave] : []), this.settingsToggle),
@@ -178,18 +213,54 @@ export class Overlay {
       this._placeHint();
     }).observe(this.buttons);
     this._how = 'mouse';
+    this.pieces = pieces;
+    this._hints = pieces.length ? PIECE_HINTS : HINTS;
+    this._aimed = -1; // the piece a TV's dot is on (setAimed)
+    this._aimShown = false; // the hint shown again for it, to fade when the dot leaves
     addEventListener('resize', () => this._placeHint());
   }
 
   /** @param {'mouse'|'touch'|'gamepad'|'tv'|'tv-card'} how */
   setHint(how, seconds = 12) {
     this._how = how;
+    this._aimShown = false;
     this.hint.classList.remove('gone');
     this.hint.removeAttribute('aria-hidden');
-    this.hint.textContent = HINTS[how];
+    this.hint.textContent = this._hintText();
     this._placeHint();
     clearTimeout(this._hintTimer);
     if (seconds) this._hintTimer = setTimeout(() => this.hideHint(), seconds * 1000);
+  }
+
+  /** The hint's words: on a TV with the dot on a piece, its OK says what OK does there, as music's does on the gramophone. */
+  _hintText() {
+    const text = this._hints[this._how];
+    if (this._how !== 'tv' || this._aimed < 0) return text;
+    const p = this.pieces[this._aimed];
+    return text.replace(/OK: [^·]*? · /, `OK: ${p.link ? p.title : `walk up to ${p.title}`} · `);
+  }
+
+  /**
+   * On a TV, walking: the piece the dot is on (its index in config.js's pieces), else -1. The hint
+   * says what OK does there ("OK: <its title>" for one with a link), shown again if it had faded,
+   * and faded again when the dot leaves.
+   */
+  setAimed(i) {
+    if (i === this._aimed) return;
+    this._aimed = i;
+    if (this._how !== 'tv') return;
+    if (i >= 0) {
+      const faded = this._aimShown || this.hint.classList.contains('gone');
+      this.setHint('tv');
+      this._aimShown = faded;
+      return;
+    }
+    this.hint.textContent = this._hintText();
+    this._placeHint();
+    if (this._aimShown) {
+      clearTimeout(this._hintTimer);
+      this.hideHint();
+    }
   }
 
   /**
@@ -334,10 +405,14 @@ export class Overlay {
     this._placeHint();
   }
 
-  /** Works out the way back's link again (it carries the shared session's room). */
+  /** Works out the way back's link again, and the pieces' (they carry the shared session's room). */
   refreshLinks() {
     const href = this.href();
     if (this.back.getAttribute('href') !== href) this.back.setAttribute('href', href);
+    for (const [i, a] of this.pieceLinks) {
+      const h = this.pieceHref(i);
+      if (a.getAttribute('href') !== h) a.setAttribute('href', h);
+    }
   }
 
   showVR(onClick) {
@@ -386,10 +461,11 @@ export class Overlay {
     setTimeout(() => t.remove(), seconds * 1000);
   }
 
-  /** No 3D view: the way back is all there is. */
+  /** No 3D view: the way back is all there is, and where the pieces lead (the rest are just named). */
   noWebGL(message) {
     this.card.classList.add('alone');
     this.inRoom.remove();
+    for (const b of this.walls?.querySelectorAll('button.piece') ?? []) b.replaceWith(el('span', { class: 'piece-title' }, b.textContent));
     this.card.append(el('p', { class: 'no-webgl' }, message));
     this.hint.remove();
   }

@@ -61,6 +61,9 @@ As in the Hallway:
 | Gamepad | right stick | left stick (click it in to hurry) | aim the dot at the doorway and press A, or walk into it | the **Wave** button |
 | TV remote (below, "On a TV") | ←/→ turn | ↑/↓ | the dot on the doorway and OK, or walk into it; or Back | **Wave** in the card (Menu) |
 
+Whatever hangs on the walls (below, "On the walls"; nothing yet here) is chosen as the doorway is:
+you walk up to it, and on through it when it leads somewhere.
+
 The walls and the furniture stop you. **Fullscreen** and **Enter VR** are at the bottom right (not on a TV). The **control panel**
 by the doorway holds Enter or exit VR, how to move and turn in VR (Smooth or Teleport, Snap or
 Smooth), the comfort settings below, and Start or Leave shared session. The card at the top left
@@ -118,6 +121,47 @@ In a session everyone is in the same room and watches the same show: choosing a 
 Pause, Next or Stop changes it for everyone, and whoever joins later starts where the others are.
 Each player streams the video itself, so the time can drift a second or two apart.
 
+## On the walls
+
+What hangs on a room's walls is in its config, `pieces`: none here yet, where the walls have the
+tapes, the screens and the room's panel. Each is a framed picture with its title on a label under
+it (over it when it hangs low), and it may lead somewhere. Choose one (click or tap it, point at it
+in VR and pull the trigger, or put the dot on it and press A or OK) and you walk up to it; one with
+a `link` then takes you there as the doorway takes you back, fading out, the shared session carried
+on (in VR, or with less motion, at once). The card lists them under **On the walls**: the ones that
+lead somewhere as links, the rest as buttons that walk you up to them, each with its description.
+With pieces on the walls, the hints name the pictures too (click, tap or aim at one), and on a TV
+the hint says what OK does with the dot on one ("On a TV").
+
+The way out is common's `hallLink` (its README, "Another hall"): the place gets `back`, this room's
+address at `?from=<the piece's id>`, and `backname`, the room's title, so a place that reads the door
+contract offers the way back here by name. Coming back by it you stand in front of the piece, facing
+into the room, and the doorway still leads where it did (the way back kept for the tab). In VR, Quest
+Browser hands the place the immersive session as it does the Hallway's rooms, when both are on
+`ariamokr.github.io` and the place takes it.
+
+```js
+pieces: [
+  {
+    id: 'studio',                 // its own, 1–32 of a–z, 0–9 and - (?from=studio comes back to it), not 'hallway'
+    wall: 'left',                 // 'left', 'right' or 'far', facing in from the doorway
+    at: 2,                        // metres along the wall from its middle, to the right as one faces it
+    y: 1.5,                       // its middle's height
+    width: 1.2, height: 0.6,      // the picture's size; the frame goes round it
+    image: 'gallery/studio.jpg',  // relative to the page (in public/), cropped from its middle to fit
+    title: 'The studio',          // on its label, and in the card
+    description: 'VARTISTE, a painting studio in VR.', // in the card, and for screen readers
+    link: 'https://ariamokr.github.io/vartiste/',      // where it leads; leave it out for a picture
+  },
+],
+```
+
+`npm test` checks that each fits: on its wall, over the skirting, under the ceiling, clear of the
+window and of the others, with its picture in `public/` (`pieceProblems` in `room.js` says what is
+wrong). It doesn't yet check them against the four rooms' furniture: here a piece wants a place no
+mode's shelves, screens or seats stand in front of. The frames are in the room's wood and the labels
+share one mesh, but each picture is a draw call and a texture of its own, against the TV's budget
+("On a TV").
 ## On a TV
 
 In the Hallway's Android TV app ([AriaMoKr/HallwayApp](https://github.com/AriaMoKr/HallwayApp): the
@@ -126,7 +170,10 @@ site full screen in a WebView whose user agent ends ` HallwayTV/<version>`), or 
 through its `tv.js`:
 
 - The arrows walk and turn. OK uses what the dot in the middle of the view is on: the doorway, a
-  tape, a seat, a button on a panel or under a screen, or the floor (it walks there).
+  tape, a seat, a picture on the walls, a button on a panel or under a screen, or the floor (it
+  walks there). With the dot on a picture, the hint says what OK does there: `OK: The studio` for
+  one that leads somewhere, `OK: walk up to …` for the rest. It comes back for that if it had
+  faded, and fades again when the dot leaves.
 - **Menu** (or holding Back) moves the focus into the card, starting at **← Hallway**. There, up
   and down go from control to control, left and right go through a choice, and OK chooses. The card
   holds the room (its four choices), Play, Next, Captions, Stop and the episodes; Start or Leave
@@ -207,8 +254,8 @@ You need Node.js 22 or newer.
 ```bash
 npm install       # three.js, common, the shared-session layer, Trystero and IWER, copied into public/vendor/ by common's tools/vendor.mjs from vendor.json
 npm start         # http://localhost:8098/
-npm test          # node --test: the config, where you may walk, the four rooms, the catalogue, the archive proxy, the way back's address, the vendor list, the page, and tsc's check of public/js/
-npm run types     # tsc's check alone
+npm test          # node --test: the config, where you may walk, the four rooms, the catalogue, the archive proxy, the way back's address, the vendor list, the page, and tsc's checks of public/js/
+npm run types     # tsc's checks alone
 npm run preview   # public/hallway-preview.jpg and public/social.jpg, in headless Chrome
 ```
 
@@ -221,8 +268,10 @@ IPv4 (`npm start -- --host 127.0.0.1`).
 `npm test` type-checks `public/js/` with TypeScript, from the modules' JSDoc (`tsconfig.json`:
 `allowJs`, `checkJs`, `noEmit`), against three.js's types and common's and the shared session's.
 Nothing is built: the page is served as it is, and the import map stays. What TypeScript's DOM
-library leaves out is in `types/globals.d.ts`. The check isn't `strict` yet; that comes a file at a
-time, and `tools/` and `test/` come later.
+library leaves out is in `types/globals.d.ts`. `strict` comes a file at a time:
+`tsconfig.strict.json` checks only the files that pass it (so far `config.js` and `presence.js`),
+and `npm test` runs it too. A file joins its `include` when a change makes it pass. `tools/` and
+`test/` come later.
 
 To try the way in and out locally, serve the Hallway's checkout as well (on 8088) and open the room
 as its door would:
@@ -288,7 +337,7 @@ git merge template/main
 
 `.github/workflows/pages.yml` publishes `public/` to GitHub Pages on every push to `main`, after
 the tests (tsc's check among them), through the sites' workflow in
-[AriaMoKr/common](https://github.com/AriaMoKr/common) (`v0.6.2`, on Node 24). Every URL in the page is relative, so it works under any repository's path.
+[AriaMoKr/common](https://github.com/AriaMoKr/common) (`v0.6.3`, on Node 24). Every URL in the page is relative, so it works under any repository's path.
 The archive proxy is not published with it: deploy it by hand when `tools/archive-proxy/` changes.
 
 ## License

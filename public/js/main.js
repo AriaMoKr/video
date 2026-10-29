@@ -8,14 +8,15 @@
 // doorway, and the room's own panel on its other side. The room is one of four (modes.js): a video
 // store (the first a visitor sees), a den, a screening room and a gallery of each decade's sets,
 // furnished by furniture.js, its tapes and sets playing their episodes (catalogue.js, from
-// public/catalogue/) on its screens (player.js, through the archive proxy). The shared session
-// (layersharedsession's together.js) comes in here too, and goes back out; in one, everyone in the
-// room sees the same mode and the same show at the same moment. In the Android TV app (common's
-// tv.js) it is the 10-foot view, walked with the remote. Outside's main.js, without its garden and
-// its book.
+// public/catalogue/) on its screens (player.js, through the archive proxy). What hangs on its walls
+// (config.js's pieces, none yet) may lead to other places, and back to stand in front of it again
+// (common's hallLink). The shared session (layersharedsession's together.js) comes in here too, and
+// goes back out; in one, everyone in the room sees the same mode and the same show at the same
+// moment. In the Android TV app (common's tv.js) it is the 10-foot view, walked with the remote.
+// Outside's main.js, without its garden and its book.
 import * as THREE from 'three';
 import { ROOM } from './config.js';
-import { DOOR, EYE, doorCrossed, doorSpawn, layoutRoom } from './room.js';
+import { DOOR, EYE, doorCrossed, doorSpawn, layoutRoom, pieceSpawn } from './room.js';
 import { DEFAULT_MODE, MODES, MODE_NAMES, SEATED_EYE, faceFrame, furnish, screenFor } from './modes.js';
 import { buildFurniture } from './furniture.js';
 import { CoverAtlas, loadStills } from './covers.js';
@@ -28,7 +29,7 @@ import { Overlay } from './overlay.js';
 import { APP_ID, noticeText, statusText } from './presence.js';
 import { setAnisotropy } from './textures.js';
 import { renderPreview, renderSocial, previewView, socialView } from './preview.js';
-import { hallwayViews, keptWay, leaveUrl, readVisit, wayBack, withoutVisit } from 'common/door.js';
+import { hallLink, hallwayViews, keptWay, leaveUrl, readVisit, wayBack, withoutVisit } from 'common/door.js';
 import { Fade } from 'common/fade.js';
 import { NAV_KEY, loadNav, saveNav } from 'common/nav.js';
 import { ACCESS_KEY, Vignette, eyeLift, loadAccess, motionQuery, reduceMotion, saveAccess, watchMotion } from 'common/access.js';
@@ -57,11 +58,13 @@ if (params.get('xr') === 'emulate') {
 
 // ── How the visitor came, and the way back ───────────────────────────────────
 // What the door added to the address is read once and taken off it. The way back, and the
-// doorway's size and glow, stay for this tab (a reload) in sessionStorage.
+// doorway's size and glow, stay for this tab (a reload) in sessionStorage. Back from where a piece
+// on the walls leads (?from=<its id>, with no way back of its own), the kept way back stays.
 
 const VISIT_KEY = `${ROOM.id}.visit`;
 const visit = readVisit(location.search);
-const cameThrough = visit.from !== null || params.has('back');
+const backFrom = params.has('back') ? -1 : ROOM.pieces.findIndex((p) => p.id === visit.from);
+const cameThrough = (visit.from !== null && backFrom < 0) || params.has('back');
 function kept() {
   try {
     const k = JSON.parse(sessionStorage.getItem(VISIT_KEY) ?? 'null');
@@ -86,10 +89,24 @@ if (unvisited !== location.pathname + location.search + location.hash) history.r
 // Where the doorway leads, as short as on the way's label: the Hallway, or the place's own name.
 const leadsTo = way.hallway ? 'Hallway' : way.label.replace(/^← /, '');
 
+/**
+ * Where piece i on the walls leads, with the way back to this room (common's hallLink: back in
+ * front of it, ?from=<its id>), named by its title, and the shared session's room.
+ */
+function pieceUrl(i) {
+  const p = ROOM.pieces[i];
+  return hallLink({ id: p.id, url: p.link }, { here: location.href, name: ROOM.title, room: together?.room ?? null });
+}
+
 let together = null; // the shared session, made once the scene is (below)
+let leftBy = -1; // the piece the visitor went by, else -1 (the doorway)
 const overlay = new Overlay(ROOM, way, {
   href: () => leaveUrl(way, together?.room ?? null),
-  onLeave: () => together?.pause(),
+  pieceHref: pieceUrl,
+  onLeave: (i) => {
+    leftBy = i;
+    together?.pause();
+  },
   tv,
 });
 
@@ -114,7 +131,8 @@ const DESCRIBED = {
   screening: 'a screening room: a big screen over a low stage, three rows of seats either side of an aisle, and shelves of tapes by the door',
   gallery: 'a gallery of television sets, one from each decade from the 1940s to the 1970s, each showing its own shows, and a bench',
 };
-const describe = (mode) => renderer.domElement.setAttribute('aria-label', `${ROOM.title}, ${DESCRIBED[mode]}, a window onto the afternoon sky, and the doorway back to the ${leadsTo}`);
+const onWalls = ROOM.pieces.map((p) => p.title).join(', ');
+const describe = (mode) => renderer.domElement.setAttribute('aria-label', `${ROOM.title}, ${DESCRIBED[mode]}, a window onto the afternoon sky, ${onWalls ? '' : 'and '}the doorway back to the ${leadsTo}${onWalls ? `, and on the walls: ${onWalls}` : ''}`);
 document.getElementById('app').append(renderer.domElement);
 const anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
 setAnisotropy(anisotropy);
@@ -146,6 +164,11 @@ if (views) room.loadView([views]);
 const roomPanel = new RoomPanel({ face: furnish(L, DEFAULT_MODE, []).panel, color: room.lightColor([-L.panel.x, L.panel.y, -0.05], [0, 0, -1]), anisotropy });
 room.group.add(roomPanel.mesh);
 const roomPanelColor = roomPanel.mesh.material.color.clone();
+// The pictures on the walls (their titles until they have loaded): the room is ready with them.
+let pictured = false;
+room.loadPictures().then(() => {
+  pictured = true;
+});
 
 const controls = new Controls({ renderer, camera, rig, scene, dom: renderer.domElement, layout: L });
 const nav = loadNav();
@@ -162,19 +185,22 @@ const fade = new Fade(camera, 1);
 const vignette = new Vignette(camera, access.vignette);
 
 // In through the door: where the visitor went through, turned as they were (and looking as high).
+// Back from where a piece leads: in front of it, facing into the room.
 {
-  const s = doorSpawn(L, visit.dx ?? 0, visit.yaw ?? 0);
-  controls.setPose(s.x, s.z, s.yaw, visit.pitch ?? 0);
+  const s = backFrom >= 0 ? pieceSpawn(L, backFrom) : doorSpawn(L, visit.dx ?? 0, visit.yaw ?? 0);
+  controls.setPose(s.x, s.z, s.yaw, backFrom >= 0 ? 0 : visit.pitch ?? 0);
 }
 
-// ── Going back out ───────────────────────────────────────────────────────────
+// ── Going back out, or on ────────────────────────────────────────────────────
 
 let leaving = false;
 let leaveTimer = 0;
-function go() {
+/** Out: back through the doorway, or with a piece's index, where it leads. */
+function go(piece = -1) {
   if (leaving) return;
   leaving = true;
-  const url = leaveUrl(way, together.room);
+  leftBy = piece;
+  const url = piece >= 0 ? pieceUrl(piece) : leaveUrl(way, together.room);
   // Leave the shared session now, so the others see the visitor go at once (the link carries its
   // room on): the fade, and then until it is left (half a second at most), give the leaving message
   // time to go out.
@@ -185,11 +211,11 @@ function go() {
   leaveTimer = setTimeout(arrive, 12000);
 }
 
-/** In here again (from the back/forward cache, or after a navigation that did not happen): at the doorway. */
+/** In here again (from the back/forward cache, or after a navigation that did not happen): at the doorway, or the piece gone by. */
 function arrive() {
   leaving = false;
   clearTimeout(leaveTimer);
-  const s = doorSpawn(L);
+  const s = leftBy >= 0 ? pieceSpawn(L, leftBy) : doorSpawn(L);
   controls.setPose(s.x, s.z, s.yaw);
   together.resume();
   fade.to(0, blink(0.6));
@@ -208,6 +234,14 @@ controls.onDoor = (how) => {
   if (how === 'xr' || reduce) go();
   else controls.walkInto();
 };
+// Choosing something on a wall walks up to it (in VR, a step there); one that leads somewhere, then
+// on through it, or straight away in VR or with less motion. In the card, its link goes at once.
+controls.onPiece = (i, how) => {
+  if (!L.pieces[i].link) controls.walkUpTo(i);
+  else if (how === 'xr' || reduce) go(i);
+  else controls.walkUpTo(i, () => go(i));
+};
+overlay.onPiece = (i) => controls.walkUpTo(i);
 
 let active = false;
 controls.onActivity = () => {
@@ -758,6 +792,8 @@ function step(dt) {
   updateShowing(dt);
   // The dot: a gamepad's aim, or on a TV the remote's OK while walking.
   overlay.setAim((controls.padActive || (remote !== null && !remote.inCard)) && !renderer.xr.isPresenting, !!controls.hover);
+  // On a TV, walking, the hint says what OK does with the dot on something on the walls.
+  if (remote) overlay.setAimed(remote.inCard ? -1 : controls.hoverPiece);
   if (!leaving && doorCrossed(L, head.x, head.z)) go();
   fade.update(dt);
 }
@@ -806,9 +842,12 @@ window.__room = {
     for (let i = 0; i < n; i++) step(dt);
     renderer.render(scene, camera);
   },
-  /** The catalogue, the covers and their stills are in, and the room furnished. */
-  ready: false,
+  /** The catalogue, the covers and their stills are in, the room furnished, and the pictures on the walls loaded (or given up on). */
+  get ready() {
+    return pictured && catalogued;
+  },
 };
+let catalogued = false;
 loadCatalogue().finally(() => {
-  window.__room.ready = true;
+  catalogued = true;
 });

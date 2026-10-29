@@ -6,9 +6,13 @@ import { HALLWAY_ID } from 'common/door.js';
 /** The app id every site in the session uses (and layersharedsession's test page, which can watch). */
 export const APP_ID = 'ariamokr-layersharedsession-test';
 
+/** @type {(n: number, word: string) => string} */
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
-/** Where a visitor on another page is: the Hallway, or that page's id (another room's). */
+/**
+ * Where a visitor on another page is: the Hallway, or that page's id (another room's).
+ * @param {string} page
+ */
 export function placeName(page) {
   return page === HALLWAY_ID ? 'the Hallway' : page;
 }
@@ -36,7 +40,7 @@ export function statusText({ here = 0, nearby = 0, away = 0, connecting = 0 }, {
 /**
  * A notice from the session as its toast, or '' for none: a visitor said hello (join), came in from
  * another page (arrive), left (leave) or waved (wave).
- * @param {{ kind: string, peer: { name?: string|null, page?: string|null } }} notice
+ * @param {{ kind: string, peer: { name?: string|null, readonly page?: string|null } }} notice
  * @param {string} id this room's page id (config.js ROOM.id)
  */
 export function noticeText({ kind, peer }, id) {

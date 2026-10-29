@@ -2,14 +2,16 @@
 // baked into the vertices (bake.js: the lamps, the window's daylight and the doorway's glow), the
 // wood round them (skirting, the doorway's and the window's casings, the panel's frame), the lamps,
 // the window onto common's afternoon sky (sky.js, turned by config.js's skyYaw), the doorway back
-// with common's portal in it, and the control panel beside it. The doorway shows the view the
-// Hallway publishes out of its door to here (common's README, "The view from your door"), or its
-// glow and the name of where it leads until that has loaded, or when there is none.
+// with common's portal in it, the control panel beside it, and what hangs on the walls (config.js's
+// pieces: framed pictures, their labels). The doorway shows the view the Hallway publishes out of
+// its door to here (common's README, "The view from your door"), or its glow and the name of where
+// it leads until that has loaded, or when there is none.
 import * as THREE from 'three';
 import { Builder } from './builder.js';
 import { bake, boxOcclusion, lightAt } from './bake.js';
-import { FLOOR_TILE, WALL_TILE, ceilingTexture, floorTexture, previewFallback, wallTexture } from './textures.js';
+import { FLOOR_TILE, WALL_TILE, ceilingTexture, floorTexture, labelAtlas, pictureFallback, previewFallback, wallTexture } from './textures.js';
 import { ControlPanel } from './panel.js';
+import { PIECE } from './room.js';
 import { viewParams } from 'common/door.js';
 import { openingGeometry, placePortal, portalMaterial, setView } from 'common/portal.js';
 import { SUN_DIR, skyColor, skyMaterial, skyTexture } from 'common/sky.js';
@@ -163,6 +165,17 @@ export function buildRoom(L, { colors, skyYaw, glow, name, anisotropy = 1 }) {
   // The panel's frame.
   const P = L.panel;
   box(near, [P.x - P.width / 2 - 0.025, P.y - P.height / 2 - 0.025, 0], [P.x + P.width / 2 + 0.025, P.y + P.height / 2 + 0.025, P.depth - 0.004], DARK);
+  // What hangs on the walls (room.js placePiece): each picture's frame, and its label's back.
+  const PF = PIECE.frame, PD = PIECE.depth, LABEL_D = 0.012;
+  for (const p of L.pieces) {
+    const f = wallFrame(L, p.wall);
+    const a0 = p.along - p.width / 2, a1 = p.along + p.width / 2, y0 = p.y - p.height / 2, y1 = p.y + p.height / 2;
+    box(f, [a0 - PF, y0 - PF, 0], [a0, y1 + PF, PD]);
+    box(f, [a1, y0 - PF, 0], [a1 + PF, y1 + PF, PD]);
+    box(f, [a0, y0 - PF, 0], [a1, y0, PD]);
+    box(f, [a0, y1, 0], [a1, y1 + PF, PD]);
+    box(f, [p.along - p.label.width / 2, p.label.y0, 0], [p.along + p.label.width / 2, p.label.y1, LABEL_D - 0.001], DARK);
+  }
   add(lit(trim), new THREE.MeshBasicMaterial({ vertexColors: true }), 'trim');
 
   // The lamps: glowing domes under their roses.
@@ -183,6 +196,67 @@ export function buildRoom(L, { colors, skyYaw, glow, name, anisotropy = 1 }) {
   // The control panel.
   const panel = new ControlPanel({ panel: P, anisotropy, color: lightColor([P.x, P.y, -0.05], [0, 0, -1]) });
   group.add(panel.mesh);
+
+  // The pictures, a mesh each (an image each), lit as the wall round them is: their titles until
+  // their images have loaded (loadPictures), or when they cannot be.
+  const pictures = L.pieces.map((p) => {
+    const at = [p.x + p.nx * PIECE.picture, p.y, p.z + p.nz * PIECE.picture];
+    const material = new THREE.MeshBasicMaterial({ map: pictureFallback(p.title, p.width / p.height), color: lightColor(at, [p.nx, 0, p.nz]) });
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(p.width, p.height), material);
+    mesh.name = `piece ${p.id}`;
+    mesh.position.set(at[0], at[1], at[2]);
+    mesh.rotation.y = Math.atan2(p.nx, p.nz);
+    group.add(mesh);
+    return { mesh, material };
+  });
+  // Their labels, all on one canvas, one mesh: the title, and an arrow on one that leads somewhere.
+  if (L.pieces.length) {
+    const atlas = labelAtlas(L.pieces.map((p) => ({ text: p.link ? `${p.title} →` : p.title, width: p.label.width, height: p.label.y1 - p.label.y0 })));
+    atlas.texture.anisotropy = anisotropy;
+    const labels = new Builder();
+    L.pieces.forEach((p, i) => {
+      const w = p.label.width, first = labels.uvs.length;
+      // From its left end, facing the wall, to its right, so it faces into the room.
+      labels.quad([p.x + p.nx * LABEL_D - (p.rx * w) / 2, p.label.y0, p.z + p.nz * LABEL_D - (p.rz * w) / 2], [p.rx * w, 0, p.rz * w], [0, p.label.y1 - p.label.y0, 0]);
+      const [u0, v0, u1, v1] = atlas.rects[i];
+      for (let k = first; k < labels.uvs.length; k += 2) {
+        labels.uvs[k] = u0 + labels.uvs[k] * (u1 - u0);
+        labels.uvs[k + 1] = v0 + labels.uvs[k + 1] * (v1 - v0);
+      }
+    });
+    add(lit(labels), new THREE.MeshBasicMaterial({ map: atlas.texture, vertexColors: true }), 'labels');
+  }
+
+  /**
+   * Loads each piece's picture, by its address relative to the page, cropped from its middle to
+   * its frame's shape. Resolves, once each has loaded or failed, to how many loaded.
+   */
+  async function loadPictures() {
+    const loader = new THREE.TextureLoader();
+    const done = await Promise.all(L.pieces.map(async (p, i) => {
+      try {
+        const map = await loader.loadAsync(new URL(p.image, document.baseURI).href);
+        map.colorSpace = THREE.SRGBColorSpace;
+        map.anisotropy = anisotropy;
+        const k = map.image.width / map.image.height / (p.width / p.height);
+        if (k > 1) {
+          map.repeat.set(1 / k, 1);
+          map.offset.set((1 - 1 / k) / 2, 0);
+        } else {
+          map.repeat.set(1, k);
+          map.offset.set(0, (1 - k) / 2);
+        }
+        const { material } = pictures[i];
+        material.map?.dispose();
+        material.map = map;
+        return true;
+      } catch (err) {
+        console.info(`room: no picture for ${p.id} at ${p.image} (${err?.message ?? 'it did not load'})`);
+        return false;
+      }
+    }));
+    return done.filter(Boolean).length;
+  }
 
   // The portal in the doorway, at the back of its lining, facing into the room.
   const fallback = previewFallback(name, glow);
@@ -223,18 +297,21 @@ export function buildRoom(L, { colors, skyYaw, glow, name, anisotropy = 1 }) {
     return null;
   }
 
-  // What the lights going down dims (setDim): everything baked, the lamps, and the panel a little.
-  const dims = ['floor', 'walls', 'ceiling', 'trim'].map((n) => /** @type {THREE.MeshBasicMaterial} */ (/** @type {THREE.Mesh} */ (group.getObjectByName(n)).material));
+  // What the lights going down dims (setDim): everything baked (the pieces' labels too, if any), the
+  // pictures as lit as their walls, the lamps, and the panel a little.
+  const dims = ['floor', 'walls', 'ceiling', 'trim', 'labels'].map((n) => /** @type {THREE.Mesh | undefined} */ (group.getObjectByName(n))).filter((m) => m).map((m) => /** @type {THREE.MeshBasicMaterial} */ (/** @type {THREE.Mesh} */ (m).material));
+  const pictureColors = pictures.map((p) => p.material.color.clone());
   const panelColor = panel.mesh.material.color.clone();
 
   return {
-    group, portal, panel, glass, loadView,
+    group, portal, panel, glass, pictures, loadView, loadPictures,
     /** The room's light, for what is added to it (furniture.js) to be lit the same: bake.js's env, and the corners' occlusion. */
     lighting, occlusion, lightColor,
     /** The lights at k, as bright as it looks (1: as baked; less while a show plays in the screening room). */
     setDim(k) {
       const lin = k ** 2.2; // the colours are linear: k is how it looks
       for (const m of dims) m.color.setScalar(lin);
+      pictures.forEach((p, i) => p.material.color.copy(pictureColors[i]).multiplyScalar(lin));
       domes.material.color.copy(globe).multiplyScalar((0.25 + 0.75 * k) ** 2.2);
       panel.mesh.material.color.copy(panelColor).multiplyScalar(Math.max(k, 0.6) ** 2.2);
     },

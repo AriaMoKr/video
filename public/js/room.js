@@ -1,11 +1,12 @@
 // The room: where everything in it is, and the questions asked of it every frame (where the viewer
 // may walk, whether they have gone back through the doorway, what a ray points at). Pure functions
-// with no three.js, so the tests run them in Node. Its size, and the wall its window is in, come
-// from config.js.
+// with no three.js, so the tests run them in Node. Its size, the wall its window is in, and what
+// hangs on its walls come from config.js.
 //
 // Coordinates: metres, y up, the floor at y = 0. The doorway's wall is the plane z = 0, with the
 // doorway in it at x = 0, and the room runs along -z to the far wall. Facing in from the doorway,
 // left is -x. A yaw of 0 faces -z (into the room); positive yaws turn left.
+import { ID } from './config.js';
 
 const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v);
 
@@ -54,14 +55,47 @@ export function panelButtonAt(u, v) {
   return null;
 }
 
+/**
+ * What hangs on the walls (config.js's pieces): a frame `frame` wide round each picture, standing
+ * `depth` out from the wall, the picture's face `picture` out; its title on a label `label.height`
+ * high, `label.gap` under the frame, or over it when under would be lower than `label.floor`, as
+ * wide as the frame or `label.width`, whichever is wider. All clear of the `skirting`.
+ */
+export const PIECE = { frame: 0.05, depth: 0.045, picture: 0.025, label: { height: 0.075, gap: 0.05, width: 0.7, floor: 0.35 }, skirting: 0.12 };
+
+/** The walls a piece can hang on: not the doorway's, which has the doorway and the panel. */
+export const PIECE_WALLS = ['left', 'right', 'far'];
+
 /** The smallest room the doorway, the panel and the window fit in, in metres. */
 export const MIN_SIZE = { width: 3.2, depth: 3, height: 2.6 };
 export const MAX_SIZE = { width: 40, depth: 40, height: 12 };
 
 /**
+ * A piece where it hangs: `along` its wall in the wall's own terms (world x on the far wall, z on the
+ * side walls, as the window's), its middle (x, y, z), the wall's normal into the room (nx, nz), the
+ * way to the right facing the wall (rx, rz), and its label's place.
+ * @param {import('./config.js').Piece} p
+ * @param {{ x0: number, x1: number, z1: number, depth: number }} box
+ */
+function placePiece(p, { x0, x1, z1, depth }) {
+  const far = p.wall === 'far', left = p.wall === 'left';
+  const along = far ? p.at : left ? -depth / 2 - p.at : -depth / 2 + p.at;
+  const nx = far ? 0 : left ? 1 : -1, nz = far ? 1 : 0;
+  const { frame: F, label: T } = PIECE;
+  const bottom = p.y - p.height / 2 - F, top = p.y + p.height / 2 + F;
+  const under = bottom - T.gap - T.height >= T.floor;
+  const y0 = under ? bottom - T.gap - T.height : top + T.gap;
+  return {
+    id: p.id, wall: p.wall, along, x: far ? along : left ? x0 : x1, y: p.y, z: far ? z1 : along, nx, nz, rx: nz, rz: far ? 0 : -nx,
+    width: p.width, height: p.height, title: p.title, image: p.image, link: p.link ?? null,
+    label: { y0, y1: y0 + T.height, width: Math.max(p.width + 2 * F, T.width) },
+  };
+}
+
+/**
  * Everything about the room the frame loop asks: its walls, the doorway (its size from the link,
- * else DOOR), the window, the panel, the lamps, and where to arrive.
- * @param {{ size: { width: number, depth: number, height: number }, window: 'left'|'right'|'far' }} room config.js's ROOM
+ * else DOOR), the window, the panel, the lamps, what hangs on the walls, and where to arrive.
+ * @param {{ size: { width: number, depth: number, height: number }, window: 'left'|'right'|'far', pieces?: import('./config.js').Piece[] }} room config.js's ROOM
  * @param {{ doorWidth?: number, doorHeight?: number }} [o]
  */
 export function layoutRoom(room, { doorWidth = DOOR.width, doorHeight = DOOR.height } = {}) {
@@ -91,7 +125,80 @@ export function layoutRoom(room, { doorWidth = DOOR.width, doorHeight = DOOR.hei
   // A lamp on the ceiling every 3.5 m or so down the middle.
   const n = Math.max(1, Math.round(depth / 3.5));
   const lamps = Array.from({ length: n }, (_, i) => ({ x: 0, y: height, z: -((i + 0.5) * depth) / n }));
-  return { width, depth, height, x0, x1, z0: 0, z1, door, window: win, panel, lamps, spawn: { x: 0, z: -0.6, yaw: 0 } };
+  const pieces = (room.pieces ?? []).map((p) => placePiece(p, { x0, x1, z1, depth }));
+  return { width, depth, height, x0, x1, z0: 0, z1, door, window: win, panel, lamps, pieces, spawn: { x: 0, z: -0.6, yaw: 0 } };
+}
+
+/** Where someone coming back out of piece i's link stands: in front of it, facing into the room. */
+export function pieceSpawn(L, i) {
+  const p = L.pieces[i], m = MARGIN + 0.05;
+  return { x: clamp(p.x + p.nx * 0.9, L.x0 + m, L.x1 - m), z: clamp(p.z + p.nz * 0.9, L.z1 + m, -m), yaw: Math.atan2(-p.nx, -p.nz) };
+}
+
+/** Where to stand to look at piece i, or go in by its link: `distance` in front of it, facing it. */
+export function pieceFront(L, i, distance = 0.8) {
+  const p = L.pieces[i], m = MARGIN + 0.05;
+  return { x: clamp(p.x + p.nx * distance, L.x0 + m, L.x1 - m), z: clamp(p.z + p.nz * distance, L.z1 + m, -m), yaw: Math.atan2(p.nx, p.nz) };
+}
+
+/**
+ * What is wrong with config.js's pieces, in words (none: []): each needs an id of its own, a wall
+ * it can hang on, a size, a picture by a relative address, a title and a description on one line
+ * each, and a link (if any) to an http(s) address without the door's parameters; and each, with its
+ * frame and label, on its wall, over the skirting, under the ceiling, clear of the window and of
+ * the others.
+ * @param {Parameters<typeof layoutRoom>[0]} room
+ */
+export function pieceProblems(room) {
+  const pieces = room.pieces ?? [];
+  if (!Array.isArray(pieces)) return ['pieces is not a list'];
+  const problems = [];
+  const ids = new Set();
+  for (const [i, p] of pieces.entries()) {
+    const name = typeof p?.id === 'string' ? p.id : `piece ${i}`;
+    const say = (what) => problems.push(`${name}: ${what}`);
+    if (typeof p?.id !== 'string' || !ID.test(p.id)) say('its id is not 1–32 of a–z, 0–9 and -');
+    else if (p.id === 'hallway') say("its id is the Hallway's");
+    else if (ids.has(p.id)) say('another piece has its id');
+    ids.add(p?.id);
+    if (!PIECE_WALLS.includes(p?.wall)) say(`its wall is not one of ${PIECE_WALLS.join(', ')}`);
+    for (const k of ['at', 'y', 'width', 'height']) if (!Number.isFinite(p?.[k])) say(`its ${k} is not a number`);
+    if (!(p?.width >= 0.1 && p?.height >= 0.1)) say('it is smaller than 10 cm');
+    if (typeof p?.image !== 'string' || !p.image || /^([a-z][a-z0-9+.-]*:|\/)/i.test(p.image)) say('its image is not a relative address');
+    for (const k of ['title', 'description']) if (typeof p?.[k] !== 'string' || !p[k].trim() || /\n/.test(p[k])) say(`its ${k} is not a line of text`);
+    if (p?.link !== undefined) {
+      let u = null;
+      try {
+        u = new URL(p.link);
+      } catch {
+        // said below
+      }
+      if (!u || !/^https?:$/.test(u.protocol)) say('its link is not an http(s) address');
+      else if (['from', 'back', 'backname', 'room'].some((k) => u.searchParams.has(k))) say("its link has the door's own parameters in it");
+    }
+  }
+  // Where they hang, once each is whole.
+  if (problems.length) return problems;
+  const L = layoutRoom(room);
+  const span = { far: [L.x0, L.x1], left: [L.z1, 0], right: [L.z1, 0] };
+  const W = L.window;
+  const rects = L.pieces.map((p) => {
+    const half = Math.max(p.width / 2 + PIECE.frame, p.label.width / 2);
+    return { wall: p.wall, a0: p.along - half, a1: p.along + half, y0: Math.min(p.y - p.height / 2 - PIECE.frame, p.label.y0), y1: Math.max(p.y + p.height / 2 + PIECE.frame, p.label.y1) };
+  });
+  const overlap = (r, a0, a1, y0, y1) => r.a0 < a1 && r.a1 > a0 && r.y0 < y1 && r.y1 > y0;
+  rects.forEach((r, i) => {
+    const say = (what) => problems.push(`${L.pieces[i].id}: ${what}`);
+    const [s0, s1] = span[r.wall];
+    if (r.a0 < s0 + 0.05 || r.a1 > s1 - 0.05) say('it, its frame or its label runs off its wall');
+    if (r.y0 < PIECE.skirting) say('it, its frame or its label is down on the skirting');
+    if (r.y1 > L.height - 0.05) say('it, its frame or its label is up in the ceiling');
+    if (r.wall === W.wall && overlap(r, W.along - W.width / 2 - 0.14, W.along + W.width / 2 + 0.14, W.bottom - 0.06, W.top + 0.13)) say('it is over the window');
+    rects.forEach((q, j) => {
+      if (j > i && q.wall === r.wall && overlap(r, q.a0, q.a1, q.y0, q.y1)) say(`it is over ${L.pieces[j].id}`);
+    });
+  });
+  return problems;
 }
 
 /** Where someone coming in through the doorway stands: dx to the right of its middle (within its jambs), turned by yaw (within a quarter turn). */
@@ -136,12 +243,13 @@ export function standable(L, x, z) {
 }
 
 /**
- * What a ray from inside the room reaches first: the doorway, the control panel, the window, the
- * floor, a wall or the ceiling. The room is a box, so this is where the ray leaves it; from the
- * doorway's reveal, the doorway is its back, where the portal is. Writes into out
- * { t, kind, x, y, z, nx, ny, nz, u, v, walkable } (n: the surface's normal, into the room; u, v:
- * where on the panel, 0…1 from its bottom left; walkable: for the floor, whether one may stand
- * there) and returns it, or null when the ray leaves through no surface.
+ * What a ray from inside the room reaches first: the doorway, the control panel, a piece on a wall,
+ * the window, the floor, a wall or the ceiling. The room is a box, so this is where the ray leaves
+ * it; from the doorway's reveal, the doorway is its back, where the portal is. Writes into out
+ * { t, kind, x, y, z, nx, ny, nz, u, v, walkable, piece } (n: the surface's normal, into the room;
+ * u, v: where on the panel or the piece's picture, 0…1 from its bottom left; walkable: for the
+ * floor, whether one may stand there; piece: which of L.pieces, else -1) and returns it, or null
+ * when the ray leaves through no surface.
  */
 export function castRay(L, ox, oy, oz, dx, dy, dz, out) {
   let t = Infinity;
@@ -162,6 +270,7 @@ export function castRay(L, ox, oy, oz, dx, dy, dz, out) {
   out.nx = out.ny = out.nz = 0;
   out.u = out.v = 0;
   out.walkable = false;
+  out.piece = -1;
   const W = L.window;
   const inWindow = (along) => Math.abs(along - W.along) < W.width / 2 && y > W.bottom && y < W.top;
   if (plane === 'near') {
@@ -188,9 +297,11 @@ export function castRay(L, ox, oy, oz, dx, dy, dz, out) {
   } else if (plane === 'left' || plane === 'right') {
     out.nx = plane === 'left' ? 1 : -1;
     out.kind = W.wall === plane && inWindow(z) ? 'window' : 'wall';
+    if (out.kind === 'wall') hitPiece(L, plane, ox, oy, oz, dx, dy, dz, out);
   } else if (plane === 'far') {
     out.nz = 1;
     out.kind = W.wall === 'far' && inWindow(x) ? 'window' : 'wall';
+    if (out.kind === 'wall') hitPiece(L, plane, ox, oy, oz, dx, dy, dz, out);
   } else if (plane === 'floor') {
     out.kind = 'floor';
     out.ny = 1;
@@ -200,4 +311,31 @@ export function castRay(L, ox, oy, oz, dx, dy, dz, out) {
     out.ny = -1;
   }
   return out;
+}
+
+/**
+ * A ray that reaches `wall` meets a piece there first when it passes through the piece's picture or
+ * frame, whose face stands out from the wall: then out is the piece, where on the picture (u, v),
+ * and the point on its face.
+ */
+function hitPiece(L, wall, ox, oy, oz, dx, dy, dz, out) {
+  for (let i = 0; i < L.pieces.length; i++) {
+    const p = L.pieces[i];
+    if (p.wall !== wall) continue;
+    // The plane of its face: PIECE.picture out from the wall, along the wall's normal.
+    const s = p.nx ? (p.x + p.nx * PIECE.picture - ox) / dx : (p.z + p.nz * PIECE.picture - oz) / dz;
+    if (!(s > 0)) continue;
+    const x = ox + dx * s, y = oy + dy * s, z = oz + dz * s;
+    const right = (x - p.x) * p.rx + (z - p.z) * p.rz, up = y - p.y;
+    if (Math.abs(right) > p.width / 2 + PIECE.frame || Math.abs(up) > p.height / 2 + PIECE.frame) continue;
+    out.kind = 'piece';
+    out.piece = i;
+    out.t = s;
+    out.x = x;
+    out.y = y;
+    out.z = z;
+    out.u = clamp(0.5 + right / p.width, 0, 1);
+    out.v = clamp(0.5 + up / p.height, 0, 1);
+    return;
+  }
 }

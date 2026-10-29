@@ -52,6 +52,21 @@ a { color: var(--accent); }
 .card.alone { width: min(440px, calc(100vw - 24px)); }
 .no-webgl { margin: 10px 0 0; color: var(--muted); }
 
+/* What hangs on the walls (config.js's pieces): each one's title, a link where it leads (with an
+   arrow, as on its label) or a button that walks up to it, and what it is. */
+.walls { margin-top: 10px; }
+.walls h2 { margin: 0; font-size: 13px; font-weight: 600; color: var(--muted); }
+.walls ul { display: grid; gap: 8px; margin: 4px 0 0; padding: 0; list-style: none; }
+.walls li { display: grid; justify-items: start; gap: 2px; font-size: 13px; }
+.piece {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 3px 12px; border-radius: 999px;
+  border: 1px solid var(--line); background: rgba(0, 0, 0, 0.2); color: var(--text); font-size: 13px; text-decoration: none;
+}
+a.piece::after { content: "→" / ""; color: var(--accent); }
+.piece:hover { border-color: var(--accent); color: var(--accent); }
+.piece-title { font-weight: 600; }
+.walls .about { color: var(--muted); }
+
 /* The shared session and the settings (motion, how to move and turn in VR, the vignette, seated):
    the control panel's choices, for a keyboard or a screen reader. */
 .in-room { margin-top: 10px; }
@@ -183,7 +198,9 @@ html.tv .card {
 }
 html.tv .brand { font-size: 26px; }
 html.tv .way-back { padding: 4px 14px; font-size: 16px; }
-html.tv .tagline, html.tv .together { font-size: 16px; }
+html.tv .tagline, html.tv .together, html.tv .walls h2, html.tv .walls li { font-size: 16px; }
+html.tv .walls ul { gap: 12px; margin-top: 8px; }
+html.tv .piece { padding: 7px 18px; font-size: 17px; }
 html.tv .actions { gap: 10px; margin-top: 4px; }
 html.tv .chip { padding: 7px 18px; font-size: 17px; }
 html.tv .together { gap: 10px; margin-top: 12px; }
@@ -212,7 +229,7 @@ html.tv .modes label input:focus-visible { outline-width: 2px; outline-offset: 1
 html.tv .episode { padding: 6px 10px; }
 
 @media (forced-colors: active) {
-  .card, .hint, .toast, .chip, .pill, .way-back, .my-name, .aim-label, .player { border: 1px solid CanvasText; }
+  .card, .hint, .toast, .chip, .pill, .way-back, .piece, .my-name, .aim-label, .player { border: 1px solid CanvasText; }
   .pill.on, .chip[aria-expanded="true"], .chip[aria-pressed="true"], .episode[aria-current="true"] { forced-color-adjust: none; background: Highlight; color: HighlightText; border-color: Highlight; }
   .aim { forced-color-adjust: none; border-color: CanvasText; box-shadow: none; }
   .aim.hover { background: Highlight; }

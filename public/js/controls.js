@@ -1,12 +1,13 @@
 // Moving about the room, as one moves about the hallway (its controls.js, with outside's walk
 // through the door, less motion and seated mode), on every device:
-//   desktop: drag to look, WASD / arrows to walk (Shift runs), click the floor, the doorway or the
-//            control panel
-//   phone:   drag to look, tap the floor, the doorway or the panel
+//   desktop: drag to look, WASD / arrows to walk (Shift runs), click the floor, the doorway, the
+//            control panel or something on a wall (walks up to it, and through its link)
+//   phone:   drag to look, tap the floor, the doorway, the panel or something on a wall
 //   gamepad: as in vrlbry, it takes over when used and the mouse takes it back: the left stick
 //            walks, the right one looks, A uses what the middle of the view is on (common's
 //            gamepad.js)
-//   headset: point and pull the trigger (or pinch) at the floor, the doorway or a panel; the left
+//   headset: point and pull the trigger (or pinch) at the floor, the doorway, a panel or something
+//            on a wall (its link, else a step up to it); the left
 //            stick walks (move 'smooth') or aims a teleport (move 'teleport'), the right one turns
 //            in steps (turn 'snap') or smoothly (turn 'smooth'); or walk through the doorway
 //   TV:      the remote's arrows walk and turn, and OK uses the middle of the view, as a gamepad's
@@ -17,7 +18,7 @@
 // body is `rig` (yaw only); the camera is its head (pitch on a screen, the headset's pose in VR).
 // Per frame nothing is allocated.
 import * as THREE from 'three';
-import { EYE, panelButtonAt } from './room.js';
+import { EYE, panelButtonAt, pieceFront } from './room.js';
 import { SEATED_EYE, barButtonAt, castRay, clampWalk, roomPanelButtonAt } from './modes.js';
 import { firstPad, readPad } from 'common/gamepad.js';
 import { keyOf } from 'common/tv.js';
@@ -53,9 +54,10 @@ export class Controls {
     this.yaw = 0;
     this.pitch = 0;
     this.keys = new Set();
-    this.hover = null; // what is pointed at that could be used: 'door', a panel button's id, or a thing's use ('tape:3', 'seat:0', …)
+    this.hover = null; // what is pointed at that could be used: 'door', 'piece', a panel button's id, or a thing's use ('tape:3', 'seat:0', …)
     this.hoverDoor = false;
     this.hoverPanel = null; // the control panel's button pointed at
+    this.hoverPiece = -1; // what hangs on the walls pointed at: its index in layout.pieces
     /** What kind of thing the usable one pointed at is (castRay's kind: 'tape', 'roompanel', …), and its id there, or null. */
     this.hoverKind = null;
     this.hoverId = null;
@@ -75,6 +77,8 @@ export class Controls {
     this.onDoor = () => {};
     /** (button id) when a button of the control panel is pressed. @type {(id: string) => void} */
     this.onPanel = () => {};
+    /** (i, how) when piece i on a wall (layout.pieces) is chosen. @type {(i: number, how: 'screen' | 'xr') => void} */
+    this.onPiece = () => {};
     /** (use, how) when one of the room's things is used: a tape ('tape:3'), a screen ('screen:main'), a seat ('seat:0'), or a button of the room's panel or a bar ('room:play', 'bar:next'). @type {(use: string, how: 'screen' | 'xr') => void} */
     this.onThing = () => {};
     /** (hand) when a controller's grip is squeezed in VR (main.js: a wave in the shared session). @type {(hand: object) => void} */
@@ -96,13 +100,13 @@ export class Controls {
     this.hasPad = false;
     /** The middle of the view is the pointer whatever is used (a TV, whose remote has none: common's tv.js). */
     this.aimMiddle = false;
-    this.auto = null; // a walk under way: { points: [[x, z], …], i, face: yaw|null, speed }
+    this.auto = null; // a walk under way: { points: [[x, z], …], i, face: yaw|null, speed, done: (() => void)|null }
     this._down = null;
     this._mouse = null;
     this._cursor = '';
     this._raycaster = new THREE.Raycaster();
     this._ndc = new THREE.Vector2();
-    this._hit = { t: 0, kind: '', id: null, use: null, x: 0, y: 0, z: 0, nx: 0, ny: 0, nz: 0, u: 0, v: 0, walkable: false };
+    this._hit = { t: 0, kind: '', id: null, use: null, x: 0, y: 0, z: 0, nx: 0, ny: 0, nz: 0, u: 0, v: 0, walkable: false, piece: -1 };
     this._head = new THREE.Vector3();
     this._dir = new THREE.Vector3();
     this._origin = new THREE.Vector3();
@@ -213,7 +217,24 @@ export class Controls {
     this._startWalk(points, Math.PI);
   }
 
-  _startWalk(points, face) {
+  /**
+   * Walks up to piece i on a wall, to stand in front of it facing it, then done() (unless the walk
+   * is taken over on the way); with less motion, there at once. In VR, a teleport there.
+   * @param {number} i
+   * @param {(() => void) | null} [done]
+   */
+  walkUpTo(i, done = null) {
+    this.stand();
+    const f = pieceFront(this.layout, i);
+    if (this.renderer.xr.isPresenting) {
+      this._teleport(f.x, f.z);
+      done?.();
+      return;
+    }
+    this._startWalk([[f.x, f.z]], f.yaw, done);
+  }
+
+  _startWalk(points, face, done = null) {
     if (this.reduceMotion) {
       // Straight to the end, facing `face` if given.
       this.auto = null;
@@ -224,6 +245,7 @@ export class Controls {
         this.pitch = 0;
       }
       this._apply();
+      done?.();
       return;
     }
     let length = 0, x = this.rig.position.x, z = this.rig.position.z;
@@ -233,7 +255,7 @@ export class Controls {
       z = pz;
     }
     // Long walks go faster, so none takes much more than a second and a half.
-    this.auto = { points, i: 0, face, speed: clamp(length / 1.5, 2.2, 7) };
+    this.auto = { points, i: 0, face, speed: clamp(length / 1.5, 2.2, 7), done };
   }
 
   update(dt) {
@@ -332,24 +354,35 @@ export class Controls {
   _updateWalk(dt) {
     const a = this.auto;
     const p = this.rig.position;
-    const [tx, tz] = a.points[a.i];
-    const dx = tx - p.x, dz = tz - p.z;
-    const dist = Math.hypot(dx, dz);
     if (a.face !== null) {
-      // Turn to face the doorway on the way.
+      // Turn to face the doorway, or what it walks up to, on the way.
       const turn = 1 - Math.exp(-dt * 6);
       this.yaw += wrapAngle(a.face - this.yaw) * turn;
       this.pitch += (0 - this.pitch) * turn;
     }
+    if (a.i >= a.points.length) {
+      // There, and done once turned to face it.
+      if (Math.abs(wrapAngle(a.face - this.yaw)) < 0.01 && Math.abs(this.pitch) < 0.01) this._endWalk(a);
+      return;
+    }
+    const [tx, tz] = a.points[a.i];
+    const dx = tx - p.x, dz = tz - p.z;
+    const dist = Math.hypot(dx, dz);
     const step = a.speed * dt;
     if (dist <= step) {
       this._move(tx, tz);
-      if (++a.i >= a.points.length) this.auto = null;
+      if (++a.i >= a.points.length && a.face === null) this._endWalk(a);
       return;
     }
     const px = p.x, pz = p.z;
     const c = this._move(px + (dx / dist) * step, pz + (dz / dist) * step);
     if (Math.hypot(c.x - px, c.z - pz) < step * 0.05) this.auto = null; // blocked by a wall
+  }
+
+  /** A walk that got where it was going: what it was for. */
+  _endWalk(a) {
+    this.auto = null;
+    a.done?.();
   }
 
   _pickScreen(clientX, clientY) {
@@ -366,13 +399,13 @@ export class Controls {
     return castRay(this.layout, o.x, o.y, o.z, d.x, d.y, d.z, this._hit);
   }
 
-  /** What could be used where a hit is: 'door', a panel's or a bar's button, a thing's use (modes.js castRay), or null. */
+  /** What could be used where a hit is: 'door', 'piece', a panel's or a bar's button, a thing's use (modes.js castRay), or null. */
   _usable(hit) {
     if (!hit) return null;
     if (hit.kind === 'panel') return panelButtonAt(hit.u, hit.v);
     if (hit.kind === 'roompanel') return roomPanelButtonAt(hit.u, hit.v);
     if (hit.kind === 'bar') return barButtonAt(hit.u, hit.v);
-    return hit.kind === 'door' ? 'door' : hit.use ?? null;
+    return hit.kind === 'door' || hit.kind === 'piece' ? hit.kind : hit.use ?? null;
   }
 
   _updateHover() {
@@ -391,15 +424,17 @@ export class Controls {
     this.hover = usable;
     this.hoverDoor = usable === 'door';
     this.hoverPanel = hit?.kind === 'panel' ? usable : null;
+    this.hoverPiece = usable === 'piece' ? hit.piece : -1;
     this.hoverKind = usable ? hit.kind : null;
     this.hoverId = usable ? hit.id : null;
   }
 
-  /** Uses what a hit is on: the doorway, a panel button, one of the room's things, or the floor (walks there, or in VR teleports). */
+  /** Uses what a hit is on: the doorway, a panel button, a piece on a wall, one of the room's things, or the floor (walks there, or in VR teleports). */
   _use(hit, how) {
     if (!hit) return;
     if (hit.kind === 'door') this.onDoor(how);
     else if (hit.kind === 'panel') this._press(panelButtonAt(hit.u, hit.v));
+    else if (hit.kind === 'piece') this.onPiece(hit.piece, how);
     else if (hit.kind === 'floor' && hit.walkable) {
       if (how === 'xr') this._teleport(hit.x, hit.z);
       else this.walkTo(hit.x, hit.z);
@@ -602,7 +637,7 @@ export class Controls {
       this._normal.set(hit.nx, hit.ny, hit.nz);
       h.reticle.position.set(hit.x + hit.nx * 0.01, hit.y + hit.ny * 0.01, hit.z + hit.nz * 0.01);
       h.reticle.quaternion.setFromUnitVectors(Z_AXIS, this._normal);
-      h.reticle.scale.setScalar(target ? 3.2 : use === 'door' ? 1.8 : use ? 0.7 : 1);
+      h.reticle.scale.setScalar(target ? 3.2 : use === 'door' ? 1.8 : use === 'piece' ? 1.3 : use ? 0.7 : 1);
       h.reticle.material.color.setHex(target ? (hit.walkable ? 0xe8c47c : 0x8a7f72) : use ? 0xe8c47c : hit.walkable ? 0xfff0d6 : 0x9a8f80);
       h.reticle.visible = true;
     }

@@ -29,7 +29,7 @@ Published at https://ariamokr.github.io/video/ from `main` of AriaMoKr/video by
 npm install          # postinstall: common's tools/vendor.mjs copies what vendor.json lists into public/vendor/ (gitignored)
 npm start            # tools/serve.mjs (common's) on config.js's port, 8098
 npm test             # node --test "test/*.test.js", tsc's check among them (test/types.test.js)
-npm run types        # tsc -p tsconfig.json alone
+npm run types        # tsc -p tsconfig.json, then -p tsconfig.strict.json, alone
 npm run preview      # tools/preview.mjs: public/hallway-preview.jpg and public/social.jpg (headless Chrome)
 node tools/catalogue.mjs                 # public/catalogue/ from tools/picks.js and archive.org's metadata
 node tools/archive-proxy/serve.mjs       # the archive proxy on 127.0.0.1:8099 (?videoproxy=http://127.0.0.1:8099/)
@@ -43,15 +43,20 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
 ## Layout
 
 - `config.js`: the one module a copy of the template changes (`ROOM`: id `video`, title, description,
-  sign, url, size, colors, window `right`, skyYaw -π/2, port 8098, glow `#6cb8e0`, `videoProxy`) and
-  `hallwayDoor()`, the Hallway's door entry it implies. `index.html` and `package.json` repeat some
-  of it; `test/config.test.js` keeps them the same. The `@satisfies` line above `ROOM` (the
-  template's, outside it, so merges leave it be) checks the window's wall for tsc.
+  sign, url, size, colors, window `right`, skyYaw -π/2, port 8098, glow `#6cb8e0`, pieces, none
+  here, each a `Piece`, and `videoProxy`) and `hallwayDoor()`, the Hallway's door entry it implies.
+  `index.html` and `package.json` repeat some of it; `test/config.test.js` keeps them the same. The
+  `@satisfies` line above `ROOM` (the template's, outside it, so merges leave it be) checks the
+  window's wall for tsc.
 - `room.js`: pure (no three, tested in Node). The layout from the config (`layoutRoom`: the doorway,
   shrunk to fit the link's size, the window, the panel, the lamps, the spawn), `doorSpawn`,
   `clampWalk` (the walls, `MARGIN` from them; the doorway between its jambs to its back),
-  `doorCrossed`, `standable`, `castRay` (the box's planes: door, panel with u/v, window, wall,
-  floor with `walkable`, ceiling), and the panel's buttons (`PANEL_BUTTONS`, `panelButtonAt`).
+  `doorCrossed`, `standable`, `castRay` (the box's planes: door, panel with u/v, a piece with
+  `piece` and u/v on its picture, window, wall, floor with `walkable`, ceiling), and the panel's
+  buttons (`PANEL_BUTTONS`, `panelButtonAt`). What hangs on the walls: `PIECE` (frame, label),
+  `PIECE_WALLS`, the layout's `pieces` (each where it hangs: `along`, its middle, the wall's normal
+  `nx`/`nz`, its right `rx`/`rz`, its label), `pieceFront` (where to stand to look),
+  `pieceSpawn` (back from its link) and `pieceProblems` (what is wrong, in words).
   Coordinates: metres, the doorway's wall at z = 0, the room along -z, the doorway at x = 0, yaw 0
   faces -z, left is -x.
 - `modes.js`: pure. The four modes (`MODES`, `MODE_NAMES`, `DEFAULT_MODE` 'store') furnished
@@ -76,11 +81,14 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   and `builder.js`, the hallway's): the lamps, the window's daylight and the doorway's glow. The
   window's glass is common's `sky.js` (`skyMaterial`, turned by `skyYaw`); the doorway is common's
   `portal.js`, showing the Hallway's view of this door from its views.json (`loadView`), else
-  `textures.js` `previewFallback`. `textures.js`: canvas textures, seeded, nearly white so the
-  config's colours are the room's. It returns `lighting`, `occlusion` and `lightColor` for the
-  furniture's bake, and `setDim` for the screening room.
+  `textures.js` `previewFallback`. The pieces: their frames in the trim, a mesh per picture
+  (`loadPictures`, its title from `pictureFallback` until loaded), and the labels as one mesh on
+  `labelAtlas`. `textures.js`: canvas textures, seeded, nearly white so the config's colours are
+  the room's. It returns `lighting`, `occlusion` and `lightColor` for the furniture's bake, and
+  `setDim` for the screening room (the pictures and labels too).
 - `controls.js`: the hallway's and outside's controls for a box room: drag to look, keys, click or
-  tap the floor (`walkTo`), the doorway (`onDoor`, `walkInto`), the panel (`onPanel`), a gamepad
+  tap the floor (`walkTo`), the doorway (`onDoor`, `walkInto`), the panel (`onPanel`), a piece
+  (`onPiece`, `hoverPiece`; `walkUpTo(i, done)`, a teleport in VR), a gamepad
   (common's `gamepad.js`), and in VR the sticks per common's `nav.js` (move smooth/teleport, turn
   snap/smooth), the trigger, a grip (`onSqueeze`); `reduceMotion` makes walks jumps, `setEyeLift`
   raises the rig in VR (seated), `moveSpeed`/`turnRate` feed the vignette. Keys go through common's
@@ -90,7 +98,8 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   (in VR the head onto the seat, `_riseXR` lowered by EYE − SEATED_EYE) and `stand()` (to its
   `out`), and every walk stands first; `settle()` after a mode change. Nothing allocated per frame.
 - `panel.js`: the control panel on the wall (outside's), redrawn only on a change. `overlay.js`: the
-  card (the page's `<nav>`: the title, ← Hallway, the description, Start / Leave shared session, in
+  card (the page's `<nav>`: the title, ← Hallway, the description, On the walls (a link to where
+  each piece leads, `pieceHref`, else a button, `onPiece`), Start / Leave shared session, in
   a session its status and the visitor's name (`onName`), and Settings with the panel's choices as
   radio buttons and checkboxes; before them, in the room, the modes as radios, what is showing,
   Play, Next, Captions, Stop and the episodes by decade: `setMode`, `setEpisodes`, `setShowing`,
@@ -98,12 +107,17 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   the label beside the aiming dot (`setLabel`), Wave,
   Copy invite link, Fullscreen, Enter VR, the aiming dot, and toasts (`role="status"`, polite). With
   `tv`, Wave is in the card and the invite is text there (`inviteText`), and the hints are the
-  remote's (`tv`, `tv-card`). On a TV, a faded hint is `aria-hidden` (out of TalkBack's reading
-  order) but stays the canvas's description (`aria-describedby`). `presence.js`: the session's status and notices in words.
+  remote's (`tv`, `tv-card`). With pieces, the hints name the pictures (`PIECE_HINTS`, else an
+  empty room's `HINTS`), and on a TV `setAimed(i)` (main.js's frame loop, the piece under the dot)
+  makes the hint's OK say what OK does there, as music's does on the gramophone. On a TV, a faded
+  hint is `aria-hidden` (out of TalkBack's reading order) but stays the canvas's description
+  (`aria-describedby`). `presence.js`: the session's status and notices in words.
 - `preview.js`: the two pictures (`renderPreview`, hung as the hallway hangs its doorways', and
   `renderSocial`, from `socialView`).
 - `main.js`: the visit and the way back (common's `door.js`; `<id>.visit` in sessionStorage),
-  arrival, `go` (fade, then `location.assign`), fullscreen, VR (`sessiongranted`, noted as
+  arrival (at the doorway, or back from a piece's link, `?from=<piece id>` with no `back`, in front
+  of it with the kept way back), `go(piece)` (fade, then `location.assign`: the way back, or the
+  piece's link, `pieceUrl`, common's `hallLink`), `leftBy` (where `pageshow` arrives), fullscreen, VR (`sessiongranted`, noted as
   `window.roomXrGranted` by the inline script in index.html), the panel, the shared session
   (layersharedsession's `createTogether`, page `ROOM.id`), the accessibility settings (common's
   `access.js`: `applyAccess`, `setAccess`, re-read on `storage` and `pageshow`; the `reduce-motion`
@@ -135,12 +149,16 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   unchanged. `test/types.test.js` runs tsc, so `npm test` and the Pages workflow do, and fails
   rather than skips without TypeScript. What TypeScript's DOM library leaves out (WebKit's
   fullscreen names, `window.__room`, `window.roomXrGranted`) is in `types/globals.d.ts`, never
-  served. Not `strict` yet (437 errors with it, nearly all untyped parameters): that comes a file
-  at a time. `tools/` and `test/` wait for `@types/node`.
+  served. `strict` comes a file at a time: `tsconfig.strict.json` (it, with `strict` on) includes
+  only the files that pass it, `config.js` and `presence.js` so far, and `test/types.test.js` runs
+  it too. A file joins its `include` when a change makes it pass; what an included file imports is
+  checked strictly with it. The rest has a few hundred errors with it, nearly all untyped
+  parameters. `tools/` and `test/` wait for `@types/node`.
 - Scripted testing: `window.__room` (THREE, renderer, scene, camera, rig, room, layout, controls,
   overlay, fade, vignette, xrDevice, go, enterVR, together, remote, tv, way, visit, setAccess, access,
   player, roomPanel, setMode, playEpisode, playerAction, sitOn, mode, furniture, episodes,
-  `preview()`, `social()`, `tick(dt, n)`, `ready`, true once the catalogue and stills have loaded). A hidden browser pane gets no animation frames:
+  `preview()`, `social()`, `tick(dt, n)`, `ready`, true once the catalogue and stills have loaded
+  and the pieces' pictures have loaded or failed). A hidden browser pane gets no animation frames:
   drive it with `tick()`. XR frames under `?xr=emulate` need frames too; headless Chrome (below)
   has them.
 - Headless Chrome is common's `tools/chrome.mjs` (`launchChrome`): it writes the fresh profile's
@@ -157,7 +175,7 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   (a localhost URL goes over adb reverse); the empty room holds 60 fps at 1080p at a pixel ratio of
   2, the budget a room's contents can spend. Other sessions may use the same TV: don't restart its
   app under them.
-- Shared packages, pinned by tag in package.json: AriaMoKr/common (`v0.6.2`: the door contract,
+- Shared packages, pinned by tag in package.json: AriaMoKr/common (`v0.6.3`: the door contract,
   nav, access with the vignette, fade, gamepad, portal, sky, tv, and the tools `serve.mjs`,
   `vendor.mjs`, `chrome.mjs`, and the Pages workflow) and AriaMoKr/layersharedsession (`v0.3.0`).
   Change them there, then move the tag here and `npm install`.
@@ -167,8 +185,9 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   `3504bd5`, which its GitHub-made "Initial commit" copies). In a conflict keep video's own:
   `config.js`, `index.html`, `package.json`'s name, description, homepage and repository, the two
   pictures, port 8098, `main.js`'s opening comment, video's additions to `controls.js`,
-  `overlay.js`, `scene.js`, `main.js`, `style.css` and `test/site.test.js`, and what README and
-  CLAUDE.md say about video.
+  `overlay.js`, `scene.js`, `main.js`, `style.css` and `test/site.test.js`, its hints (`HINTS` and
+  `PIECE_HINTS` in `overlay.js`, which name the tapes, screens and seats, and the hints test in
+  `test/pieces.test.js` that says them), and what README and CLAUDE.md say about video.
   A fix to the template's code goes into RoomTemplateEmpty first and comes here by that merge.
 - `.claude/launch.json`: `room` (8098), `archive-proxy` (8099) and `hallway` (`../hallway/public`
   on 8088).

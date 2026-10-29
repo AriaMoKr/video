@@ -1,7 +1,8 @@
 // Canvas textures, painted once and seeded, so the room looks the same on every visit: the floor's
 // boards, the walls' plaster and the ceiling, nearly white, so the colours in config.js (baked into
-// the vertices, scene.js) are the room's; and the hallway's enamel, for the control panel, and the
-// picture the doorway shows until the Hallway's view of this door has loaded.
+// the vertices, scene.js) are the room's; the hallway's enamel, for the control panel and the
+// labels under what hangs on the walls; the picture the doorway shows until the Hallway's view of
+// this door has loaded, and a piece's until its own has.
 import * as THREE from 'three';
 
 export const SERIF = '"Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Noto Serif", serif';
@@ -173,4 +174,60 @@ export function previewFallback(name, color) {
   }
   g.fillText(name, W / 2, H * 0.5);
   return texture(c);
+}
+
+/** A piece's picture until its image has loaded, or when it cannot be: its title, dim, `aspect` (width ÷ height) wide. */
+export function pictureFallback(title, aspect) {
+  const H = 256, W = Math.round(H * Math.min(4, Math.max(0.25, aspect)));
+  const c = canvas(W, H), g = c.getContext('2d');
+  const grad = g.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, '#4a4238');
+  grad.addColorStop(1, '#2c2620');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, W, H);
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  g.fillStyle = 'rgba(255,248,235,0.55)';
+  let size = 40;
+  for (; size > 10; size -= 2) {
+    g.font = `600 ${size}px ${SERIF}`;
+    if (g.measureText(title).width <= W * 0.85) break;
+  }
+  g.fillText(title, W / 2, H / 2);
+  return texture(c);
+}
+
+/** How many canvas pixels high a label is in labelAtlas, and how wide the canvas is at most. */
+const LABEL_PX = { height: 72, width: 2048 };
+
+/**
+ * The labels under the pieces, all on one canvas, one under another: the hallway's enamel with the
+ * title in gold, each `width` × `height` metres. Returns the texture and where on it each label is,
+ * as [u0, v0, u1, v1].
+ * @param {{ text: string, width: number, height: number }[]} labels
+ */
+export function labelAtlas(labels) {
+  const H = LABEL_PX.height;
+  const widths = labels.map((l) => Math.min(LABEL_PX.width, Math.round((H * l.width) / l.height)));
+  const W = Math.max(64, ...widths), rows = Math.max(1, labels.length);
+  const c = canvas(W, H * rows), g = c.getContext('2d');
+  const rects = labels.map((l, i) => {
+    const w = widths[i], y = i * H;
+    g.save();
+    g.translate(0, y);
+    enamel(g, w, H, 4);
+    g.restore();
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.fillStyle = GOLD;
+    let size = 40;
+    for (; size > 12; size -= 2) {
+      g.font = `600 ${size}px ${SERIF}`;
+      if (g.measureText(l.text).width <= w - 48) break;
+    }
+    g.fillText(l.text, w / 2, y + H / 2 + 2);
+    // The canvas's top is the texture's v = 1.
+    return [0, 1 - (y + H) / c.height, w / W, 1 - y / c.height];
+  });
+  return { texture: texture(c), rects };
 }

@@ -2,11 +2,11 @@
 // this template"): every field in its form, and the page, the package and the door saying the same.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { HEX, ID, ROOM, WINDOW_WALLS, hallwayDoor } from '../public/js/config.js';
-import { MAX_SIZE, MIN_SIZE } from '../public/js/room.js';
+import { MAX_SIZE, MIN_SIZE, pieceProblems } from '../public/js/room.js';
 import { LINK_PARAMS, VISIT_PARAMS, hallwayUrl } from 'common/door.js';
 
 const here = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -52,6 +52,12 @@ test('its colours and its glow are #rrggbb', () => {
 test('its window is in a wall a window can be in, and the sky outside it is turned by a yaw in radians', () => {
   assert.ok(WINDOW_WALLS.includes(ROOM.window));
   assert.ok(Number.isFinite(ROOM.skyYaw) && Math.abs(ROOM.skyYaw) <= 2 * Math.PI);
+});
+
+test('what hangs on its walls fits there, each with its picture in public/ (none in an empty room)', () => {
+  assert.ok(Array.isArray(ROOM.pieces));
+  assert.deepEqual(pieceProblems(ROOM), []);
+  for (const p of ROOM.pieces) assert.ok(existsSync(join(here, 'public', decodeURIComponent(p.image.split(/[?#]/)[0]))), `${p.id}: ${p.image} is not in public/`);
 });
 
 test("its dev server's port is its own: clear of the hallway's, outside's, the shared session's, music's, the template's and art's", () => {
