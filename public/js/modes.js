@@ -31,7 +31,8 @@ export const SEATED_EYE = 1.15;
  * four modes, then what is showing.
  */
 export const ROOM_PANEL_PX = { width: 512, height: 768 };
-/** @type {[id: string, x0: number, y0: number, x1: number, y1: number][]} */
+/** @typedef {[id: string, x0: number, y0: number, x1: number, y1: number]} Button */
+/** @type {Button[]} */
 export const ROOM_PANEL_BUTTONS = [
   ['room:mode:store', 32, 84, 250, 142],
   ['room:mode:den', 262, 84, 480, 142],
@@ -45,7 +46,7 @@ export const ROOM_PANEL_BUTTONS = [
 
 /** The bar under a screen: its canvas (6:1, as every bar is), and its buttons, as the panel's. */
 export const BAR_PX = { width: 768, height: 128 };
-/** @type {[id: string, x0: number, y0: number, x1: number, y1: number][]} */
+/** @type {Button[]} */
 export const BAR_BUTTONS = [
   ['bar:play', 8, 60, 188, 122],
   ['bar:next', 200, 60, 380, 122],
@@ -53,7 +54,14 @@ export const BAR_BUTTONS = [
   ['bar:stop', 584, 60, 760, 122],
 ];
 
-/** The button at (u, v) (0…1 from the bottom left) of a canvas `px` with `buttons`, or null. */
+/**
+ * The button at (u, v) (0…1 from the bottom left) of a canvas `px` with `buttons`, or null.
+ * @param {Button[]} buttons
+ * @param {{ width: number, height: number }} px
+ * @param {number} u
+ * @param {number} v
+ * @returns {string | null}
+ */
 function buttonAt(buttons, px, u, v) {
   const x = u * px.width, y = (1 - v) * px.height;
   for (const b of buttons) {
@@ -61,7 +69,9 @@ function buttonAt(buttons, px, u, v) {
   }
   return null;
 }
+/** @type {(u: number, v: number) => string | null} */
 export const roomPanelButtonAt = (u, v) => buttonAt(ROOM_PANEL_BUTTONS, ROOM_PANEL_PX, u, v);
+/** @type {(u: number, v: number) => string | null} */
 export const barButtonAt = (u, v) => buttonAt(BAR_BUTTONS, BAR_PX, u, v);
 
 /**
@@ -80,9 +90,25 @@ export const barButtonAt = (u, v) => buttonAt(BAR_BUTTONS, BAR_PX, u, v);
  *   curtain: boolean, dim: number }} Furniture
  *   bar: the bar of the screen in use, which castRay asks (none in the gallery until a set plays);
  *   curtain: whether the window's curtains close while a show plays; dim: how far the lights go down then
+ * @typedef {import('./room.js').Layout & { furniture?: Furniture | null }} VideoLayout
+ *   room.js's layout, and its furniture (furnish's) once the room is furnished
+ * @typedef {import('./room.js').RoomHit & { id: string | number | null, use: string | null }} VideoHit
+ *   what castRay writes: room.js's hit, with the face's id, and what using it does (use), else null
  */
 
-/** @returns {Face} */
+/**
+ * @param {string} kind
+ * @param {string | number} id
+ * @param {string | null} use
+ * @param {'x' | 'z'} axis
+ * @param {number} at
+ * @param {1 | -1} facing
+ * @param {number} a0
+ * @param {number} a1
+ * @param {number} y0
+ * @param {number} y1
+ * @returns {Face}
+ */
 function face(kind, id, use, axis, at, facing, a0, a1, y0, y1) {
   return { kind, id, use, axis, at, facing, a0: Math.min(a0, a1), a1: Math.max(a0, a1), y0, y1 };
 }
@@ -109,30 +135,61 @@ export function faceFrame(f) {
 /**
  * A wall's frame for laying things against it: `a` along it, `d` out from it into the room. box()
  * is a box in it, face() a face standing `d` out from the wall.
+ * @param {VideoLayout} L
+ * @param {'left' | 'right' | 'far'} name
  */
 function wall(L, name) {
-  const W = {
+  /** @type {Record<'left' | 'right' | 'far', { axis: 'x' | 'z', facing: 1 | -1, x: (a: number, d: number) => number, z: (a: number, d: number) => number }>} */
+  const WALLS = {
     left: { axis: 'x', facing: 1, x: (a, d) => L.x0 + d, z: (a) => a },
     right: { axis: 'x', facing: -1, x: (a, d) => L.x1 - d, z: (a) => a },
     far: { axis: 'z', facing: 1, x: (a) => a, z: (a, d) => L.z1 + d },
-  }[name];
+  };
+  const W = WALLS[name];
   return {
     ...W,
-    /** @returns {Box} */
+    /**
+     * @param {number} a0
+     * @param {number} a1
+     * @param {number} d0
+     * @param {number} d1
+     * @param {number} y0
+     * @param {number} y1
+     * @param {string} material
+     * @param {Pick<Box, 'solid' | 'visible'>} [more]
+     * @returns {Box}
+     */
     box(a0, a1, d0, d1, y0, y1, material, more = {}) {
       const xs = [W.x(a0, d0), W.x(a1, d1)], zs = [W.z(a0, d0), W.z(a1, d1)];
       return { min: [Math.min(...xs), y0, Math.min(...zs)], max: [Math.max(...xs), y1, Math.max(...zs)], material, ...more };
     },
+    /**
+     * @param {string} kind
+     * @param {string | number} id
+     * @param {string | null} use
+     * @param {number} d
+     * @param {number} a0
+     * @param {number} a1
+     * @param {number} y0
+     * @param {number} y1
+     */
     face(kind, id, use, d, a0, a1, y0, y1) {
-      return face(kind, id, use, /** @type {'x'|'z'} */ (W.axis), W.axis === 'x' ? W.x(0, d) : W.z(0, d), /** @type {1|-1} */ (W.facing), a0, a1, y0, y1);
+      return face(kind, id, use, W.axis, W.axis === 'x' ? W.x(0, d) : W.z(0, d), W.facing, a0, a1, y0, y1);
     },
   };
 }
 
-/** The floor a box stands on, as a rect to walk round. @returns {Rect} */
+/** The floor a box stands on, as a rect to walk round. @type {(b: Box) => Rect} */
 const footprint = (b) => ({ minX: b.min[0], maxX: b.max[0], minZ: b.min[2], maxZ: b.max[2] });
 
-/** A bar under a screen, `width` wide (6:1), its bottom at y0, on the face's plane. */
+/**
+ * A bar under a screen, `width` wide (6:1), its bottom at y0, on the face's plane.
+ * @param {string} screenId
+ * @param {Face} f
+ * @param {number} width
+ * @param {number} y0
+ * @param {number} [along]
+ */
 function barFace(screenId, f, width, y0, along = (f.a0 + f.a1) / 2) {
   return face('bar', screenId, null, f.axis, f.at, f.facing, along - width / 2, along + width / 2, y0, y0 + width / 6);
 }
@@ -144,6 +201,10 @@ export const SHELF = { depth: 0.34, tapeW: 0.22, tapeH: 0.3, pitch: 0.27, pad: 0
  * Shelves of tapes against a side wall from zStart on along -z, a bay to a decade with its sign
  * over it, holding the tapes of `decades`, in their order as one reads them facing the wall (left
  * to right, row by row). Returns where they end (the far z).
+ * @param {VideoLayout} L
+ * @param {Furniture} F
+ * @param {{ decade: string }[]} episodes
+ * @param {{ side?: 'left' | 'right', zStart: number, rows?: number, decades?: string[] }} options
  */
 function shelves(L, F, episodes, { side = 'left', zStart, rows = 4, decades = DECADES }) {
   const w = wall(L, side);
@@ -186,7 +247,14 @@ function shelves(L, F, episodes, { side = 'left', zStart, rows = 4, decades = DE
   return z;
 }
 
-/** A seat: where one sits (yaw set by facing()), where one stands up to, and its boxes, which using sits on it. */
+/**
+ * A seat: where one sits (yaw set by facing()), where one stands up to, and its boxes, which using sits on it.
+ * @param {Furniture} F
+ * @param {number} x
+ * @param {number} z
+ * @param {[number, number]} out
+ * @param {...Box} boxes
+ */
 function seat(F, x, z, out, ...boxes) {
   for (const box of boxes) box.use = `seat:${F.seats.length}`;
   F.seats.push({ x, z, yaw: 0, out });
@@ -197,25 +265,40 @@ function seat(F, x, z, out, ...boxes) {
  * A couch or a sofa facing -z, from x0 to x1: to each of `places` (the seats' x) its cushion and
  * its piece of the back, the arms the end ones', and the rect round it. One stands up behind it,
  * the way one came.
+ * @param {Furniture} F
+ * @param {number} x0
+ * @param {number} x1
+ * @param {number} zFront
+ * @param {number} zBack
+ * @param {string} material
+ * @param {number[]} places
  */
 function couch(F, x0, x1, zFront, zBack, material, places) {
   const back = zBack + 0.22;
   places.forEach((x, i) => {
     const a = i ? (places[i - 1] + x) / 2 : x0, b = i < places.length - 1 ? (x + places[i + 1]) / 2 : x1;
-    const arms = [i === 0 && [x0, x0 + 0.2], i === places.length - 1 && [x1 - 0.2, x1]].filter(Boolean)
-      .map(([p, q]) => ({ min: [p, 0, zFront], max: [q, 0.62, back], material }));
+    /** @type {[number, number][]} */
+    const ends = [];
+    if (i === 0) ends.push([x0, x0 + 0.2]);
+    if (i === places.length - 1) ends.push([x1 - 0.2, x1]);
+    const arms = ends.map(([p, q]) => ({ min: [p, 0, zFront], max: [q, 0.62, back], material }));
     seat(F, x, (zFront + zBack) / 2 + 0.05, [x, back + MARGIN + 0.05],
       { min: [a, 0, zFront], max: [b, 0.43, zBack], material }, { min: [a, 0, zBack - 0.01], max: [b, 0.9, back], material }, ...arms);
   });
   F.obstacles.push({ minX: x0, maxX: x1, minZ: zFront, maxZ: back });
 }
 
-/** Seats `seats` face what they look at: (tx, tz). */
+/**
+ * Seats `seats` face what they look at: (tx, tz).
+ * @param {Seat[]} seats
+ * @param {number} tx
+ * @param {number} tz
+ */
 function facing(seats, tx, tz) {
   for (const s of seats) s.yaw = Math.atan2(-(tx - s.x), -(tz - s.z));
 }
 
-/** @type {Record<Mode, (L: any, F: Furniture, episodes: { decade: string }[]) => void>} */
+/** @type {Record<Mode, (L: VideoLayout, F: Furniture, episodes: { decade: string }[]) => void>} */
 const BUILD = {
   store(L, F, episodes) {
     shelves(L, F, episodes, { side: 'left', zStart: -1.0, rows: 4 });
@@ -292,6 +375,7 @@ const BUILD = {
   gallery(L, F, episodes) {
     // A set to a decade (of those with episodes), each as sets were then: [cabinet: width, depth,
     // bottom, top], its legs, [screen: width, bottom], [bar: width, bottom], and what it is made of.
+    /** @type {Record<string, { cab: number[], screen: number[], bar: number[], material: string, cart?: boolean }>} */
     const STYLES = {
       '1940s': { cab: [0.8, 0.5, 0.1, 1.28], screen: [0.36, 0.86], bar: [0.72, 0.62], material: 'walnut' },
       '1950s': { cab: [0.98, 0.5, 0.2, 1.06], screen: [0.52, 0.6], bar: [0.84, 0.32], material: 'oak' },
@@ -335,10 +419,13 @@ const BUILD = {
  * The room furnished as `mode` (else the default), for the layout L (room.js layoutRoom) and the
  * episodes (catalogue.js), whose tapes it shelves by decade. Set it as L.furniture for castRay and
  * clampWalk to see it.
+ * @param {VideoLayout} L
+ * @param {string} mode
+ * @param {{ decade: string }[]} episodes
  * @returns {Furniture}
  */
 export function furnish(L, mode, episodes) {
-  const m = /** @type {Mode} */ (MODES.includes(mode) ? mode : DEFAULT_MODE);
+  const m = /** @type {readonly string[]} */ (MODES).includes(mode) ? /** @type {Mode} */ (mode) : DEFAULT_MODE;
   const P = L.panel;
   /** @type {Furniture} */
   const F = {
@@ -353,12 +440,22 @@ export function furnish(L, mode, episodes) {
   return F;
 }
 
-/** The screen an episode plays on: the main one, or in the gallery its decade's set (null if none). */
+/**
+ * The screen an episode plays on: the main one, or in the gallery its decade's set (null if none).
+ * @param {Furniture} F
+ * @param {{ decade: string } | null | undefined} episode
+ * @returns {Screen | null}
+ */
 export function screenFor(F, episode) {
   return F.screens.find((s) => s.id === 'main') ?? F.screens.find((s) => s.decade === episode?.decade) ?? null;
 }
 
-/** Whether (x, z) is in the way of furniture (within MARGIN of it). */
+/**
+ * Whether (x, z) is in the way of furniture (within MARGIN of it).
+ * @param {Furniture} F
+ * @param {number} x
+ * @param {number} z
+ */
 export function blocked(F, x, z) {
   for (const r of F.obstacles) {
     if (x > r.minX - MARGIN && x < r.maxX + MARGIN && z > r.minZ - MARGIN && z < r.maxZ + MARGIN) return true;
@@ -370,7 +467,13 @@ export function blocked(F, x, z) {
  * room.js clampWalk, and round the furniture (L.furniture): a walk into it stops MARGIN from it on
  * the side it came from, sliding along it; one already in it (a mode changed under them) is put out
  * on its nearest side, or, where that is in something else (between rows of seats), at the nearest
- * place clear of it all.
+ * place clear of it all. Writes { x, z } into out and returns it.
+ * @param {VideoLayout} L
+ * @param {number} fx
+ * @param {number} fz
+ * @param {number} x
+ * @param {number} z
+ * @param {{ x: number, z: number }} [out]
  */
 export function clampWalk(L, fx, fz, x, z, out = { x: 0, z: 0 }) {
   clampRoomWalk(L, fx, fz, x, z, out);
@@ -412,7 +515,16 @@ export function clampWalk(L, fx, fz, x, z, out = { x: 0, z: 0 }) {
 // What castRay found nearest in the furniture, kept here so it allocates nothing.
 let nearT = 0, nearFace = /** @type {Face | null} */ (null), nearBox = /** @type {Box | null} */ (null), nearAxis = 0, nearSign = 0;
 
-/** Where a ray meets a face from in front, or -1. */
+/**
+ * Where a ray meets a face from in front, or -1.
+ * @param {Face} f
+ * @param {number} ox
+ * @param {number} oy
+ * @param {number} oz
+ * @param {number} dx
+ * @param {number} dy
+ * @param {number} dz
+ */
 function meetFace(f, ox, oy, oz, dx, dy, dz) {
   const o = f.axis === 'x' ? ox : oz, d = f.axis === 'x' ? dx : dz;
   if (d * f.facing >= 0) return -1; // from behind it, or along it
@@ -430,9 +542,18 @@ function meetFace(f, ox, oy, oz, dx, dy, dz) {
  * where on it, 0…1 from its bottom left), 'seat' or 'furniture' (a box); `use` is what using it
  * does (a face's or a seat's), or null; and the floor is walkable only clear of the furniture.
  * Writes into out (which needs `id` and `use` too) and returns it, or null.
+ * @param {VideoLayout} L
+ * @param {number} ox
+ * @param {number} oy
+ * @param {number} oz
+ * @param {number} dx
+ * @param {number} dy
+ * @param {number} dz
+ * @param {VideoHit} out
+ * @returns {VideoHit | null}
  */
 export function castRay(L, ox, oy, oz, dx, dy, dz, out) {
-  const hit = castRoomRay(L, ox, oy, oz, dx, dy, dz, out);
+  const hit = castRoomRay(L, ox, oy, oz, dx, dy, dz, out) ? out : null;
   if (hit) hit.id = hit.use = null;
   const F = L.furniture;
   if (!F) return hit;
@@ -490,6 +611,7 @@ export function castRay(L, ox, oy, oz, dx, dy, dz, out) {
   out.walkable = false;
   out.u = out.v = 0;
   out.nx = out.ny = out.nz = 0;
+  out.piece = -1;
   if (nearFace) {
     const f = nearFace;
     out.kind = f.kind;
@@ -502,7 +624,7 @@ export function castRay(L, ox, oy, oz, dx, dy, dz, out) {
     const fromLeft = (f.axis === 'x') === (f.facing > 0) ? f.a1 - a : a - f.a0;
     out.u = fromLeft / (f.a1 - f.a0);
     out.v = (out.y - f.y0) / (f.y1 - f.y0);
-  } else {
+  } else if (nearBox) {
     out.kind = nearBox.use ? 'seat' : 'furniture';
     out.id = null;
     out.use = nearBox.use ?? null;

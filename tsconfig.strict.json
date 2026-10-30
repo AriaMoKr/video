@@ -6,5 +6,5 @@
   "compilerOptions": {
     "strict": true
   },
-  "include": ["public/js/config.js", "public/js/presence.js", "types/*.d.ts"]
+  "include": ["public/js/config.js", "public/js/presence.js", "public/js/room.js", "public/js/modes.js", "public/js/controls.js", "types/*.d.ts"]
 }

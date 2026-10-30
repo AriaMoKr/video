@@ -636,7 +636,7 @@ function updateShowing(dt) {
   furniture.highlight(thing?.face ?? null);
   roomPanel.setHover(controls.hoverKind === 'roompanel' ? controls.hover : null);
   furniture.bar.setHover(controls.hoverKind === 'bar' ? controls.hover : null);
-  const mouse = controls._mouse;
+  const mouse = controls.pointer;
   const aim = controls.padActive || (remote !== null && !remote.inCard);
   overlay.setLabel(renderer.xr.isPresenting ? '' : thing?.label ?? '', aim || !mouse ? null : mouse.x, aim || !mouse ? null : mouse.y);
   // The screening room: the lights down and the curtains drawn while a show plays.

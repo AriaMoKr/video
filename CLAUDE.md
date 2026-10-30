@@ -56,7 +56,9 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   buttons (`PANEL_BUTTONS`, `panelButtonAt`). What hangs on the walls: `PIECE` (frame, label),
   `PIECE_WALLS`, the layout's `pieces` (each where it hangs: `along`, its middle, the wall's normal
   `nx`/`nz`, its right `rx`/`rz`, its label), `pieceFront` (where to stand to look),
-  `pieceSpawn` (back from its link) and `pieceProblems` (what is wrong, in words).
+  `pieceSpawn` (back from its link) and `pieceProblems` (what is wrong, in words). Its types:
+  `Layout` (layoutRoom's, which the rest take) and `RoomHit` (what castRay writes: common's `Hit`
+  with `u`, `v` and `piece`).
   Coordinates: metres, the doorway's wall at z = 0, the room along -z, the doorway at x = 0, yaw 0
   faces -z, left is -x.
 - `modes.js`: pure. The four modes (`MODES`, `MODE_NAMES`, `DEFAULT_MODE` 'store') furnished
@@ -66,6 +68,8 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   buttons (`ROOM_PANEL_BUTTONS`, `roomPanelButtonAt`, `BAR_BUTTONS`, `barButtonAt`); and `castRay`
   and `clampWalk` as room.js's with the furniture in the way (one stood in it after a mode change
   is put out, at the nearest clear place where its nearest side is blocked too). `SEATED_EYE` 1.15.
+  Its types: `VideoLayout` (room.js's `Layout` with `furniture`) and `VideoHit` (room.js's
+  `RoomHit` with the face's `id` and `use`, what castRay writes: controls.js's `hit`).
 - `furniture.js`: `buildFurniture` makes a mode's meshes, baked like the room: the boxes, the tapes
   on `covers.js`'s atlas, the signs, the screens (a `VideoTexture` or a card), the bar, the
   captions strip, the hover frame and the screening room's curtains; `setDim` (k**2.2, colours
@@ -86,17 +90,28 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   `labelAtlas`. `textures.js`: canvas textures, seeded, nearly white so the config's colours are
   the room's. It returns `lighting`, `occlusion` and `lightColor` for the furniture's bake, and
   `setDim` for the screening room (the pictures and labels too).
-- `controls.js`: the hallway's and outside's controls for a box room: drag to look, keys, click or
-  tap the floor (`walkTo`), the doorway (`onDoor`, `walkInto`), the panel (`onPanel`), a piece
-  (`onPiece`, `hoverPiece`; `walkUpTo(i, done)`, a teleport in VR), a gamepad
-  (common's `gamepad.js`), and in VR the sticks per common's `nav.js` (move smooth/teleport, turn
-  snap/smooth), the trigger, a grip (`onSqueeze`); `reduceMotion` makes walks jumps, `setEyeLift`
-  raises the rig in VR (seated), `moveSpeed`/`turnRate` feed the vignette. Keys go through common's
-  `tv.js` `keyOf` (a TV remote's come with no `code`); `aimMiddle` makes the middle of the view the
-  pointer (on a TV) and `useMiddle()` uses it (a gamepad's A, the remote's OK). Things in a mode
-  (`use` 'tape:i', 'seat:i', 'screen:id', the bar and the room panel) go to `onThing`; `sit(seat)`
-  (in VR the head onto the seat, `_riseXR` lowered by EYE − SEATED_EYE) and `stand()` (to its
-  `out`), and every walk stands first; `settle()` after a mode change. Nothing allocated per frame.
+- `controls.js`: a subclass of common's `Controls` (`common/controls.js`) for a `VideoHit`. Common's
+  is the walking on every device: drag to look, keys through `tv.js` `keyOf` (a TV remote's come
+  with no `code`; a key a page control has used, or one in a form control or a `data-own-keys`
+  element, is the page's), click or tap (two fingers neither look nor tap), a gamepad
+  (`gamepad.js`), and in VR the trigger, a grip (`onSqueeze`) and the sticks per `nav.js` (move
+  smooth/teleport, turn snap/smooth); `walkTo(x, z, { face, then })` on the floor,
+  `onDoor(how, hit)` on the doorway, `onTeleport` (main.js's blink), `reduceMotion` (a walk jumps to
+  its end), `setEyeLift` (seated), `moveSpeed`/`turnRate` (the vignette), `aimMiddle` and
+  `useMiddle()` (a gamepad's A, the remote's OK), `pointer` (the mouse over the view, which main.js
+  puts the label beside), and in VR `_lineUp`, `_onSessionEnd`, `_placeHead`, `_moveHead`,
+  `_turnAboutHead` and `_headYaw`; its walks, keys, gamepad, sticks and teleports call `stand()`
+  first; nothing allocated per frame. The template's: `layout` (set after `super()`), the panel
+  (`onPanel`, `hoverPanel`, `_press`) and the pieces (`onPiece`, `hoverPiece`, a reticle at 1.3) in
+  `usable`, `use`, `_setHover` and `reticleScale`, then `super`'s; `walkInto` (`_startWalk` with
+  `turn` false: facing the doorway from the first step) and `walkUpTo(i, done)` (a teleport in VR).
+  video's: `castRay` and `clampWalk` are modes.js's, the furniture in the way (the hit's `u`, `v`,
+  `piece`, `id` and `use` through the `hit` option); a thing in a mode (`use` 'tape:i', 'seat:i',
+  'screen:id', and the bar's and the room panel's buttons) goes to `onThing`, the one pointed at
+  `hoverKind` and `hoverId`; the seats: `seat`, `sit(seat, pitch)` (in VR the head onto the seat,
+  `_riseXR` lowered by EYE − SEATED_EYE), `stand()` (to its `out`), and `settle()` after a mode
+  change; `walkInto` and `walkUpTo` stand first, `setPose` clears the seat (on a screen the eye
+  back at EYE), `_lineUp` puts a seated head onto its seat, and `_onSessionEnd` sits again.
 - `panel.js`: the control panel on the wall (outside's), redrawn only on a change. `overlay.js`: the
   card (the page's `<nav>`: the title, ← Hallway, the description, On the walls (a link to where
   each piece leads, `pieceHref`, else a button, `onPiece`), Start / Leave shared session, in
@@ -150,10 +165,11 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   rather than skips without TypeScript. What TypeScript's DOM library leaves out (WebKit's
   fullscreen names, `window.__room`, `window.roomXrGranted`) is in `types/globals.d.ts`, never
   served. `strict` comes a file at a time: `tsconfig.strict.json` (it, with `strict` on) includes
-  only the files that pass it, `config.js` and `presence.js` so far, and `test/types.test.js` runs
-  it too. A file joins its `include` when a change makes it pass; what an included file imports is
-  checked strictly with it. The rest has a few hundred errors with it, nearly all untyped
-  parameters. `tools/` and `test/` wait for `@types/node`.
+  only the files that pass it, `config.js`, `presence.js`, `room.js`, `modes.js` and `controls.js`
+  so far, and `test/types.test.js` runs it too. A file joins its `include` when a change makes it
+  pass; what an included file imports is checked strictly with it. The rest has a few hundred
+  errors with it, mostly untyped parameters and values that may be null (a canvas's 2D context).
+  `tools/` and `test/` wait for `@types/node`.
 - Scripted testing: `window.__room` (THREE, renderer, scene, camera, rig, room, layout, controls,
   overlay, fade, vignette, xrDevice, go, enterVR, together, remote, tv, way, visit, setAccess, access,
   player, roomPanel, setMode, playEpisode, playerAction, sitOn, mode, furniture, episodes,
@@ -175,18 +191,19 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   (a localhost URL goes over adb reverse); the empty room holds 60 fps at 1080p at a pixel ratio of
   2, the budget a room's contents can spend. Other sessions may use the same TV: don't restart its
   app under them.
-- Shared packages, pinned by tag in package.json: AriaMoKr/common (`v0.6.3`: the door contract,
-  nav, access with the vignette, fade, gamepad, portal, sky, tv, and the tools `serve.mjs`,
-  `vendor.mjs`, `chrome.mjs`, and the Pages workflow) and AriaMoKr/layersharedsession (`v0.3.0`).
-  Change them there, then move the tag here and `npm install`.
+- Shared packages, pinned by tag in package.json: AriaMoKr/common (`v0.7.1`: the door contract,
+  nav, access with the vignette, fade, gamepad, portal, sky, tv, controls, and the tools
+  `serve.mjs`, `vendor.mjs`, `chrome.mjs`, and the Pages workflow) and AriaMoKr/layersharedsession
+  (`v0.3.0`). Change them there, then move the tag here and `npm install`.
 - The template's fixes come by merge, as music takes vrlbry's and art the template's: `git fetch
   template` and `git merge template/main` (the remote `template` is
   `github-custom-remote:AriaMoKr/RoomTemplateEmpty.git`; video's history joins the template's at
   `3504bd5`, which its GitHub-made "Initial commit" copies). In a conflict keep video's own:
   `config.js`, `index.html`, `package.json`'s name, description, homepage and repository, the two
-  pictures, port 8098, `main.js`'s opening comment, video's additions to `controls.js`,
-  `overlay.js`, `scene.js`, `main.js`, `style.css` and `test/site.test.js`, its hints (`HINTS` and
-  `PIECE_HINTS` in `overlay.js`, which name the tapes, screens and seats, and the hints test in
+  pictures, port 8098, `main.js`'s opening comment, video's additions to `controls.js` (castRay and
+  clampWalk from modes.js, `onThing`, the seats, and where they meet common's), `overlay.js`,
+  `scene.js`, `main.js`, `style.css` and `test/site.test.js`, its hints (`HINTS` and `PIECE_HINTS`
+  in `overlay.js`, which name the tapes, screens and seats, and the hints test in
   `test/pieces.test.js` that says them), and what README and CLAUDE.md say about video.
   A fix to the template's code goes into RoomTemplateEmpty first and comes here by that merge.
 - `.claude/launch.json`: `room` (8098), `archive-proxy` (8099) and `hallway` (`../hallway/public`

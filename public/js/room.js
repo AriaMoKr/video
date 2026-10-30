@@ -8,6 +8,7 @@
 // left is -x. A yaw of 0 faces -z (into the room); positive yaws turn left.
 import { ID } from './config.js';
 
+/** @type {(v: number, lo: number, hi: number) => number} */
 const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v);
 
 /** The viewer's eye on a screen, and how near a wall their head comes. */
@@ -46,7 +47,11 @@ export const PANEL_BUTTONS = [
   ['session', 32, 652, 480, 706],
 ];
 
-/** The button at (u, v) on the panel (0…1 from its bottom left, as castRay reports), or null. */
+/**
+ * The button at (u, v) on the panel (0…1 from its bottom left, as castRay reports), or null.
+ * @param {number} u
+ * @param {number} v
+ */
 export function panelButtonAt(u, v) {
   const x = u * PANEL_PX.width, y = (1 - v) * PANEL_PX.height;
   for (const b of PANEL_BUTTONS) {
@@ -129,13 +134,23 @@ export function layoutRoom(room, { doorWidth = DOOR.width, doorHeight = DOOR.hei
   return { width, depth, height, x0, x1, z0: 0, z1, door, window: win, panel, lamps, pieces, spawn: { x: 0, z: -0.6, yaw: 0 } };
 }
 
-/** Where someone coming back out of piece i's link stands: in front of it, facing into the room. */
+/** The room as layoutRoom lays it out, which the rest asks of. @typedef {ReturnType<typeof layoutRoom>} Layout */
+
+/**
+ * Where someone coming back out of piece i's link stands: in front of it, facing into the room.
+ * @param {Layout} L
+ * @param {number} i
+ */
 export function pieceSpawn(L, i) {
   const p = L.pieces[i], m = MARGIN + 0.05;
   return { x: clamp(p.x + p.nx * 0.9, L.x0 + m, L.x1 - m), z: clamp(p.z + p.nz * 0.9, L.z1 + m, -m), yaw: Math.atan2(-p.nx, -p.nz) };
 }
 
-/** Where to stand to look at piece i, or go in by its link: `distance` in front of it, facing it. */
+/**
+ * Where to stand to look at piece i, or go in by its link: `distance` in front of it, facing it.
+ * @param {Layout} L
+ * @param {number} i
+ */
 export function pieceFront(L, i, distance = 0.8) {
   const p = L.pieces[i], m = MARGIN + 0.05;
   return { x: clamp(p.x + p.nx * distance, L.x0 + m, L.x1 - m), z: clamp(p.z + p.nz * distance, L.z1 + m, -m), yaw: Math.atan2(p.nx, p.nz) };
@@ -152,20 +167,22 @@ export function pieceFront(L, i, distance = 0.8) {
 export function pieceProblems(room) {
   const pieces = room.pieces ?? [];
   if (!Array.isArray(pieces)) return ['pieces is not a list'];
+  /** @type {string[]} */
   const problems = [];
   const ids = new Set();
   for (const [i, p] of pieces.entries()) {
     const name = typeof p?.id === 'string' ? p.id : `piece ${i}`;
+    /** @param {string} what */
     const say = (what) => problems.push(`${name}: ${what}`);
     if (typeof p?.id !== 'string' || !ID.test(p.id)) say('its id is not 1–32 of a–z, 0–9 and -');
     else if (p.id === 'hallway') say("its id is the Hallway's");
     else if (ids.has(p.id)) say('another piece has its id');
     ids.add(p?.id);
     if (!PIECE_WALLS.includes(p?.wall)) say(`its wall is not one of ${PIECE_WALLS.join(', ')}`);
-    for (const k of ['at', 'y', 'width', 'height']) if (!Number.isFinite(p?.[k])) say(`its ${k} is not a number`);
+    for (const k of /** @type {const} */ (['at', 'y', 'width', 'height'])) if (!Number.isFinite(p?.[k])) say(`its ${k} is not a number`);
     if (!(p?.width >= 0.1 && p?.height >= 0.1)) say('it is smaller than 10 cm');
     if (typeof p?.image !== 'string' || !p.image || /^([a-z][a-z0-9+.-]*:|\/)/i.test(p.image)) say('its image is not a relative address');
-    for (const k of ['title', 'description']) if (typeof p?.[k] !== 'string' || !p[k].trim() || /\n/.test(p[k])) say(`its ${k} is not a line of text`);
+    for (const k of /** @type {const} */ (['title', 'description'])) if (typeof p?.[k] !== 'string' || !p[k].trim() || /\n/.test(p[k])) say(`its ${k} is not a line of text`);
     if (p?.link !== undefined) {
       let u = null;
       try {
@@ -186,8 +203,10 @@ export function pieceProblems(room) {
     const half = Math.max(p.width / 2 + PIECE.frame, p.label.width / 2);
     return { wall: p.wall, a0: p.along - half, a1: p.along + half, y0: Math.min(p.y - p.height / 2 - PIECE.frame, p.label.y0), y1: Math.max(p.y + p.height / 2 + PIECE.frame, p.label.y1) };
   });
+  /** @type {(r: { a0: number, a1: number, y0: number, y1: number }, a0: number, a1: number, y0: number, y1: number) => boolean} */
   const overlap = (r, a0, a1, y0, y1) => r.a0 < a1 && r.a1 > a0 && r.y0 < y1 && r.y1 > y0;
   rects.forEach((r, i) => {
+    /** @param {string} what */
     const say = (what) => problems.push(`${L.pieces[i].id}: ${what}`);
     const [s0, s1] = span[r.wall];
     if (r.a0 < s0 + 0.05 || r.a1 > s1 - 0.05) say('it, its frame or its label runs off its wall');
@@ -201,7 +220,11 @@ export function pieceProblems(room) {
   return problems;
 }
 
-/** Where someone coming in through the doorway stands: dx to the right of its middle (within its jambs), turned by yaw (within a quarter turn). */
+/**
+ * Where someone coming in through the doorway stands: dx to the right of its middle (within its
+ * jambs), turned by yaw (within a quarter turn).
+ * @param {Layout} L
+ */
 export function doorSpawn(L, dx = 0, yaw = 0) {
   const jamb = Math.max(0, L.door.width / 2 - 0.25);
   return { x: clamp(dx, -jamb, jamb), z: L.spawn.z, yaw: clamp(yaw, -Math.PI / 2, Math.PI / 2) };
@@ -211,6 +234,11 @@ export function doorSpawn(L, dx = 0, yaw = 0) {
  * The nearest place to (x, z) a head coming from (fx, fz) may be: inside the walls, `MARGIN` from
  * them, or in the doorway between its jambs (which the shoulders keep clear of), through to the
  * portal at the back of the wall. Writes { x, z } into out.
+ * @param {Layout} L
+ * @param {number} fx
+ * @param {number} fz
+ * @param {number} x
+ * @param {number} z
  */
 export function clampWalk(L, fx, fz, x, z, out = { x: 0, z: 0 }) {
   const m = MARGIN;
@@ -231,16 +259,31 @@ export function clampWalk(L, fx, fz, x, z, out = { x: 0, z: 0 }) {
   return out;
 }
 
-/** Whether a head at (x, z) has gone back through the doorway. */
+/**
+ * Whether a head at (x, z) has gone back through the doorway.
+ * @param {Layout} L
+ * @param {number} x
+ * @param {number} z
+ */
 export function doorCrossed(L, x, z) {
   return Math.abs(x) < L.door.width / 2 && z > L.door.threshold;
 }
 
-/** Whether (x, z) is somewhere to stand: inside the walls, MARGIN from them. */
+/**
+ * Whether (x, z) is somewhere to stand: inside the walls, MARGIN from them.
+ * @param {Layout} L
+ * @param {number} x
+ * @param {number} z
+ */
 export function standable(L, x, z) {
   const m = MARGIN - 1e-9;
   return x >= L.x0 + m && x <= L.x1 - m && z >= L.z1 + m && z <= -m;
 }
+
+/**
+ * What castRay writes: common's Hit (common/controls.js, what its walking reads), with u, v and piece.
+ * @typedef {import('common/controls.js').Hit & { u: number, v: number, piece: number }} RoomHit
+ */
 
 /**
  * What a ray from inside the room reaches first: the doorway, the control panel, a piece on a wall,
@@ -250,6 +293,15 @@ export function standable(L, x, z) {
  * u, v: where on the panel or the piece's picture, 0…1 from its bottom left; walkable: for the
  * floor, whether one may stand there; piece: which of L.pieces, else -1) and returns it, or null
  * when the ray leaves through no surface.
+ * @param {Layout} L
+ * @param {number} ox
+ * @param {number} oy
+ * @param {number} oz
+ * @param {number} dx
+ * @param {number} dy
+ * @param {number} dz
+ * @param {RoomHit} out
+ * @returns {RoomHit | null}
  */
 export function castRay(L, ox, oy, oz, dx, dy, dz, out) {
   let t = Infinity;
@@ -272,6 +324,7 @@ export function castRay(L, ox, oy, oz, dx, dy, dz, out) {
   out.walkable = false;
   out.piece = -1;
   const W = L.window;
+  /** @param {number} along */
   const inWindow = (along) => Math.abs(along - W.along) < W.width / 2 && y > W.bottom && y < W.top;
   if (plane === 'near') {
     out.nz = -1;
@@ -317,6 +370,15 @@ export function castRay(L, ox, oy, oz, dx, dy, dz, out) {
  * A ray that reaches `wall` meets a piece there first when it passes through the piece's picture or
  * frame, whose face stands out from the wall: then out is the piece, where on the picture (u, v),
  * and the point on its face.
+ * @param {Layout} L
+ * @param {string} wall
+ * @param {number} ox
+ * @param {number} oy
+ * @param {number} oz
+ * @param {number} dx
+ * @param {number} dy
+ * @param {number} dz
+ * @param {RoomHit} out
  */
 function hitPiece(L, wall, ox, oy, oz, dx, dy, dz, out) {
   for (let i = 0; i < L.pieces.length; i++) {

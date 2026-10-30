@@ -192,8 +192,9 @@ through its `tv.js`:
 A room made from this template keeps the remote working if:
 
 - **What it adds in 3D works with OK.** Anything a click or a tap uses, OK uses too, when
-  `controls.js`'s `_use` handles it. Anything used only with a letter key, the mouse or a control in
-  3D is also a real control in the card, where the remote reaches it.
+  `controls.js`'s `use` handles it (the room's subclass of common's `Controls`: its own first, then
+  `super.use`). Anything used only with a letter key, the mouse or a control in 3D is also a real
+  control in the card, where the remote reaches it.
 - **It reads keys through `keyOf(e)`** (common's `tv.js`). The remote's OK, and keys sent with
   `adb shell input keyevent`, come with no `code`.
 - **Back undoes its own step first.** If the room has something to step back from (sitting down, a
@@ -269,9 +270,9 @@ IPv4 (`npm start -- --host 127.0.0.1`).
 `allowJs`, `checkJs`, `noEmit`), against three.js's types and common's and the shared session's.
 Nothing is built: the page is served as it is, and the import map stays. What TypeScript's DOM
 library leaves out is in `types/globals.d.ts`. `strict` comes a file at a time:
-`tsconfig.strict.json` checks only the files that pass it (so far `config.js` and `presence.js`),
-and `npm test` runs it too. A file joins its `include` when a change makes it pass. `tools/` and
-`test/` come later.
+`tsconfig.strict.json` checks only the files that pass it (so far `config.js`, `presence.js`,
+`room.js`, `modes.js` and `controls.js`), and `npm test` runs it too. A file joins its `include`
+when a change makes it pass. `tools/` and `test/` come later.
 
 To try the way in and out locally, serve the Hallway's checkout as well (on 8088) and open the room
 as its door would:
@@ -337,7 +338,7 @@ git merge template/main
 
 `.github/workflows/pages.yml` publishes `public/` to GitHub Pages on every push to `main`, after
 the tests (tsc's check among them), through the sites' workflow in
-[AriaMoKr/common](https://github.com/AriaMoKr/common) (`v0.6.3`, on Node 24). Every URL in the page is relative, so it works under any repository's path.
+[AriaMoKr/common](https://github.com/AriaMoKr/common) (`v0.7.1`, on Node 24). Every URL in the page is relative, so it works under any repository's path.
 The archive proxy is not published with it: deploy it by hand when `tools/archive-proxy/` changes.
 
 ## License
