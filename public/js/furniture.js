@@ -7,7 +7,7 @@
 import * as THREE from 'three';
 import { Builder } from './builder.js';
 import { bake, lightAt } from './bake.js';
-import { faceFrame } from './modes.js';
+import { CURTAINS, faceFrame } from './modes.js';
 import { CAPTION, CaptionStrip, ScreenCard, SignAtlas } from './covers.js';
 import { ScreenBar } from './roompanel.js';
 
@@ -103,7 +103,7 @@ export function buildFurniture(L, F, { lighting, occlusion, covers, anisotropy =
     body.box([P.a0 - 0.025, P.y0 - 0.025, P.at + 0.004], [P.a1 + 0.025, P.y1 + 0.025, 0], { albedo: lin('#33231a'), skip: ['+z'] });
   }
   if (F.curtain) {
-    const W = L.window, a0 = W.along - W.width / 2 - 0.34, a1 = W.along + W.width / 2 + 0.34, y = W.top + 0.16;
+    const W = L.window, a0 = W.along - W.width / 2 - CURTAINS.rail, a1 = W.along + W.width / 2 + CURTAINS.rail, y = W.top + 0.16;
     if (W.wall === 'far') body.box([a0, y, L.z1], [a1, y + 0.04, L.z1 + 0.12], { albedo: ALBEDO.rail });
     else {
       const x = W.wall === 'left' ? L.x0 : L.x1, s = W.wall === 'left' ? 1 : -1;
@@ -191,7 +191,7 @@ export function buildFurniture(L, F, { lighting, occlusion, covers, anisotropy =
     if (!curtains.length || k === drawn) return;
     drawn = k;
     const W = L.window, a0 = W.along - W.width / 2, a1 = W.along + W.width / 2;
-    const spans = [[a0 - 0.3, a0 + 0.02 + k * (W.width / 2 + 0.02)], [a1 - 0.02 - k * (W.width / 2 + 0.02), a1 + 0.3]];
+    const spans = [[a0 - CURTAINS.open, a0 + 0.02 + k * (W.width / 2 + 0.02)], [a1 - 0.02 - k * (W.width / 2 + 0.02), a1 + CURTAINS.open]];
     curtains.forEach(({ mesh, map }, i) => {
       const [p, q] = spans[i], span = q - p, mid = (p + q) / 2;
       mesh.scale.x = span;

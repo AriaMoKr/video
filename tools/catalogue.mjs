@@ -4,7 +4,8 @@
 // archive.org's search):
 //   episodes.json      the episodes, as the page reads them (public/js/catalogue.js)
 //   stills/<id>.jpg    a frame of each from its item's .thumbs (one a minute), on its tape and its set
-//   captions/<id>.vtt  its captions, archive.org's speech to text, where the item has them
+//   captions/<id>.vtt  its captions, archive.org's speech to text, where the item has them (and its
+//                      pick doesn't say they are no use)
 // Each item is checked as the archive proxy checks it (worker.js refusal: in classic_tv or one of
 // its decades, marked public domain), and its video chosen: an mp4 that browsers play (h.264, or
 // the upload itself), the one its captions were made from where there is one. Only the video
@@ -40,7 +41,8 @@ export function seconds(length) {
 
 /**
  * The video to play from an item's files, and its captions: by the pick's `file` if it names one,
- * else the best of FORMATS, from those with captions first.
+ * else the best of FORMATS, from those with captions first. A named file (one of an item's several
+ * episodes) has only its own captions; else the item's will do.
  * @param {{ name: string, format?: string, width?: string, length?: string }[]} files
  * @param {string} [named]
  */
@@ -51,7 +53,7 @@ export function chooseFiles(files, named) {
   const rank = (f) => (captioned(f) ? 0 : 10) + FORMATS.indexOf(f.format);
   const video = named ? files.find((f) => f.name === named) : [...videos].sort((a, b) => rank(a) - rank(b) || Number(b.width ?? 0) - Number(a.width ?? 0))[0];
   if (!video) return null;
-  return { video, captions: captioned(video) ?? captions[0] ?? null };
+  return { video, captions: captioned(video) ?? (named ? null : captions[0] ?? null) };
 }
 
 async function get(url, type = 'json') {
@@ -73,11 +75,15 @@ async function catalogue(pick) {
   if (why) throw new Error(`${pick.id}: ${why}`);
   const chosen = chooseFiles(item.files ?? [], pick.file);
   if (!chosen) throw new Error(`${pick.id}: no video a browser plays`);
-  const { video, captions } = chosen;
+  const { video } = chosen;
+  const captions = pick.captions === false ? null : chosen.captions;
   const length = seconds(video.length);
-  // The still: the item's frame nearest STILL_AT of the way in (they are named by their second).
-  const thumbs = (item.files ?? []).filter((f) => /\.thumbs\/.*_(\d+)\.jpg$/.test(f.name))
-    .map((f) => ({ name: f.name, at: Number(/_(\d+)\.jpg$/.exec(f.name)[1]) })).sort((a, b) => a.at - b.at);
+  // The still: the item's frame nearest STILL_AT of the way in. Its thumbs are named by the video
+  // they are of and their second; for a named file (one of the item's several episodes), its own.
+  const thumbs = (item.files ?? []).flatMap((f) => {
+    const m = /\.thumbs\/(.*)_(\d+)\.jpg$/.exec(f.name);
+    return m && (!pick.file || m[1] === base(video.name)) ? [{ name: f.name, at: Number(m[2]) }] : [];
+  }).sort((a, b) => a.at - b.at);
   if (!thumbs.length) throw new Error(`${pick.id}: no stills`);
   const at = pick.still ?? length * STILL_AT;
   const still = thumbs.reduce((best, t) => (Math.abs(t.at - at) < Math.abs(best.at - at) ? t : best));

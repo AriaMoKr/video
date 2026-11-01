@@ -2,14 +2,20 @@
 // (https://archive.org/details/classic_tv), which its users upload. Only items marked public domain
 // (the archive proxy relays no others), and of those only shows known to have lapsed into it and
 // fit for the whole family: the collection's most watched include shows still under copyright, and
-// most of what is marked public domain from the 1980s and 1990s is not. tools/catalogue.mjs reads
-// each one's metadata and writes public/catalogue/ from it.
+// most of what is marked public domain from the 1980s and 1990s is not. Nor is all that is marked
+// from before (Bonanza's 1959 episodes were renewed in 1987), so each is checked before it is
+// added: the year of the notice in its credits (not of its air date), and for 1950 to 1963 no
+// renewal 28 years on in the Copyright Office's records (https://publicrecords.copyright.gov/).
+// From 1964 renewal was automatic, so only a show with no notice will do, or a film of the US
+// government's (The Big Picture, Vision USA). tools/catalogue.mjs reads each one's metadata and
+// writes public/catalogue/ from it.
 //
 // Each: the item's id, the show and the episode's title as the room shows them, the year it was
 // first shown where it is known (else the decade alone), and, where the tool's own choice is not
-// the right one, `file` (the video) or `still` (the frame on its tape, in seconds).
+// the right one, `file` (the video) or `still` (the frame on its tape, in seconds), and
+// `captions: false` where archive.org's speech to text is no use.
 
-/** @typedef {{ id: string, show: string, title: string, decade: '1940s' | '1950s' | '1960s' | '1970s', year?: number, file?: string, still?: number }} Pick */
+/** @typedef {{ id: string, show: string, title: string, decade: '1940s' | '1950s' | '1960s' | '1970s', year?: number, file?: string, still?: number, captions?: false }} Pick */
 
 /** @type {Pick[]} */
 export const PICKS = [
@@ -54,9 +60,9 @@ export const PICKS = [
   { id: 'OZZIE_AND_HARRIET_ep_Halloween_Party', show: 'Ozzie and Harriet', title: 'Halloween Party', decade: '1950s' },
   { id: 'OzzieAndHarriet-BusyChristmas', show: 'Ozzie and Harriet', title: 'Busy Christmas', decade: '1950s' },
   { id: 'You_Bet_Your_Life_Groucho', show: 'You Bet Your Life', title: 'With Groucho Marx', decade: '1950s' },
-  { id: 'Bonanza-DeathOnSunMountain', show: 'Bonanza', title: 'Death on Sun Mountain', decade: '1950s', year: 1959 },
   { id: 'OSB-02_Night_Of_April_14th', show: 'One Step Beyond', title: 'Night of April 14th', decade: '1950s', year: 1959 },
 
+  { id: 'Bonanza_pd', show: 'Bonanza', title: 'San Francisco', decade: '1960s', year: 1960, file: 'Bonanza s01e28.mp4' },
   { id: 'Bonanza-TheAbductionEp2x08', show: 'Bonanza', title: 'The Abduction', decade: '1960s', year: 1960 },
   { id: 'BarkingDog1961', show: 'Ozzie and Harriet', title: 'The Barking Dog', decade: '1960s', year: 1961, still: 120 },
   { id: 'TheBigPicture516', show: 'The Big Picture', title: 'The Army Nurse Story', decade: '1960s', year: 1961 },
@@ -65,6 +71,9 @@ export const PICKS = [
   { id: 'Beverly_Hillbillies_Ep06_Trick_Or_Treat', show: 'The Beverly Hillbillies', title: 'Trick or Treat', decade: '1960s', year: 1962 },
   { id: 'Beverly_Hillbillies_Ep13_Home_For_Christmas', show: 'The Beverly Hillbillies', title: 'Home for Christmas', decade: '1960s', year: 1962 },
   { id: 'Beverly_Hillbillies_Ep46_Turkey_Day', show: 'The Beverly Hillbillies', title: 'Turkey Day', decade: '1960s', year: 1963 },
+  { id: 'Beverly_Hillbillies_Ep52_The_Giant_JackRabbit', show: 'The Beverly Hillbillies', title: 'The Giant Jackrabbit', decade: '1960s', year: 1964 },
+  { id: 'Beverly_Hillbillies_Ep53_The_Girl_From_Home', show: 'The Beverly Hillbillies', title: 'The Girl from Home', decade: '1960s', year: 1964 },
+  { id: 'Beverly_Hillbillies_Ep55_The_Race_For_The_Queen', show: 'The Beverly Hillbillies', title: 'The Race for Queen', decade: '1960s', year: 1964 },
   { id: 'dick_van_dyke_show_39_the_night_the_roof_fell_in', show: 'The Dick Van Dyke Show', title: 'The Night the Roof Fell In', decade: '1960s', year: 1962 },
   { id: 'jack_benny_03_04_62', show: 'The Jack Benny Program', title: 'From March 4, 1962', decade: '1960s', year: 1962 },
   { id: 'TLS_Lucy_The_Babysitter', show: 'The Lucy Show', title: 'Lucy the Babysitter', decade: '1960s' },
@@ -76,7 +85,12 @@ export const PICKS = [
   { id: 'Andy_Griffith_A_Wife_For_Andy', show: 'The Andy Griffith Show', title: 'A Wife for Andy', decade: '1960s', year: 1963 },
   { id: 'Wacky_Wizardry', show: 'Mack and Myer for Hire', title: 'Wacky Wizardry', decade: '1960s', year: 1963 },
   { id: 'Mack_and_Myer_For_Hire_Dueling_Fools', show: 'Mack and Myer for Hire', title: 'Dueling Fools', decade: '1960s', year: 1963 },
-  { id: 'PetticoatJunction', show: 'Petticoat Junction', title: 'From January 7, 1964', decade: '1960s', year: 1964 },
+  { id: 'PetticoatJunction', show: 'Petticoat Junction', title: 'Bobbie Jo and the Beatnik', decade: '1960s', year: 1964 },
+  { id: 'PetticoatJunction_678', show: 'Petticoat Junction', title: 'Last Chance Farm', decade: '1960s', year: 1964 },
+  { id: 'TheCobraStrikes', show: 'The Big Picture', title: 'The Cobra Strikes', decade: '1960s', year: 1965 },
+  { id: 'OurHeritage_', show: 'The Big Picture', title: 'Our Great American Heritage', decade: '1960s', still: 300, captions: false },
+  { id: 'TheBigPicture723', show: 'The Big Picture', title: 'When the Chips Are Down', decade: '1960s', year: 1968, still: 210 },
+  { id: 'DDayAnniversary', show: 'The Big Picture', title: 'D-Day Anniversary', decade: '1960s', year: 1969, still: 1470 },
 
   { id: 'TheBigPicture-USArmyinSpaceandUndertheSea', show: 'The Big Picture', title: 'The Army in Space and Under the Sea', decade: '1970s', year: 1971 },
   { id: 'FortBliss', show: 'The Big Picture', title: 'Fort Bliss, Heart of Army Air Defense', decade: '1970s', year: 1972, still: 300 },
@@ -86,4 +100,5 @@ export const PICKS = [
   { id: 'Dusty_5', show: "Dusty's Trail", title: "Cavalry's Coming", decade: '1970s', year: 1973 },
   { id: 'DustysTrail5', show: "Dusty's Trail", title: 'Love Means Bananas', decade: '1970s', year: 1973 },
   { id: 'Dustys_Trail_Bear', show: "Dusty's Trail", title: 'Androcles and the Bear', decade: '1970s', year: 1973 },
+  { id: '306-v-20', show: 'Vision USA', title: 'No. 20', decade: '1970s', year: 1974, still: 295 },
 ];

@@ -42,7 +42,7 @@ that visit. The first visit is the video store.
   and the card have the same.
 - **Sit down** on a seat (the couch, the sofa, a seat in the screening room) the same way: you sit
   at a seated height, facing the screen. Walking stands you up again beside it.
-- **Captions** come from archive.org's speech to text, where an item has it (65 of the 70
+- **Captions** come from archive.org's speech to text, where an item has it (72 of the 79
   episodes), drawn under the screen. They are off until you turn them on, and the choice is kept
   with the room's (an episode without them says so).
 - **If the video can't reach the screen** (the archive proxy, below, can't be reached), it plays on
@@ -211,17 +211,26 @@ A room made from this template keeps the remote working if:
 
 ## The shows
 
-70 episodes of 41 shows, from the 1940s to the 1970s, chosen by hand from
+79 episodes of 42 shows, from the 1940s to the 1970s, chosen by hand from
 [Classic TV](https://archive.org/details/classic_tv). Its users upload the items, so the room takes
 only those marked public domain, and of those only shows known to have lapsed into it and fit for
 the whole family. That is why the decades stop at the 1970s: the collection's most watched include
 shows still under copyright, and most of what is marked public domain from the 1980s and 1990s is
 not.
 
-`tools/picks.js` lists them (the item, the show, the episode's title, the year), and
+Not everything marked public domain from before then is, either: NBC renewed Bonanza's 1959
+episodes, so only its 1960 ones are here. So each is checked before it goes on the shelves. The
+year that counts is the one in the copyright notice in its credits, not its air date. A show from
+1950 to 1963 is free only if it was never renewed in its 28th year, which the
+[Copyright Office's records](https://publicrecords.copyright.gov/) show. From 1964 renewal was
+automatic, so a later show is free only if it carried no notice, or if the US government made it
+(The Big Picture, the Army's, and Vision USA, the US Information Agency's).
+
+`tools/picks.js` lists them (the item, the show, the episode's title, the year, and where the tool
+would choose wrong, which of the item's videos, the frame for its tape, or no captions), and
 `node tools/catalogue.mjs` writes `public/catalogue/` from it and from archive.org's metadata: the
 page's `episodes.json`, a still of each (on its tape and its set), and its captions. These are
-committed (2.6 MB), so the page never searches archive.org. Only the videos come from archive.org,
+committed (2.8 MB), so the page never searches archive.org. Only the videos come from archive.org,
 streamed as they play. Run the tool again after changing the picks.
 
 ## The archive proxy

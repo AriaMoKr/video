@@ -7,7 +7,7 @@ import { ROOM } from '../public/js/config.js';
 import { EYE, MARGIN, doorSpawn, layoutRoom, standable } from '../public/js/room.js';
 import { readCatalogue } from '../public/js/catalogue.js';
 import {
-  BAR_BUTTONS, BAR_PX, DEFAULT_MODE, MODES, MODE_NAMES, ROOM_PANEL_BUTTONS, ROOM_PANEL_PX,
+  BAR_BUTTONS, BAR_PX, CURTAINS, DEFAULT_MODE, MODES, MODE_NAMES, ROOM_PANEL_BUTTONS, ROOM_PANEL_PX,
   barButtonAt, blocked, castRay, clampWalk, faceFrame, furnish, roomPanelButtonAt, screenFor,
 } from '../public/js/modes.js';
 
@@ -56,10 +56,10 @@ for (const mode of MODES) {
     assert.ok(!blocked(F, s.x, s.z));
     assert.ok(!blocked(F, L.panel.x, -0.6) && !blocked(F, -L.panel.x, -0.6));
     assert.ok(!blocked(F, 0, -2), 'the middle, two metres in');
-    // Nothing stands in front of the window.
-    const W = L.window;
+    // Nothing stands in front of the window, nor where its curtains hang either side of it.
+    const W = L.window, reach = F.curtain ? CURTAINS.rail : 0;
     for (const r of F.obstacles) {
-      if (W.wall === 'right') assert.ok(r.maxX < L.x1 - 0.2 || r.maxZ < W.along - W.width / 2 || r.minZ > W.along + W.width / 2, `in front of the window: ${JSON.stringify(r)}`);
+      if (W.wall === 'right') assert.ok(r.maxX < L.x1 - 0.2 || r.maxZ < W.along - W.width / 2 - reach || r.minZ > W.along + W.width / 2 + reach, `in front of the window: ${JSON.stringify(r)}`);
     }
     // The furniture's floor is not walkable; where one sits is in it.
     for (const seat of F.seats) {
@@ -147,6 +147,29 @@ for (const mode of MODES) {
     }
   });
 }
+
+test("the store's and the den's shelves take more rows as the catalogue grows, and stop short of the back wall", () => {
+  const L = layoutRoom(ROOM);
+  const rowsOf = (F) => new Set(F.tapes.map((t) => t.face.y0.toFixed(3))).size;
+  const many = Array.from({ length: 96 }, (_, i) => ({ decade: ['1940s', '1950s', '1960s', '1970s'][i % 4] }));
+  for (const mode of ['store', 'den']) {
+    assert.equal(rowsOf(furnish(L, mode, episodes.slice(0, 40))), 4, `${mode}: four rows while they fit`);
+    const F = furnish(L, mode, many);
+    assert.equal(F.tapes.length, many.length);
+    assert.ok(rowsOf(F) > 4, `${mode}: ${rowsOf(F)} rows for ${many.length} tapes`);
+    for (const b of F.boxes.filter((b) => b.material.startsWith('shelf'))) {
+      assert.ok(b.min[2] >= L.z1 + 0.25 && b.max[1] <= L.height, `${mode}: a shelf at ${b.min} ${b.max}`);
+    }
+  }
+});
+
+test("the screening room's shelves on the left end before the first row of seats", () => {
+  const F = furnished('screening').furniture;
+  const seats = Math.max(...F.boxes.filter((b) => b.use?.startsWith('seat:')).map((b) => b.max[2]));
+  for (const b of F.boxes.filter((b) => b.material.startsWith('shelf') && b.max[0] < 0)) {
+    assert.ok(b.min[2] > seats, `a shelf at ${b.min} ${b.max}, the seats from ${seats}`);
+  }
+});
 
 test('the floor behind furniture is not walkable, and a walk into it stops MARGIN short, sliding along', () => {
   const L = furnished('store'), F = L.furniture;

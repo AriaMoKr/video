@@ -5,7 +5,7 @@ Guidance for Claude Code in this repository.
 ## What this is
 
 video: a WebXR room behind one of the Hallway's doors to watch old TV in, alone or in a shared
-session (three.js 0.186, plain ES modules, no bundler or build step): 70 public-domain episodes
+session (three.js 0.186, plain ES modules, no bundler or build step): 79 public-domain episodes
 from archive.org's Classic TV (https://archive.org/details/classic_tv), on tapes, played on the
 room's screens, in four modes (video store, the default; den; screening room; decades gallery).
 The room is AriaMoKr/RoomTemplateEmpty's (a checkout at `../RoomTemplateEmpty`): a floor, four
@@ -64,10 +64,17 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
 - `modes.js`: pure. The four modes (`MODES`, `MODE_NAMES`, `DEFAULT_MODE` 'store') furnished
   (`furnish(L, mode, episodes)`) into `L.furniture`: boxes, faces (`{kind, id, use, axis, at, ...}`:
   tapes, screens, bars, signs, the room panel), obstacles (rects, `MARGIN` from them), seats
-  (`{x, z, yaw, out}`) and screens (`{id, decade, face, bar}`); the room panel's and a screen bar's
-  buttons (`ROOM_PANEL_BUTTONS`, `roomPanelButtonAt`, `BAR_BUTTONS`, `barButtonAt`); and `castRay`
-  and `clampWalk` as room.js's with the furniture in the way (one stood in it after a mode change
-  is put out, at the nearest clear place where its nearest side is blocked too). `SEATED_EYE` 1.15.
+  (`{x, z, yaw, out}`) and screens (`{id, decade, face, bar}`). The tapes' shelves (`SHELF`,
+  `shelves`), a bay to a decade: in the store and the den down the left wall, as many rows as it
+  takes (four to six) to end 0.3 short of the back wall; in the screening room six rows from the
+  doorway's wall, the 1940s and 1950s on the left ending before the seats and the 1960s and 1970s
+  on the right short of the window's curtains (`CURTAINS`: how far past the window furniture.js
+  hangs them and their rail), with room for six more 1940s or seven more 1950s, and one more 1960s
+  and three more 1970s, as the catalogue stands (`test/modes.test.js` fails when one runs past).
+  The room panel's and a screen bar's buttons (`ROOM_PANEL_BUTTONS`, `roomPanelButtonAt`,
+  `BAR_BUTTONS`, `barButtonAt`); and `castRay` and `clampWalk` as room.js's with the furniture in
+  the way (one stood in it after a mode change is put out, at the nearest clear place where its
+  nearest side is blocked too). `SEATED_EYE` 1.15.
   Its types: `VideoLayout` (room.js's `Layout` with `furniture`) and `VideoHit` (room.js's
   `RoomHit` with the face's `id` and `use`, what castRay writes: controls.js's `hit`).
 - `furniture.js`: `buildFurniture` makes a mode's meshes, baked like the room: the boxes, the tapes
@@ -144,9 +151,11 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   show shared in a session (`video:show`: mode, episode, playing, where, when; `shareShow`,
   `takeShow`), and the frame loop.
 - `public/catalogue/`: `episodes.json`, `stills/<id>.jpg` and `captions/<id>.vtt`, written by
-  `tools/catalogue.mjs` from `tools/picks.js` (70 picks, 1940s–1970s: public domain and fit for the
-  family; a pick's `still` where the tool's own frame was not right) and committed; the page never
-  searches archive.org.
+  `tools/catalogue.mjs` from `tools/picks.js` (79 picks, 1940s–1970s: public domain, checked as its
+  opening says, and fit for the family; a pick's `file` for one of an item's several episodes, with
+  that file's own thumbs and captions, `still` where the tool's own frame was not right, and
+  `captions: false` where archive.org's are no use) and committed; the page never searches
+  archive.org.
 - `tools/archive-proxy/`: `worker.js`, the Cloudflare Worker `video-archive-proxy` on vrlbry's
   account (https://video-archive-proxy.vrlbry.workers.dev/, beside vrlbry-zim-proxy, sharing the
   free plan's 100,000 requests a day): Range GETs of video files of classic_tv items marked public

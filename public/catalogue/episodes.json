@@ -522,19 +522,6 @@
    "captions": "catalogue/captions/You_Bet_Your_Life_Groucho.vtt"
   },
   {
-   "id": "Bonanza-DeathOnSunMountain",
-   "show": "Bonanza",
-   "title": "Death on Sun Mountain",
-   "decade": "1950s",
-   "year": 1959,
-   "file": "BonanzaS1e02DeathOnSunMountain.mp4",
-   "minutes": 44,
-   "width": 640,
-   "height": 480,
-   "still": "catalogue/stills/Bonanza-DeathOnSunMountain.jpg",
-   "captions": "catalogue/captions/Bonanza-DeathOnSunMountain.vtt"
-  },
-  {
    "id": "OSB-02_Night_Of_April_14th",
    "show": "One Step Beyond",
    "title": "Night of April 14th",
@@ -546,6 +533,19 @@
    "height": 336,
    "still": "catalogue/stills/OSB-02_Night_Of_April_14th.jpg",
    "captions": "catalogue/captions/OSB-02_Night_Of_April_14th.vtt"
+  },
+  {
+   "id": "Bonanza_pd",
+   "show": "Bonanza",
+   "title": "San Francisco",
+   "decade": "1960s",
+   "year": 1960,
+   "file": "Bonanza s01e28.mp4",
+   "minutes": 48,
+   "width": 480,
+   "height": 360,
+   "still": "catalogue/stills/Bonanza_pd.jpg",
+   "captions": "catalogue/captions/Bonanza_pd.vtt"
   },
   {
    "id": "Bonanza-TheAbductionEp2x08",
@@ -650,6 +650,45 @@
    "height": 336,
    "still": "catalogue/stills/Beverly_Hillbillies_Ep46_Turkey_Day.jpg",
    "captions": "catalogue/captions/Beverly_Hillbillies_Ep46_Turkey_Day.vtt"
+  },
+  {
+   "id": "Beverly_Hillbillies_Ep52_The_Giant_JackRabbit",
+   "show": "The Beverly Hillbillies",
+   "title": "The Giant Jackrabbit",
+   "decade": "1960s",
+   "year": 1964,
+   "file": "BH52_The_Giant_JackRabbit.mp4",
+   "minutes": 25,
+   "width": 512,
+   "height": 384,
+   "still": "catalogue/stills/Beverly_Hillbillies_Ep52_The_Giant_JackRabbit.jpg",
+   "captions": "catalogue/captions/Beverly_Hillbillies_Ep52_The_Giant_JackRabbit.vtt"
+  },
+  {
+   "id": "Beverly_Hillbillies_Ep53_The_Girl_From_Home",
+   "show": "The Beverly Hillbillies",
+   "title": "The Girl from Home",
+   "decade": "1960s",
+   "year": 1964,
+   "file": "BH53_The_Girl_From_Home.mp4",
+   "minutes": 25,
+   "width": 512,
+   "height": 384,
+   "still": "catalogue/stills/Beverly_Hillbillies_Ep53_The_Girl_From_Home.jpg",
+   "captions": "catalogue/captions/Beverly_Hillbillies_Ep53_The_Girl_From_Home.vtt"
+  },
+  {
+   "id": "Beverly_Hillbillies_Ep55_The_Race_For_The_Queen",
+   "show": "The Beverly Hillbillies",
+   "title": "The Race for Queen",
+   "decade": "1960s",
+   "year": 1964,
+   "file": "BH55_The_Race_For_Queen.mp4",
+   "minutes": 26,
+   "width": 512,
+   "height": 384,
+   "still": "catalogue/stills/Beverly_Hillbillies_Ep55_The_Race_For_The_Queen.jpg",
+   "captions": "catalogue/captions/Beverly_Hillbillies_Ep55_The_Race_For_The_Queen.vtt"
   },
   {
    "id": "dick_van_dyke_show_39_the_night_the_roof_fell_in",
@@ -797,7 +836,7 @@
   {
    "id": "PetticoatJunction",
    "show": "Petticoat Junction",
-   "title": "From January 7, 1964",
+   "title": "Bobbie Jo and the Beatnik",
    "decade": "1960s",
    "year": 1964,
    "file": "Petticoat-Junction-1-7-64.ia.mp4",
@@ -806,6 +845,71 @@
    "height": 480,
    "still": "catalogue/stills/PetticoatJunction.jpg",
    "captions": "catalogue/captions/PetticoatJunction.vtt"
+  },
+  {
+   "id": "PetticoatJunction_678",
+   "show": "Petticoat Junction",
+   "title": "Last Chance Farm",
+   "decade": "1960s",
+   "year": 1964,
+   "file": "Petticoat_Junction-2-4-64.ia.mp4",
+   "minutes": 25,
+   "width": 720,
+   "height": 480,
+   "still": "catalogue/stills/PetticoatJunction_678.jpg",
+   "captions": "catalogue/captions/PetticoatJunction_678.vtt"
+  },
+  {
+   "id": "TheCobraStrikes",
+   "show": "The Big Picture",
+   "title": "The Cobra Strikes",
+   "decade": "1960s",
+   "year": 1965,
+   "file": "TheCobraStrikes.mp4",
+   "minutes": 28,
+   "width": 600,
+   "height": 480,
+   "still": "catalogue/stills/TheCobraStrikes.jpg",
+   "captions": "catalogue/captions/TheCobraStrikes.vtt"
+  },
+  {
+   "id": "OurHeritage_",
+   "show": "The Big Picture",
+   "title": "Our Great American Heritage",
+   "decade": "1960s",
+   "year": null,
+   "file": "OurHeritage.mp4",
+   "minutes": 29,
+   "width": 600,
+   "height": 480,
+   "still": "catalogue/stills/OurHeritage_.jpg",
+   "captions": null
+  },
+  {
+   "id": "TheBigPicture723",
+   "show": "The Big Picture",
+   "title": "When the Chips Are Down",
+   "decade": "1960s",
+   "year": 1968,
+   "file": "The Big Picture 723 When the Chips Are Down Bob Hope.mp4",
+   "minutes": 29,
+   "width": 316,
+   "height": 240,
+   "still": "catalogue/stills/TheBigPicture723.jpg",
+   "captions": "catalogue/captions/TheBigPicture723.vtt"
+  },
+  {
+   "id": "DDayAnniversary",
+   "show": "The Big Picture",
+   "title": "D-Day Anniversary",
+   "decade": "1960s",
+   "year": 1969,
+   "file": "The Big Picture 762 D-Day Anniversary 1969.mp4",
+   "minutes": 29,
+   "width": 1024,
+   "height": 768,
+   "still": "catalogue/stills/DDayAnniversary.jpg",
+   "captions": "catalogue/captions/DDayAnniversary.vtt"
   },
   {
    "id": "TheBigPicture-USArmyinSpaceandUndertheSea",
@@ -910,6 +1014,19 @@
    "height": 240,
    "still": "catalogue/stills/Dustys_Trail_Bear.jpg",
    "captions": "catalogue/captions/Dustys_Trail_Bear.vtt"
+  },
+  {
+   "id": "306-v-20",
+   "show": "Vision USA",
+   "title": "No. 20",
+   "decade": "1970s",
+   "year": 1974,
+   "file": "306-v-20.mp4",
+   "minutes": 25,
+   "width": 1920,
+   "height": 1080,
+   "still": "catalogue/stills/306-v-20.jpg",
+   "captions": null
   }
  ]
 }

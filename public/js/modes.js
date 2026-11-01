@@ -197,21 +197,29 @@ function barFace(screenId, f, width, y0, along = (f.a0 + f.a1) / 2) {
 /** The tapes' shelves: one deep, the tapes face out on them, a row every rowH from `bottom`. */
 export const SHELF = { depth: 0.34, tapeW: 0.22, tapeH: 0.3, pitch: 0.27, pad: 0.08, rowH: 0.4, bottom: 0.36, board: 0.03 };
 
+/** The screening room's curtains either side of the window (furniture.js's): how far past it they hang open, and their rail runs. */
+export const CURTAINS = { open: 0.3, rail: 0.34 };
+
 /**
  * Shelves of tapes against a side wall from zStart on along -z, a bay to a decade with its sign
  * over it, holding the tapes of `decades`, in their order as one reads them facing the wall (left
- * to right, row by row). Returns where they end (the far z).
+ * to right, row by row): `rows` high, or as the catalogue grows as many more, up to `maxRows`, as
+ * it takes to end short of zEnd. Returns where they end (the far z).
  * @param {VideoLayout} L
  * @param {Furniture} F
  * @param {{ decade: string }[]} episodes
- * @param {{ side?: 'left' | 'right', zStart: number, rows?: number, decades?: string[] }} options
+ * @param {{ side?: 'left' | 'right', zStart: number, zEnd?: number, rows?: number, maxRows?: number, decades?: string[] }} options
  */
-function shelves(L, F, episodes, { side = 'left', zStart, rows = 4, decades = DECADES }) {
+function shelves(L, F, episodes, { side = 'left', zStart, zEnd = -Infinity, rows: fewest = 4, maxRows = fewest, decades = DECADES }) {
   const w = wall(L, side);
+  const bays = decades.map((decade) => ({ decade, eps: episodes.map((e, i) => ({ e, i })).filter(({ e }) => e.decade === decade) })).filter((b) => b.eps.length);
+  /** How far the bays run along the wall, `n` rows high. @param {number} n */
+  const span = (n) => bays.reduce((sum, bay) => sum + Math.ceil(bay.eps.length / n) * SHELF.pitch + 2 * SHELF.pad, 0);
+  let rows = fewest;
+  while (rows < maxRows && zStart - span(rows) < zEnd) rows++;
   const top = SHELF.bottom + rows * SHELF.rowH + 0.04;
   // Facing the left wall, left to right runs along -z; facing the right wall, along +z: there the
   // first bay is the far one.
-  const bays = decades.map((decade) => ({ decade, eps: episodes.map((e, i) => ({ e, i })).filter(({ e }) => e.decade === decade) })).filter((b) => b.eps.length);
   let z = zStart;
   const placed = [];
   for (const bay of side === 'left' ? bays : [...bays].reverse()) {
@@ -301,7 +309,7 @@ function facing(seats, tx, tz) {
 /** @type {Record<Mode, (L: VideoLayout, F: Furniture, episodes: { decade: string }[]) => void>} */
 const BUILD = {
   store(L, F, episodes) {
-    shelves(L, F, episodes, { side: 'left', zStart: -1.0, rows: 4 });
+    shelves(L, F, episodes, { side: 'left', zStart: -1.0, zEnd: L.z1 + 0.3, rows: 4, maxRows: 6 });
     // The counter, on the right as one comes in, and the store's sign on the wall over it.
     const r = wall(L, 'right');
     const counter = r.box(-2.25, -1.05, 0.3, 0.95, 0, 0.98, 'counter');
@@ -321,7 +329,7 @@ const BUILD = {
   },
 
   den(L, F, episodes) {
-    shelves(L, F, episodes, { side: 'left', zStart: -1.2, rows: 4 });
+    shelves(L, F, episodes, { side: 'left', zStart: -1.2, zEnd: L.z1 + 0.3, rows: 4, maxRows: 6 });
     const back = L.z1;
     // The console: a cabinet on short legs, the screen above the speaker's grille.
     for (const x of [-0.72, 0.66]) for (const z of [back + 0.04, back + 0.48]) F.boxes.push({ min: [x, 0, z], max: [x + 0.06, 0.12, z + 0.06], material: 'dark', solid: false });
@@ -345,10 +353,11 @@ const BUILD = {
   },
 
   screening(L, F, episodes) {
-    // The tapes either side of the way in, from just inside it: the 1940s and 1950s on the left, ending
-    // before the first row of seats, and the 1960s and 1970s on the right, short of the window.
-    shelves(L, F, episodes, { side: 'left', zStart: -0.35, rows: 6, decades: ['1940s', '1950s'] });
-    shelves(L, F, episodes, { side: 'right', zStart: -0.35, rows: 6, decades: ['1960s', '1970s'] });
+    // The tapes either side of the way in, from the doorway's wall: the 1940s and 1950s on the left,
+    // ending before the first row of seats, and the 1960s and 1970s on the right, short of the
+    // window's curtains.
+    shelves(L, F, episodes, { side: 'left', zStart: -0.03, rows: 6, decades: ['1940s', '1950s'] });
+    shelves(L, F, episodes, { side: 'right', zStart: -0.03, rows: 6, decades: ['1960s', '1970s'] });
     const back = L.z1;
     F.boxes.push({ min: [-2.4, 0, back], max: [2.4, 0.3, back + 0.6], material: 'stage' });
     F.boxes.push({ min: [-1.58, 0.58, back], max: [1.58, Math.min(3.04, L.height - 0.08), back + 0.03], material: 'black' });
