@@ -1,21 +1,22 @@
 // The room's four modes (modes.js): everything inside the room and out of the way in, every tape
-// shelved and every screen with its bar, the seats, and castRay and clampWalk with the furniture.
+// shelved (by decade, and by kind) and every screen with its bar, the seats, and castRay and
+// clampWalk with the furniture.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { ROOM } from '../public/js/config.js';
 import { EYE, MARGIN, doorSpawn, layoutRoom, standable } from '../public/js/room.js';
-import { readCatalogue } from '../public/js/catalogue.js';
+import { KINDS, KIND_NAMES, readCatalogue } from '../public/js/catalogue.js';
 import {
-  BAR_BUTTONS, BAR_PX, CURTAINS, DEFAULT_MODE, MODES, MODE_NAMES, ROOM_PANEL_BUTTONS, ROOM_PANEL_PX,
-  barButtonAt, blocked, castRay, clampWalk, faceFrame, furnish, roomPanelButtonAt, screenFor,
+  BAR_BUTTONS, BAR_PX, CURTAINS, DEFAULT_MODE, DEFAULT_SHELVING, MODES, MODE_NAMES, ROOM_PANEL_BUTTONS, ROOM_PANEL_PX,
+  SHELVINGS, SHELVING_NAMES, barButtonAt, blocked, castRay, clampWalk, faceFrame, furnish, roomPanelButtonAt, screenFor,
 } from '../public/js/modes.js';
 
 const episodes = readCatalogue(JSON.parse(readFileSync(new URL('../public/catalogue/episodes.json', import.meta.url), 'utf8')));
 const hit = () => ({ t: 0, kind: '', id: null, use: null, x: 0, y: 0, z: 0, nx: 0, ny: 0, nz: 0, u: 0, v: 0, walkable: false });
-const furnished = (mode) => {
+const furnished = (mode, by = 'decade') => {
   const L = layoutRoom(ROOM);
-  L.furniture = furnish(L, mode, episodes);
+  L.furniture = furnish(L, mode, episodes, by);
   return L;
 };
 const ray = (L, o, to) => {
@@ -37,9 +38,21 @@ test('four modes, the video store first', () => {
   assert.ok(episodes.length >= 30, `${episodes.length} episodes`);
 });
 
-for (const mode of MODES) {
-  test(`${mode}: inside the room, clear of the doorway, the panels and the window`, () => {
-    const L = furnished(mode), F = L.furniture;
+test('the tapes shelved by decade (first), or by kind (a category, on the page)', () => {
+  assert.deepEqual([...SHELVINGS], ['decade', 'kind']);
+  assert.equal(DEFAULT_SHELVING, 'decade');
+  assert.deepEqual(SHELVING_NAMES, { decade: 'By decade', kind: 'By category' });
+  const L = layoutRoom(ROOM);
+  assert.equal(furnish(L, 'store', episodes).shelving, 'decade');
+  assert.equal(furnish(L, 'den', episodes, 'kind').shelving, 'kind');
+  assert.equal(furnish(L, 'store', episodes, 'no such shelving').shelving, 'decade');
+});
+
+// Each mode with its shelves by decade and by kind (the gallery has none).
+for (const mode of MODES) for (const by of mode === 'gallery' ? ['decade'] : SHELVINGS) {
+  const name = mode === 'gallery' ? mode : `${mode} by ${by}`;
+  test(`${name}: inside the room, clear of the doorway, the panels and the window`, () => {
+    const L = furnished(mode, by), F = L.furniture;
     const eps = 1e-6;
     for (const b of F.boxes) {
       assert.ok(b.min[0] >= L.x0 - eps && b.max[0] <= L.x1 + eps && b.min[2] >= L.z1 - eps && b.max[2] <= 0 + eps, `${b.material} ${b.min} ${b.max}`);
@@ -68,8 +81,8 @@ for (const mode of MODES) {
     }
   });
 
-  test(`${mode}: every tape on the shelves or every decade's set, each screen with its bar, and castRay finds them`, () => {
-    const L = furnished(mode), F = L.furniture;
+  test(`${name}: every tape on the shelves or every decade's set, each screen with its bar, and castRay finds them`, () => {
+    const L = furnished(mode, by), F = L.furniture;
     if (mode === 'gallery') {
       assert.equal(F.tapes.length, 0);
       assert.deepEqual(F.screens.map((s) => s.decade).sort(), [...new Set(episodes.map((e) => e.decade))].sort());
@@ -89,7 +102,9 @@ for (const mode of MODES) {
         assert.equal(h?.kind, 'tape', `tape ${episode} from in front: ${h?.kind}`);
         assert.equal(h.use, `tape:${episode}`);
       }
-      // Read left to right, row by row, facing its wall, a shelf's tapes go in the catalogue's order.
+      // Read left to right, row by row, facing its wall, a shelf's tapes go bay by bay, in its
+      // decades' order or its kinds', each bay's in the catalogue's order.
+      const rank = (i) => (by === 'kind' ? KINDS.indexOf(episodes[i].kind) * episodes.length + i : i);
       const rows = new Map();
       for (const t of F.tapes) {
         const key = `${t.face.axis} ${t.face.at} ${t.face.y0.toFixed(3)}`;
@@ -99,8 +114,22 @@ for (const mode of MODES) {
         // Facing the left wall, left is +z, and facing the doorway's, +x; facing the right wall, -z.
         const { axis, facing } = row[0].face, leftward = (axis === 'x') === (facing === 1) ? -1 : 1;
         const order = [...row].sort((p, q) => leftward * (p.face.a0 - q.face.a0)).map((t) => t.episode);
-        assert.deepEqual(order, [...order].sort((a, b) => a - b), `left to right on the ${axis} ${facing} wall`);
+        assert.deepEqual(order, [...order].sort((a, b) => rank(a) - rank(b)), `left to right on the ${axis} ${facing} wall`);
       }
+      // F.tapes are in the order one reads them, wall after wall (Next plays the next of them): by
+      // decade, the catalogue's; by kind, each kind's together in the catalogue's order, the kinds in
+      // theirs, but in the screening room the few silent films and cartoons by the door first.
+      const read = F.tapes.map((t) => t.episode);
+      if (by === 'decade') assert.deepEqual(read, episodes.map((_, i) => i));
+      else {
+        const runs = read.filter((i, k) => !k || episodes[i].kind !== episodes[read[k - 1]].kind).map((i) => episodes[i].kind);
+        assert.deepEqual(runs, mode === 'screening' ? ['silent', 'cartoon', 'tv', 'film', 'newsreel'] : KINDS);
+        assert.deepEqual(read, [...read].sort((a, b) => runs.indexOf(episodes[a].kind) - runs.indexOf(episodes[b].kind) || a - b));
+      }
+      // A sign over each bay: its decade, or what its kind are called (the store's own sign besides).
+      const bays = F.signs.filter((s) => s.face.id !== 'store');
+      assert.deepEqual(bays.map((s) => s.face.id).sort(), [...new Set(episodes.map((e) => e[by]))].sort());
+      for (const s of bays) assert.equal(s.text, by === 'kind' ? KIND_NAMES[s.face.id][1] : s.face.id);
       // Nor do the shelves run into each other (a bay's solid box against the next one's is fine).
       const solid = F.boxes.filter((b) => b.material === 'shelf' && b.solid !== false);
       for (const [i, b] of solid.entries()) {
@@ -138,8 +167,8 @@ for (const mode of MODES) {
     });
   });
 
-  test(`${mode}: one can walk up to every tape, however many there are`, () => {
-    const L = furnished(mode), F = L.furniture;
+  test(`${name}: one can walk up to every tape, however many there are`, () => {
+    const L = furnished(mode, by), F = L.furniture;
     // Somewhere to stand within a step of the floor in front of it (the shelves run on as the
     // catalogue grows, and must stop short of the seats and the window).
     for (const { episode, face } of F.tapes) {
@@ -160,24 +189,28 @@ test("the store's and the den's shelves take more rows as the catalogue grows, a
   const L = layoutRoom(ROOM);
   const rowsOf = (F) => new Set(F.tapes.map((t) => t.face.y0.toFixed(3))).size;
   const decades = ['1920s', '1930s', '1940s', '1950s', '1960s', '1970s'];
-  const many = Array.from({ length: 192 }, (_, i) => ({ decade: decades[Math.floor((i * decades.length) / 192)] }));
+  const many = Array.from({ length: 192 }, (_, i) => ({ decade: decades[Math.floor((i * decades.length) / 192)], kind: KINDS[i % KINDS.length] }));
   for (const mode of ['store', 'den']) {
-    assert.equal(rowsOf(furnish(L, mode, episodes.slice(0, 40))), 4, `${mode}: four rows while they fit`);
-    const F = furnish(L, mode, many);
-    assert.equal(F.tapes.length, many.length);
-    assert.ok(rowsOf(F) > 4 && rowsOf(F) <= 8, `${mode}: ${rowsOf(F)} rows for ${many.length} tapes`);
-    for (const b of F.boxes.filter((b) => b.material.startsWith('shelf'))) {
-      assert.ok(b.min[2] >= L.z1 + 0.25 && b.max[1] <= L.height, `${mode}: a shelf at ${b.min} ${b.max}`);
+    for (const by of SHELVINGS) {
+      assert.equal(rowsOf(furnish(L, mode, episodes.slice(0, 40), by)), 4, `${mode} by ${by}: four rows while they fit`);
+      const F = furnish(L, mode, many, by);
+      assert.equal(F.tapes.length, many.length);
+      assert.ok(rowsOf(F) > 4 && rowsOf(F) <= 8, `${mode} by ${by}: ${rowsOf(F)} rows for ${many.length} tapes`);
+      for (const b of F.boxes.filter((b) => b.material.startsWith('shelf'))) {
+        assert.ok(b.min[2] >= L.z1 + 0.25 && b.max[1] <= L.height, `${mode} by ${by}: a shelf at ${b.min} ${b.max}`);
+      }
+      for (const s of F.signs) assert.ok(s.face.y1 <= L.height - 0.05, `${mode} by ${by}: the ${s.text} sign under the ceiling`);
     }
-    for (const s of F.signs) assert.ok(s.face.y1 <= L.height - 0.05, `${mode}: the ${s.text} sign under the ceiling`);
   }
 });
 
 test("the screening room's shelves on the left end before the first row of seats", () => {
-  const F = furnished('screening').furniture;
-  const seats = Math.max(...F.boxes.filter((b) => b.use?.startsWith('seat:')).map((b) => b.max[2]));
-  for (const b of F.boxes.filter((b) => b.material.startsWith('shelf') && b.max[0] < 0)) {
-    assert.ok(b.min[2] > seats, `a shelf at ${b.min} ${b.max}, the seats from ${seats}`);
+  for (const by of SHELVINGS) {
+    const F = furnished('screening', by).furniture;
+    const seats = Math.max(...F.boxes.filter((b) => b.use?.startsWith('seat:')).map((b) => b.max[2]));
+    for (const b of F.boxes.filter((b) => b.material.startsWith('shelf') && b.max[0] < 0)) {
+      assert.ok(b.min[2] > seats, `by ${by}: a shelf at ${b.min} ${b.max}, the seats from ${seats}`);
+    }
   }
 });
 

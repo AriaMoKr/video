@@ -1,9 +1,10 @@
 // The page around the 3D view (not shown in a headset), as outside's and the hallway's. The card is
 // the page's <nav>: the room's name, the way back to the hallway as a real link (for keyboards,
 // screen readers and browsers without WebGL), its description, what the room is (its four modes,
-// modes.js) and what is showing in it (the episode, a link to it on archive.org, how it's going,
-// and Play / Pause, Next, Captions and Stop, with every episode on the shelves in a list to choose
-// from, by decade and kind, each kind with an icon drawn as its tapes are), what hangs on its walls (each one that leads somewhere a link there, the rest buttons
+// modes.js, and its shelves by decade or by category) and what is showing in it (the episode, a
+// link to it on archive.org, how it's going, and Play / Pause, Next, Captions and Stop, with every
+// episode on the shelves in a list to choose from, grouped as they are shelved, by decade and kind
+// or by kind and decade, each kind with an icon drawn as its tapes are), what hangs on its walls (each one that leads somewhere a link there, the rest buttons
 // that walk up to them), Start / Leave shared session (and, in one, how it's going), and Settings,
 // the control panel's choices: motion (common/access.js, for a screen too), how to move and turn in
 // VR, the comfort vignette and seated mode. The view is the page's <main>, with a hint on how to
@@ -16,8 +17,8 @@
 // (common's tv.js) the remote reaches only the card, so Wave is in it, and there is nothing to copy
 // a link to: the invite link is shown to type on another device. Fullscreen and Enter VR are not
 // offered there (main.js).
-import { DECADES, KINDS, KIND_NAMES, episodeName } from './catalogue.js';
-import { MODES, MODE_NAMES } from './modes.js';
+import { DECADES, KINDS, KIND_ICONS, KIND_NAMES, episodeName } from './catalogue.js';
+import { MODES, MODE_NAMES, SHELVINGS, SHELVING_NAMES } from './modes.js';
 
 function el(tag, attrs = {}, ...children) {
   const e = document.createElement(tag);
@@ -30,31 +31,20 @@ function el(tag, attrs = {}, ...children) {
   return e;
 }
 
-/** An eight-pointed star round (8, 8), for the cartoons. */
-const STAR = `M${Array.from({ length: 16 }, (_, k) => {
-  const a = (k / 16) * Math.PI * 2 - Math.PI / 2, r = k % 2 ? 3.2 : 6.6;
-  return `${(8 + r * Math.cos(a)).toFixed(1)} ${(8 + r * Math.sin(a)).toFixed(1)}`;
-}).join('L')}Z`;
-/** Each kind's sign beside its name in the episodes' list, drawn as its tapes are (covers.js): [tag, attributes] on a 16 × 16 grid. */
-const KIND_ICONS = {
-  tv: [['rect', { x: 1.5, y: 4.5, width: 13, height: 10, rx: 2 }], ['rect', { x: 3.5, y: 6.5, width: 7, height: 6, rx: 1 }], ['path', { d: 'M5 1.5l3 3 3-3M12.5 8v.01M12.5 11v.01' }]],
-  silent: [['rect', { x: 1.5, y: 2.5, width: 13, height: 11, rx: 1 }], ['ellipse', { cx: 8, cy: 8, rx: 4, ry: 3 }]],
-  cartoon: [['path', { d: STAR }]],
-  film: [['rect', { x: 1.5, y: 2.5, width: 13, height: 11, rx: 1 }], ['rect', { x: 5, y: 5, width: 6, height: 6 }], ['path', { d: 'M3.25 4.5v.01M3.25 8v.01M3.25 11.5v.01M12.75 4.5v.01M12.75 8v.01M12.75 11.5v.01' }]],
-  newsreel: [['path', { d: 'M2.5 2.5h11v11h-11z' }], ['path', { d: 'M4.5 5h7M4.5 8h3M4.5 10.5h3M9.5 8h2v2.5h-2z' }]],
-};
-
-/** A kind's icon (KIND_ICONS), in the text's colour, for the eye only: its name is beside it. */
+/** A kind's icon (catalogue.js KIND_ICONS), in the text's colour, for the eye only: its name is beside it. */
 function kindIcon(kind) {
   const NS = 'http://www.w3.org/2000/svg';
   const svg = document.createElementNS(NS, 'svg');
   for (const [k, v] of Object.entries({ viewBox: '0 0 16 16', fill: 'none', stroke: 'currentColor', 'stroke-width': 1.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true', focusable: 'false' })) svg.setAttribute(k, String(v));
-  for (const [tag, attrs] of KIND_ICONS[kind] ?? []) {
-    const part = document.createElementNS(NS, tag);
-    for (const [k, v] of Object.entries(attrs)) part.setAttribute(k, String(v));
-    svg.append(part);
-  }
+  const path = document.createElementNS(NS, 'path');
+  path.setAttribute('d', KIND_ICONS[kind] ?? '');
+  svg.append(path);
   return svg;
+}
+
+/** A group's heading in the episodes' list: a decade, or a kind's name with its icon. */
+function groupHeading(tag, group) {
+  return KIND_NAMES[group] ? el(tag, {}, kindIcon(group), KIND_NAMES[group][1]) : el(tag, {}, group);
 }
 
 // tv: walking with a remote, and a line for TalkBack, which keeps the arrows (the view is described
@@ -125,6 +115,8 @@ export class Overlay {
     this.onName = (name) => name;
     /** (mode) a mode of the room chosen (modes.js MODES). @type {(mode: string) => void} */
     this.onMode = () => {};
+    /** (by) a way of shelving the tapes chosen (modes.js SHELVINGS: 'decade' or 'kind'). @type {(by: string) => void} */
+    this.onShelving = () => {};
     /** (action) a button of the player: 'play' (or pause), 'next', 'captions' or 'stop'. @type {(action: string) => void} */
     this.onPlayer = () => {};
     /** (i) an episode chosen from the list (its index in the catalogue). @type {(i: number) => void} */
@@ -174,17 +166,27 @@ export class Overlay {
       this.status,
       el('label', { class: 'me' }, el('span', {}, 'Your name'), this.myName),
       ...(this.inviteText ? [this.inviteText] : []));
-    // The room's modes, and what is showing: the room panel's and the bars' buttons.
-    /** @type {Map<string, HTMLInputElement>} */
-    this.modeChoices = new Map();
-    this.modes = el('fieldset', { class: 'modes' }, el('legend', {}, 'Room'), ...MODES.map((mode) => {
-      const input = el('input', { type: 'radio', name: 'mode', value: mode });
-      input.addEventListener('change', () => {
-        if (input.checked) this.onMode(mode);
-      });
-      this.modeChoices.set(mode, input);
-      return el('label', {}, input, MODE_NAMES[mode]);
-    }));
+    // The room's modes and how its tapes are shelved, and what is showing: the room panel's and the
+    // bars' buttons.
+    const radios = (name, legend, values, names, chosen) => {
+      /** @type {Map<string, HTMLInputElement>} */
+      const inputs = new Map();
+      const set = el('fieldset', { class: 'modes' }, el('legend', {}, legend), ...values.map((value) => {
+        const input = el('input', { type: 'radio', name, value });
+        input.addEventListener('change', () => {
+          if (input.checked) chosen(value);
+        });
+        inputs.set(value, input);
+        return el('label', {}, input, names[value]);
+      }));
+      return { set, inputs };
+    };
+    const modes = radios('mode', 'Room', MODES, MODE_NAMES, (mode) => this.onMode(mode));
+    this.modes = modes.set;
+    this.modeChoices = modes.inputs;
+    const shelvings = radios('shelving', 'Shelves', SHELVINGS, SHELVING_NAMES, (by) => this.onShelving(by));
+    this.shelving = shelvings.set;
+    this.shelvingChoices = shelvings.inputs;
     this.now = el('p', { class: 'now' });
     this._now = '';
     const action = (name, label, attrs = {}) => {
@@ -205,8 +207,12 @@ export class Overlay {
     });
     /** The episodes' buttons, in the catalogue's order. @type {HTMLButtonElement[]} */
     this.episodeButtons = [];
+    /** The episodes in the list (setEpisodes), and how it groups them (setShelving). @type {import('./catalogue.js').Episode[]} */
+    this._episodes = [];
+    this._shelving = 'decade';
     this.showing = el('section', { class: 'showing', 'aria-label': 'Now showing' },
       this.modes,
+      this.shelving,
       this.now,
       el('div', { class: 'actions' }, this.play, this.next, this.captions, this.stop, this.episodesToggle),
       this.episodes);
@@ -324,29 +330,52 @@ export class Overlay {
     if (this.tv) this.hint.setAttribute('aria-hidden', 'true');
   }
 
-  /** The room's mode (modes.js), checked in its choices. */
+  /** The room's mode (modes.js), checked in its choices; in the gallery, which has no shelves, how they are shelved is not to be chosen. */
   setMode(mode) {
     for (const [m, input] of this.modeChoices) if (input.checked !== (m === mode)) input.checked = m === mode;
+    this.shelving.disabled = mode === 'gallery';
   }
 
-  /** The episodes to choose from (catalogue.js), by decade and in each by kind, as on the shelves. */
+  /** How the tapes are shelved (modes.js SHELVINGS), checked in its choices; the episodes' list is grouped the same way. */
+  setShelving(by) {
+    for (const [s, input] of this.shelvingChoices) if (input.checked !== (s === by)) input.checked = s === by;
+    if (by === this._shelving) return;
+    this._shelving = by;
+    this._list();
+  }
+
+  /** The episodes to choose from (catalogue.js), grouped as on the shelves (setShelving). */
   setEpisodes(episodes) {
+    this._episodes = episodes;
+    this._list();
+  }
+
+  /**
+   * The episodes' list: by decade and in each by kind, or shelved by kind, by kind and in each by
+   * decade; each group under its heading (a kind's with its icon), each episode a button. Made again,
+   * the button that had the focus keeps it.
+   */
+  _list() {
+    const focused = this.episodeButtons.findIndex((b) => b && b === document.activeElement);
     this.episodeButtons = [];
-    const groups = DECADES.map((decade) => {
-      const kinds = KINDS.flatMap((kind) => {
+    const byKind = this._shelving === 'kind';
+    const groups = (byKind ? KINDS : DECADES).map((group) => {
+      const parts = (byKind ? DECADES : KINDS).flatMap((within) => {
+        const [decade, kind] = byKind ? [within, group] : [group, within];
         const items = [];
-        episodes.forEach((e, i) => {
+        this._episodes.forEach((e, i) => {
           if (e.decade !== decade || e.kind !== kind) return;
           const b = el('button', { class: 'episode', type: 'button' }, episodeName(e));
           b.addEventListener('click', () => this.onEpisode(i));
           this.episodeButtons[i] = b;
           items.push(el('li', {}, b));
         });
-        return items.length ? [el('h3', { class: 'kind' }, kindIcon(kind), KIND_NAMES[kind][1]), el('ul', {}, ...items)] : [];
+        return items.length ? [groupHeading('h3', within), el('ul', {}, ...items)] : [];
       });
-      return kinds.length ? el('section', { 'aria-label': decade }, el('h2', { class: 'decade' }, decade), ...kinds) : null;
+      return parts.length ? el('section', { 'aria-label': byKind ? KIND_NAMES[group][1] : group }, groupHeading('h2', group), ...parts) : null;
     }).filter(Boolean);
     this.episodes.replaceChildren(...groups);
+    if (focused >= 0) this.episodeButtons[focused]?.focus();
   }
 
   /**

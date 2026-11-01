@@ -7,17 +7,18 @@
 // four walls, a ceiling, the lamps, a window onto common's afternoon sky, the control panel by the
 // doorway, and the room's own panel on its other side. The room is one of four (modes.js): a video
 // store (the first a visitor sees), a den, a screening room and a gallery of each decade's sets,
-// furnished by furniture.js, its tapes and sets playing their episodes (catalogue.js, from
-// public/catalogue/) on its screens (player.js, through the archive proxy). What hangs on its walls
-// (config.js's pieces, none yet) may lead to other places, and back to stand in front of it again
-// (common's hallLink). The shared session (layersharedsession's together.js) comes in here too, and
-// goes back out; in one, everyone in the room sees the same mode and the same show at the same
-// moment. In the Android TV app (common's tv.js) it is the 10-foot view, walked with the remote.
+// furnished by furniture.js, its tapes (shelved by decade or by kind) and sets playing their
+// episodes (catalogue.js, from public/catalogue/) on its screens (player.js, through the archive
+// proxy). What hangs on its walls (config.js's pieces, none yet) may lead to other places, and back
+// to stand in front of it again (common's hallLink). The shared session (layersharedsession's
+// together.js) comes in here too, and goes back out; in one, everyone in the room sees the same mode,
+// the same shelves and the same show at the same moment. In the Android TV app (common's tv.js) it
+// is the 10-foot view, walked with the remote.
 // Outside's main.js, without its garden and its book.
 import * as THREE from 'three';
 import { ROOM } from './config.js';
 import { DOOR, EYE, doorCrossed, doorSpawn, layoutRoom, pieceSpawn } from './room.js';
-import { DEFAULT_MODE, MODES, MODE_NAMES, SEATED_EYE, faceFrame, furnish, screenFor } from './modes.js';
+import { DEFAULT_MODE, DEFAULT_SHELVING, MODES, MODE_NAMES, SEATED_EYE, SHELVINGS, SHELVING_NAMES, faceFrame, furnish, screenFor } from './modes.js';
 import { buildFurniture } from './furniture.js';
 import { CoverAtlas, loadStills } from './covers.js';
 import { RoomPanel } from './roompanel.js';
@@ -124,15 +125,16 @@ renderer.xr.setReferenceSpaceType('local-floor');
 // The view, to a screen reader: a picture of the room, as the mode furnishes it (what can be done
 // in it is in the card).
 renderer.domElement.setAttribute('role', 'img');
-/** Each mode, in words. */
+/** Each mode, in words, its shelves' bays ($bays) as BAYS says. */
 const DESCRIBED = {
-  store: 'a video store: tapes face out on shelves down the left wall, a counter with a till by the door, and a television and a couch at the back',
-  den: 'a den: a console television against the far wall, a sofa and a coffee table on a rug, a standard lamp, and shelves of tapes',
-  screening: 'a screening room: a big screen over a low stage, three rows of seats either side of an aisle, and shelves of tapes by the door',
+  store: 'a video store: tapes face out on shelves down the left wall, $bays, a counter with a till by the door, and a television and a couch at the back',
+  den: 'a den: a console television against the far wall, a sofa and a coffee table on a rug, a standard lamp, and shelves of tapes, $bays',
+  screening: 'a screening room: a big screen over a low stage, three rows of seats either side of an aisle, and shelves of tapes by the door, $bays',
   gallery: 'a gallery of television sets, one from each decade from the 1920s to the 1970s, each showing its own shows, and a bench',
 };
+const BAYS = { decade: 'a bay to each decade', kind: 'a bay to each category: television, silent films, cartoons, short films and newsreels' };
 const onWalls = ROOM.pieces.map((p) => p.title).join(', ');
-const describe = (mode) => renderer.domElement.setAttribute('aria-label', `${ROOM.title}, ${DESCRIBED[mode]}, a window onto the afternoon sky, ${onWalls ? '' : 'and '}the doorway back to the ${leadsTo}${onWalls ? `, and on the walls: ${onWalls}` : ''}`);
+const describe = (mode, shelving) => renderer.domElement.setAttribute('aria-label', `${ROOM.title}, ${DESCRIBED[mode].replace('$bays', BAYS[shelving])}, a window onto the afternoon sky, ${onWalls ? '' : 'and '}the doorway back to the ${leadsTo}${onWalls ? `, and on the walls: ${onWalls}` : ''}`);
 document.getElementById('app').append(renderer.domElement);
 const anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
 setAnisotropy(anisotropy);
@@ -423,25 +425,27 @@ controls.onTeleport = (move) => {
 };
 
 // ── The room's modes, its episodes and what is showing ───────────────────────
-// The mode is kept for the next visit (localStorage, video.room, with the captions), unless the
-// address asks for one (?mode=den, for this visit). The catalogue (public/catalogue/) is loaded once;
-// the furniture is made for the mode, and made again for another.
+// The mode and how the tapes are shelved are kept for the next visit (localStorage, video.room, with
+// the captions), unless the address asks for them (?mode=den, ?shelving=kind, for this visit). The
+// catalogue (public/catalogue/) is loaded once; the furniture is made for the mode and the shelving,
+// and made again for another.
 
 const ROOM_KEY = `${ROOM.id}.room`;
 function loadRoom() {
   try {
     const k = JSON.parse(localStorage.getItem(ROOM_KEY) ?? 'null');
-    return { mode: MODES.includes(k?.mode) ? k.mode : DEFAULT_MODE, captions: k?.captions === true };
+    return { mode: MODES.includes(k?.mode) ? k.mode : DEFAULT_MODE, shelving: SHELVINGS.includes(k?.shelving) ? k.shelving : DEFAULT_SHELVING, captions: k?.captions === true };
   } catch {
-    return { mode: DEFAULT_MODE, captions: false };
+    return { mode: DEFAULT_MODE, shelving: DEFAULT_SHELVING, captions: false };
   }
 }
 const keptRoom = loadRoom();
-const asked = params.get('mode');
+const asked = params.get('mode'), askedShelving = params.get('shelving');
 let mode = MODES.includes(/** @type {any} */ (asked)) ? asked : keptRoom.mode;
+let shelving = SHELVINGS.includes(/** @type {any} */ (askedShelving)) ? askedShelving : keptRoom.shelving;
 function saveRoom() {
   try {
-    localStorage.setItem(ROOM_KEY, JSON.stringify({ mode, captions: player.captions }));
+    localStorage.setItem(ROOM_KEY, JSON.stringify({ mode, shelving, captions: player.captions }));
   } catch {
     // No storage: the choice lasts this visit.
   }
@@ -480,13 +484,17 @@ function activeScreen() {
   return player.current ? screenFor(F, player.current) : F.screens.find((sc) => sc.id === 'main') ?? null;
 }
 
-/** Furnishes the room as the mode, and puts the viewer out of the furniture's way. */
-function furnishRoom() {
+/**
+ * Furnishes the room as the mode, its tapes shelved as asked, and puts the viewer out of the
+ * furniture's way, standing them up first; unless `stand` is false (only the shelves are new): then
+ * one seated stays on their seat, which is where it was.
+ */
+function furnishRoom({ stand = true } = {}) {
   if (furniture) {
     room.group.remove(furniture.group);
     furniture.dispose();
   }
-  const F = furnish(L, mode, episodes);
+  const F = furnish(L, mode, episodes, shelving);
   L.furniture = F;
   furniture = buildFurniture(L, F, { lighting: room.lighting, occlusion: room.occlusion, covers, anisotropy });
   room.group.add(furniture.group);
@@ -497,22 +505,35 @@ function furnishRoom() {
   for (const sc of F.screens) {
     if (sc.decade) showsOn.set(sc.decade, episodes.findIndex((e) => e.decade === sc.decade));
   }
-  controls.stand();
-  controls.settle();
-  describe(mode);
+  if (stand) controls.stand();
+  if (!controls.seat) controls.settle();
+  describe(mode, shelving);
   showShowing();
 }
 
-/** Turns the room to `m`: furnished as it, kept for the next visit (save), and in a shared session the same for everyone (share). */
-function setMode(m, { share = true, save = true } = {}) {
-  if (!MODES.includes(m)) return;
-  const changed = m !== mode || !furniture;
+/**
+ * Turns the room to `m`, its tapes shelved `by` (as they are, unless given): furnished as it, kept
+ * for the next visit (save), and in a shared session the same for everyone (share). A new mode
+ * stands the visitor up; new shelves leave them be.
+ */
+function setMode(m, { by = shelving, share = true, save = true } = {}) {
+  if (!MODES.includes(m) || !SHELVINGS.includes(by)) return;
+  const turned = m !== mode || !furniture;
+  const reshelved = by !== shelving && m !== 'gallery'; // the gallery has no shelves
   mode = m;
+  shelving = by;
   if (save) saveRoom();
   overlay.setMode(m);
-  if (changed && covers) furnishRoom();
-  if (changed) overlay.toast(MODE_NAMES[m], 2);
+  overlay.setShelving(by);
+  if ((turned || reshelved) && covers) furnishRoom({ stand: turned });
+  if (turned) overlay.toast(MODE_NAMES[m], 2);
+  else if (reshelved) overlay.toast(`Shelves ${SHELVING_NAMES[by].toLowerCase()}`, 2);
   if (share) shareShow();
+}
+
+/** Shelves the tapes `by` decade or kind (modes.js SHELVINGS), as setMode does; not in the gallery, which has no shelves. */
+function setShelving(by, options = {}) {
+  if (mode !== 'gallery') setMode(mode, { ...options, by });
 }
 
 /** Plays episode i (a tape, a set, the list), for everyone in a shared session. */
@@ -537,10 +558,12 @@ function playerAction(name) {
     if (player.episode < 0) playEpisode(mode === 'gallery' ? showsOn.get('1950s') ?? 0 : Math.max(0, episodes.findIndex((e) => e.decade === '1950s')));
     else player.toggle();
   } else if (name === 'next') {
-    // In the gallery, the next on the same set; elsewhere the next tape on the shelves.
+    // In the gallery, the next on the same set; elsewhere the next tape on the shelves, in the order
+    // one reads them (by decade, the catalogue's), and with nothing chosen yet the first.
     const e = player.current;
-    const among = mode === 'gallery' && e ? episodes.map((x, i) => (x.decade === e.decade ? i : -1)).filter((i) => i >= 0) : null;
-    if (player.episode < 0) playEpisode(0);
+    const among = mode !== 'gallery' ? L.furniture?.tapes.map((t) => t.episode) ?? null
+      : e ? episodes.map((x, i) => (x.decade === e.decade ? i : -1)).filter((i) => i >= 0) : null;
+    if (player.episode < 0) playEpisode(among?.[0] ?? 0);
     else player.next(among);
     if (mode === 'gallery' && player.current) showsOn.set(player.current.decade, player.episode);
   } else if (name === 'stop') player.stop();
@@ -567,13 +590,16 @@ controls.onThing = (use) => {
     if (sc?.decade && player.current?.decade !== sc.decade) playEpisode(showsOn.get(sc.decade) ?? 0);
     else playerAction('play');
   } else if (kind === 'room' && a === 'mode') setMode(b);
+  else if (kind === 'room' && a === 'shelving') setShelving(b);
   else if (kind === 'room' || kind === 'bar') playerAction(a);
 };
 overlay.onMode = (m) => setMode(m);
+overlay.onShelving = (by) => setShelving(by);
 overlay.onPlayer = (name) => playerAction(name);
 overlay.onEpisode = (i) => playEpisode(i);
 overlay.setMode(mode);
-describe(mode);
+overlay.setShelving(shelving);
+describe(mode, shelving);
 
 let shownSecond = -1;
 let activeId = ''; // the screen in use's id, as showShowing last found it (the frame loop asks it)
@@ -583,7 +609,7 @@ function showShowing() {
   const status = player.status();
   const time = e ? `${clock(player.time)} / ${clock(player.duration)}` : '';
   shownSecond = Math.floor(player.time);
-  const state = { mode, name: e ? names[player.episode] : null, status: e ? status : PICK[mode], time, playing: player.playing, captions: player.captions, hasCaptions: !!e?.captions };
+  const state = { mode, shelving, name: e ? names[player.episode] : null, status: e ? status : PICK[mode], time, playing: player.playing, captions: player.captions, hasCaptions: !!e?.captions };
   roomPanel.set(state);
   overlay.setShowing({ ...state, episode: player.episode, link: e ? detailsUrl(e) : null, status: e && !e.captions ? `${status}, no captions` : status, hint: CHOOSE[mode] });
   if (!furniture || !F) return;
@@ -710,20 +736,22 @@ overlay.onWave = () => {
 controls.onSqueeze = (hand) => {
   if (together.wave()) hand.source?.gamepad?.hapticActuators?.[0]?.pulse?.(0.6, 60);
 };
-// What is showing, the same for everyone in here: the mode, the episode, whether it plays and
-// where it is (at `at` seconds, `since` then, by the writer's clock), a shared value of the session
-// (layersharedsession's shared.js) that only this page writes. Each visitor's own Play, Next, Stop,
-// a tape or a mode writes it; another's is taken as it comes, and the last one by whoever joins.
+// What is showing, the same for everyone in here: the mode and how its tapes are shelved, the
+// episode, whether it plays and where it is (at `at` seconds, `since` then, by the writer's clock),
+// a shared value of the session (layersharedsession's shared.js) that only this page writes. Each
+// visitor's own Play, Next, Stop, a tape, a mode or the shelves write it; another's is taken as it
+// comes, and the last one by whoever joins.
 const SHOW_KEY = `${ROOM.id}:show`;
 function shareShow() {
   const s = together.session;
   if (!s) return;
-  s.set(SHOW_KEY, { mode, id: player.current?.id ?? null, playing: player.playing || player.loading, at: Math.round(player.time * 10) / 10, since: Date.now() });
+  s.set(SHOW_KEY, { mode, shelving, id: player.current?.id ?? null, playing: player.playing || player.loading, at: Math.round(player.time * 10) / 10, since: Date.now() });
 }
-/** Another visitor's show, if it is one this room can show. */
+/** Another visitor's show, if it is one this room can show (from a page before the shelving, the shelves as they are). */
 function takeShow(v) {
   if (!v || typeof v !== 'object' || !MODES.includes(v.mode) || typeof v.playing !== 'boolean' || !Number.isFinite(v.at) || !Number.isFinite(v.since)) return;
-  if (v.mode !== mode) setMode(v.mode, { share: false, save: false });
+  const by = SHELVINGS.includes(v.shelving) ? v.shelving : shelving;
+  if (v.mode !== mode || by !== shelving) setMode(v.mode, { by, share: false, save: false });
   const i = typeof v.id === 'string' ? episodes.findIndex((e) => e.id === v.id) : -1;
   if (i < 0) {
     player.stop();
@@ -818,9 +846,12 @@ fade.to(0, blink(0.8));
 // For scripted testing, and tools/preview.mjs. A hidden page gets no animation frames: drive it with tick().
 window.__room = {
   THREE, renderer, scene, camera, rig, room, layout: L, controls, overlay, fade, vignette, xrDevice, go, enterVR, together, remote, tv, way, visit, setAccess,
-  player, roomPanel, setMode, playEpisode, playerAction, sitOn,
+  player, roomPanel, setMode, setShelving, playEpisode, playerAction, sitOn,
   get mode() {
     return mode;
+  },
+  get shelving() {
+    return shelving;
   },
   get furniture() {
     return furniture;

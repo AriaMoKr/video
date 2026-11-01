@@ -16,7 +16,7 @@ Behind you as you come in is the doorway you came through, glowing sky blue, wit
 through it. Walk back through it (or click or tap it, or point at it in VR and pull the trigger) and
 you are back in the Hallway, in front of this room's door. On the wall either side of it are two panels:
 facing the doorway, the control panel on the left, and the room's own on the right (which room it
-is, and what is showing). The room itself is [RoomTemplateEmpty](https://github.com/AriaMoKr/RoomTemplateEmpty)'s: a
+is, how its tapes are shelved, and what is showing). The room itself is [RoomTemplateEmpty](https://github.com/AriaMoKr/RoomTemplateEmpty)'s: a
 floor, four walls, a ceiling with its lamps and a window onto the afternoon sky in the right-hand
 wall.
 
@@ -29,7 +29,7 @@ that visit. The first visit is the video store.
 
 | Room | What is in it |
 |---|---|
-| **Video store** | Every tape face out on shelves down the left wall, a bay to each decade under its sign, a counter by the doorway, and a TV and a couch at the back. |
+| **Video store** | Every tape face out on shelves down the left wall, a bay to each decade (or category) under its sign, a counter by the doorway, and a TV and a couch at the back. |
 | **Den** | A console TV against the far wall, a sofa and a coffee table on a rug, and the tapes on shelves. |
 | **Screening room** | A screen across the far wall over a low stage, three rows of seats on either side of an aisle, and the tapes round the way in: on the doorway's wall and down both sides. While a show plays, the lights go down and the window's curtains close. |
 | **Decades gallery** | A TV set from each decade, styled for its time, from a 1920s televisor on a table to a 1970s set on its cart, each showing that decade's shows (a still from each in turn). Using one plays what it shows. |
@@ -41,14 +41,25 @@ page. Along its foot are its kind, its year and how long it runs. On the shelves
 tapes stand in that order: its television, then its silent films, cartoons and short films, then its
 newsreels.
 
+The shelves can instead be by category: a bay to each, Television, Silent films, Cartoons, Short
+films and Newsreels, its sign with its icon either side, and in each the decades in order, so the
+sleeves' colours run from the 1920s to the 1970s. In the screening room the few silent films and
+cartoons are then on the doorway's wall, the television down the left, and the short films and
+newsreels on the right. Choose **By decade** or **By category** under **Shelves** on the room's
+panel or in the card (not in the gallery, which has no shelves). The Episodes list in the card is
+grouped the same way, and **Next** plays the next tape along the shelves. The choice is kept with
+the room's, and `?shelving=kind` (or `decade`) picks one for a visit. In a shared session everyone
+sees the same shelves.
+
 ## Watching
 
 - **Choose a tape**: click or tap it, point at it in VR and pull the trigger, or put the dot on it
   and press A (a gamepad) or OK (a TV remote). The room's screen plays it, with its name and the
   time on the room's panel. The card's **Episodes** lists every episode too, for a keyboard or a
-  screen reader: by decade, and in each by kind, under its name and an icon drawn like its tapes.
-- **Under the screen** is a bar of buttons: Play or Pause, Next, Captions, Stop. The room's panel
-  and the card have the same.
+  screen reader: by decade, and in each by kind, under its name and an icon drawn like its tapes
+  (or, with the shelves by category, by kind and in each by decade).
+- **Under the screen** is a bar of buttons: Play or Pause, Next (the next tape on the shelves),
+  Captions, Stop. The room's panel and the card have the same.
 - **Sit down** on a seat (the couch, the sofa, a seat in the screening room) the same way: you sit
   at a seated height, facing the screen. Walking stands you up again beside it.
 - **Captions** come from archive.org's speech to text, where an item has it (106 of the 132

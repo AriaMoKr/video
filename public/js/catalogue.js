@@ -1,17 +1,44 @@
 // The episodes the room shows (public/catalogue/episodes.json, written by tools/catalogue.mjs from
-// tools/picks.js), what to call them, where their video is, and their captions. Pure, for the page
-// and the tests.
+// tools/picks.js), what to call them and each kind of them, where their video is, and their
+// captions. Pure, for the page and the tests.
 
+/** @type {string[]} */
 export const DECADES = ['1920s', '1930s', '1940s', '1950s', '1960s', '1970s'];
-/** The kinds of video, in their order in each decade on the shelves: television first, the newsreels last. */
+/** The kinds of video, in their order in each decade on the shelves: television first, the newsreels last. @type {string[]} */
 export const KINDS = ['tv', 'silent', 'cartoon', 'film', 'newsreel'];
-/** What each kind is called: one of them (on its tape), and all of them (over them in the card's list). */
+/**
+ * What each kind is called: one of them (on its tape), and all of them (over them in the card's list
+ * and on their shelves' sign).
+ * @type {Record<string, [one: string, all: string]>}
+ */
 export const KIND_NAMES = {
   tv: ['TV', 'Television'],
   silent: ['Silent film', 'Silent films'],
   cartoon: ['Cartoon', 'Cartoons'],
   film: ['Short film', 'Short films'],
   newsreel: ['Newsreel', 'Newsreels'],
+};
+/** An eight-pointed star round (8, 8), for the cartoons. */
+const STAR = `M${Array.from({ length: 16 }, (_, k) => {
+  const a = (k / 16) * Math.PI * 2 - Math.PI / 2, r = k % 2 ? 3.2 : 6.6;
+  return `${(8 + r * Math.cos(a)).toFixed(1)} ${(8 + r * Math.sin(a)).toFixed(1)}`;
+}).join('L')}Z`;
+/**
+ * Each kind's icon, drawn as its tapes are (covers.js): an SVG path on a 16 × 16 grid, stroked 1.5
+ * wide with round ends (a dot is a stroke .01 long), beside its name in the card's list
+ * (overlay.js) and either side of it on its shelves' sign (covers.js SignAtlas).
+ * @type {Record<string, string>}
+ */
+export const KIND_ICONS = {
+  // A set: its cabinet, its glass, its aerial and two knobs.
+  tv: 'M3.5 4.5h9a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2zM4.5 6.5h5a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1zM5 1.5l3 3 3-3M12.5 8v.01M12.5 11v.01',
+  // An intertitle's frame round an oval.
+  silent: 'M2.5 2.5h11a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1zM4 8a4 3 0 1 0 8 0a4 3 0 1 0-8 0z',
+  cartoon: STAR,
+  // A frame of film between its sprocket holes.
+  film: 'M2.5 2.5h11a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1zM5 5h6v6h-6zM3.25 4.5v.01M3.25 8v.01M3.25 11.5v.01M12.75 4.5v.01M12.75 8v.01M12.75 11.5v.01',
+  // A newspaper: its column of lines and its photograph.
+  newsreel: 'M2.5 2.5h11v11h-11zM4.5 5h7M4.5 8h3M4.5 10.5h3M9.5 8h2v2.5h-2z',
 };
 /** archive.org, where the videos are: through the archive proxy (config.js videoProxy), or straight. */
 export const ARCHIVE = 'https://archive.org/';
@@ -35,7 +62,10 @@ export function readCatalogue(json) {
     .map((e) => (KINDS.includes(e.kind) ? e : { ...e, kind: 'tv' }));
 }
 
-/** "Dragnet: The Big Little Jesus (1953)", the year or else the decade. */
+/**
+ * "Dragnet: The Big Little Jesus (1953)", the year or else the decade.
+ * @param {Pick<Episode, 'show' | 'title' | 'year' | 'decade'>} e
+ */
 export function episodeName(e) {
   return `${e.show}: ${e.title} (${e.year ?? e.decade})`;
 }
@@ -50,12 +80,20 @@ export function videoUrl(e, proxy) {
   return `${proxy ?? ARCHIVE}download/${e.id}/${encodeURIComponent(e.file)}`;
 }
 
-/** The episode's page on archive.org. */
+/**
+ * The episode's page on archive.org.
+ * @param {Pick<Episode, 'id'>} e
+ */
 export function detailsUrl(e) {
   return `${ARCHIVE}details/${e.id}`;
 }
 
-/** The proxy's address from ?videoproxy= (for trying it on this machine), else config.js's; null for none. */
+/**
+ * The proxy's address from ?videoproxy= (for trying it on this machine), else config.js's; null for none.
+ * @param {string} search
+ * @param {string | null | undefined} configured
+ * @returns {string | null}
+ */
 export function proxyOf(search, configured) {
   const asked = new URLSearchParams(search).get('videoproxy');
   const p = asked === null ? configured : asked;
@@ -68,7 +106,10 @@ export function proxyOf(search, configured) {
   }
 }
 
-/** "12:03", or "1:02:03". */
+/**
+ * "12:03", or "1:02:03".
+ * @param {number} seconds
+ */
 export function clock(seconds) {
   const s = Math.max(0, Math.floor(Number.isFinite(seconds) ? seconds : 0));
   const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), r = s % 60;
@@ -76,7 +117,10 @@ export function clock(seconds) {
   return `${h ? `${h}:` : ''}${mm}:${String(r).padStart(2, '0')}`;
 }
 
-/** A WebVTT time: "01:02.500" or "1:01:02.500", in seconds; NaN if it is not one. */
+/**
+ * A WebVTT time: "01:02.500" or "1:01:02.500", in seconds; NaN if it is not one.
+ * @param {string} t
+ */
 function vttTime(t) {
   const m = /^(?:(\d+):)?(\d{2}):(\d{2})\.(\d{3})$/.exec(t.trim());
   return m ? Number(m[1] ?? 0) * 3600 + Number(m[2]) * 60 + Number(m[3]) + Number(m[4]) / 1000 : NaN;
@@ -105,6 +149,8 @@ export function parseVtt(text) {
 /**
  * The cue showing at `time`: its index, or -1. `hint` is the last answer, where the next usually
  * is (it is asked every frame, and allocates nothing).
+ * @param {{ start: number, end: number }[]} cues
+ * @param {number} time
  */
 export function cueAt(cues, time, hint = -1) {
   const n = cues.length;

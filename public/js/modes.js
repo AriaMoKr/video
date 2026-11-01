@@ -1,10 +1,11 @@
 // The room's four modes, and where everything in each one is: the furniture, the tapes on their
 // shelves, the screens and the bars of buttons under them, the seats, the signs, and the room's own
-// panel by the doorway (which mode, and what is showing). Pure functions with no three.js, so the
-// tests run them in Node; and castRay and clampWalk as room.js has them, with the furniture in the
-// way, which controls.js asks instead.
+// panel by the doorway (which mode, how the tapes are shelved, and what is showing). Pure functions
+// with no three.js, so the tests run them in Node; and castRay and clampWalk as room.js has them,
+// with the furniture in the way, which controls.js asks instead.
 //   store      the video store (the first a visitor sees): every tape face out on shelves down the
-//              left wall, a bay to a decade, a counter by the doorway, and a TV and a couch at the back
+//              left wall, a bay to a decade (or to a kind: SHELVINGS), a counter by the doorway, and
+//              a TV and a couch at the back
 //   den        a console TV against the far wall, a sofa and a coffee table on a rug, and the tapes
 //   screening  a screen across the far wall over a low stage, three rows of seats either side of an
 //              aisle, the tapes on the doorway's wall and down both sides from it, and while a show
@@ -14,13 +15,25 @@
 // Furnished (furnish) into the layout's `furniture`, which castRay and clampWalk read. Coordinates as
 // room.js's: the doorway's wall at z = 0, the room along -z, left is -x.
 import { MARGIN, castRay as castRoomRay, clampWalk as clampRoomWalk, standable } from './room.js';
+import { DECADES, KINDS, KIND_NAMES } from './catalogue.js';
 
 export const MODES = /** @type {const} */ (['store', 'den', 'screening', 'gallery']);
 /** @typedef {typeof MODES[number]} Mode */
 /** @type {Record<Mode, string>} */
 export const MODE_NAMES = { store: 'Video store', den: 'Den', screening: 'Screening room', gallery: 'Decades gallery' };
 export const DEFAULT_MODE = 'store';
-const DECADES = ['1920s', '1930s', '1940s', '1950s', '1960s', '1970s'];
+
+/**
+ * How the tapes are shelved: a bay to each decade, its kinds together in it in their order (the
+ * catalogue's), or a bay to each kind (catalogue.js KINDS, a category on the page), its decades in
+ * order in it. The gallery has no shelves.
+ */
+export const SHELVINGS = /** @type {const} */ (['decade', 'kind']);
+/** @typedef {typeof SHELVINGS[number]} Shelving */
+/** @type {Record<Shelving, string>} */
+export const SHELVING_NAMES = { decade: 'By decade', kind: 'By category' };
+export const DEFAULT_SHELVING = 'decade';
+/** @typedef {{ decade: string, kind: string }} Shelved what shelving an episode needs of it: its decade and its kind */
 
 /** Seated, the eye on a screen is this high (in VR it is the headset's). */
 export const SEATED_EYE = 1.15;
@@ -28,20 +41,22 @@ export const SEATED_EYE = 1.15;
 /**
  * The room's panel by the doorway, on the left as the control panel is on the right (room.js
  * PANEL's size): its canvas, and its buttons as [id, x0, y0, x1, y1] in canvas pixels (y down): the
- * four modes, then what is showing.
+ * four modes, the two ways of shelving the tapes, then what is showing.
  */
 export const ROOM_PANEL_PX = { width: 512, height: 768 };
 /** @typedef {[id: string, x0: number, y0: number, x1: number, y1: number]} Button */
 /** @type {Button[]} */
 export const ROOM_PANEL_BUTTONS = [
-  ['room:mode:store', 32, 84, 250, 142],
-  ['room:mode:den', 262, 84, 480, 142],
-  ['room:mode:screening', 32, 154, 250, 212],
-  ['room:mode:gallery', 262, 154, 480, 212],
-  ['room:play', 32, 446, 250, 504],
-  ['room:next', 262, 446, 480, 504],
-  ['room:captions', 32, 516, 250, 574],
-  ['room:stop', 262, 516, 480, 574],
+  ['room:mode:store', 32, 80, 250, 134],
+  ['room:mode:den', 262, 80, 480, 134],
+  ['room:mode:screening', 32, 144, 250, 198],
+  ['room:mode:gallery', 262, 144, 480, 198],
+  ['room:shelving:decade', 150, 210, 310, 256],
+  ['room:shelving:kind', 322, 210, 480, 256],
+  ['room:play', 32, 476, 250, 530],
+  ['room:next', 262, 476, 480, 530],
+  ['room:captions', 32, 540, 250, 594],
+  ['room:stop', 262, 540, 480, 594],
 ];
 
 /** The bar under a screen: its canvas (6:1, as every bar is), and its buttons, as the panel's. */
@@ -85,11 +100,13 @@ export const barButtonAt = (u, v) => buttonAt(BAR_BUTTONS, BAR_PX, u, v);
  * @typedef {{ minX: number, maxX: number, minZ: number, maxZ: number }} Rect where one may not walk (MARGIN from it)
  * @typedef {{ x: number, z: number, yaw: number, out: [number, number] }} Seat where one sits, facing which way, and where one stands up to
  * @typedef {{ id: string, decade: string | null, face: Face, bar: Face }} Screen
- * @typedef {{ mode: Mode, boxes: Box[], obstacles: Rect[], faces: Face[], tapes: { episode: number, face: Face }[],
+ * @typedef {{ mode: Mode, shelving: Shelving, boxes: Box[], obstacles: Rect[], faces: Face[], tapes: { episode: number, face: Face }[],
  *   screens: Screen[], signs: { text: string, face: Face }[], seats: Seat[], panel: Face, bar: Face | null,
  *   curtain: boolean, dim: number }} Furniture
- *   bar: the bar of the screen in use, which castRay asks (none in the gallery until a set plays);
- *   curtain: whether the window's curtains close while a show plays; dim: how far the lights go down then
+ *   tapes: in the order one reads them on the shelves (by decade, the catalogue's); a sign's face's id
+ *   is its bay's decade or kind; bar: the bar of the screen in use, which castRay asks (none in the
+ *   gallery until a set plays); curtain: whether the window's curtains close while a show plays; dim:
+ *   how far the lights go down then
  * @typedef {import('./room.js').Layout & { furniture?: Furniture | null }} VideoLayout
  *   room.js's layout, and its furniture (furnish's) once the room is furnished
  * @typedef {import('./room.js').RoomHit & { id: string | number | null, use: string | null }} VideoHit
@@ -205,19 +222,20 @@ export const SHELF = { depth: 0.34, tapeW: 0.165, tapeH: 0.225, pitch: 0.2, pad:
 export const CURTAINS = { open: 0.3, rail: 0.34 };
 
 /**
- * Shelves of tapes against a wall, a bay to a decade with its sign over it, holding the tapes of
- * `decades`, in their order as one reads them facing the wall (left to right, row by row): along a
- * side wall from `start` (a z) on along -z, or along the doorway's wall from `start` (an x) on
- * along -x; `rows` high, a row every `rowH` (SHELF's unless given), or as the catalogue grows as
- * many more, up to `maxRows`, as it takes to end short of `end`. Returns where they end.
+ * Shelves of tapes against a wall, a bay to each of `bays` (decades, or kinds as `by` says) with its
+ * sign over it, holding their tapes in their order as one reads them facing the wall (left to right,
+ * row by row; into F.tapes in that order too): along a side wall from `start` (a z) on along -z, or
+ * along the doorway's wall from `start` (an x) on along -x; `rows` high, a row every `rowH` (SHELF's
+ * unless given), or as the catalogue grows as many more, up to `maxRows`, as it takes to end short of
+ * `end`. Returns where they end.
  * @param {VideoLayout} L
  * @param {Furniture} F
- * @param {{ decade: string }[]} episodes
- * @param {{ side?: 'left' | 'right' | 'near', start: number, end?: number, rows?: number, maxRows?: number, rowH?: number, decades?: string[] }} options
+ * @param {Shelved[]} episodes
+ * @param {{ side?: 'left' | 'right' | 'near', start: number, end?: number, rows?: number, maxRows?: number, rowH?: number, by?: Shelving, bays?: string[] }} options
  */
-function shelves(L, F, episodes, { side = 'left', start, end = -Infinity, rows: fewest = 4, maxRows = fewest, rowH = SHELF.rowH, decades = DECADES }) {
+function shelves(L, F, episodes, { side = 'left', start, end = -Infinity, rows: fewest = 4, maxRows = fewest, rowH = SHELF.rowH, by = 'decade', bays: keys = by === 'kind' ? KINDS : DECADES }) {
   const w = wall(L, side);
-  const bays = decades.map((decade) => ({ decade, eps: episodes.map((e, i) => ({ e, i })).filter(({ e }) => e.decade === decade) })).filter((b) => b.eps.length);
+  const bays = keys.map((key) => ({ key, eps: episodes.map((e, i) => ({ e, i })).filter(({ e }) => e[by] === key) })).filter((b) => b.eps.length);
   /** How long a bay of `count` tapes is, `n` rows high. @param {number} count @param {number} n */
   const bayLength = (count, n) => Math.max(Math.ceil(count / n) * SHELF.pitch + 2 * SHELF.pad, SHELF.bay);
   /** How far the bays run along the wall, `n` rows high. @param {number} n */
@@ -226,7 +244,8 @@ function shelves(L, F, episodes, { side = 'left', start, end = -Infinity, rows: 
   while (rows < maxRows && start - span(rows) < end) rows++;
   const top = SHELF.bottom + rows * rowH + 0.04;
   // Facing the left wall, left to right runs along -z, and facing the doorway's, along -x: the way
-  // the bays are laid. Facing the right wall, along +z: there the first bay is the far one.
+  // the bays are laid. Facing the right wall, along +z: there the first bay is the far one, laid
+  // last, and shelved first.
   const back = side === 'right';
   let a = start;
   const placed = [];
@@ -236,7 +255,7 @@ function shelves(L, F, episodes, { side = 'left', start, end = -Infinity, rows: 
     placed.push({ ...bay, cols, near: a, far: a - length }); // near: its end toward `start`
     a -= length;
   }
-  for (const { decade, eps, cols, near, far } of placed) {
+  for (const { key, eps, cols, near, far } of back ? placed.reverse() : placed) {
     const left = back ? far : near; // the bay's end on one's left, facing it
     const step = back ? 1 : -1;
     const inset = (near - far - cols * SHELF.pitch) / 2; // SHELF.pad, or more in a bay made long for its sign
@@ -257,9 +276,10 @@ function shelves(L, F, episodes, { side = 'left', start, end = -Infinity, rows: 
       F.boxes.push(w.box(far, near, 0, SHELF.depth, Math.max(0, y), y + SHELF.board, 'shelf', { solid: false }));
     }
     F.boxes.push(w.box(far, near, SHELF.depth - 0.02, SHELF.depth, 0, Math.max(SHELF.bottom - SHELF.board, 0.08), 'shelfBack', { solid: false })); // the plinth
-    // The sign over it, half as high as wide, and below the ceiling over a tall bay.
+    // The sign over it, half as high as wide, and below the ceiling over a tall bay: its decade, or
+    // what its kind are called.
     const mid = (near + far) / 2, half = Math.min(0.42, (near - far) / 2 - 0.03, 2 * (L.height - 0.05 - top - 0.06));
-    F.signs.push({ text: decade, face: w.face('sign', decade, null, 0.012, mid - half, mid + half, top + 0.06, top + 0.06 + half / 2) });
+    F.signs.push({ text: by === 'kind' ? KIND_NAMES[key][1] : key, face: w.face('sign', key, null, 0.012, mid - half, mid + half, top + 0.06, top + 0.06 + half / 2) });
     F.obstacles.push(footprint(w.box(far, near, 0, SHELF.depth, 0, top, 'shelf')));
   }
   return a;
@@ -316,10 +336,10 @@ function facing(seats, tx, tz) {
   for (const s of seats) s.yaw = Math.atan2(-(tx - s.x), -(tz - s.z));
 }
 
-/** @type {Record<Mode, (L: VideoLayout, F: Furniture, episodes: { decade: string }[]) => void>} */
+/** @type {Record<Mode, (L: VideoLayout, F: Furniture, episodes: Shelved[], by: Shelving) => void>} */
 const BUILD = {
-  store(L, F, episodes) {
-    shelves(L, F, episodes, { side: 'left', start: -1.0, end: L.z1 + 0.3, rows: 4, maxRows: 8 });
+  store(L, F, episodes, by) {
+    shelves(L, F, episodes, { side: 'left', start: -1.0, end: L.z1 + 0.3, rows: 4, maxRows: 8, by });
     // The counter, on the right as one comes in, and the store's sign on the wall over it.
     const r = wall(L, 'right');
     const counter = r.box(-2.25, -1.05, 0.3, 0.95, 0, 0.98, 'counter');
@@ -338,8 +358,8 @@ const BUILD = {
     facing(F.seats, 1.3, back + 0.62);
   },
 
-  den(L, F, episodes) {
-    shelves(L, F, episodes, { side: 'left', start: -1.2, end: L.z1 + 0.3, rows: 4, maxRows: 8 });
+  den(L, F, episodes, by) {
+    shelves(L, F, episodes, { side: 'left', start: -1.2, end: L.z1 + 0.3, rows: 4, maxRows: 8, by });
     const back = L.z1;
     // The console: a cabinet on short legs, the screen above the speaker's grille.
     for (const x of [-0.72, 0.66]) for (const z of [back + 0.04, back + 0.48]) F.boxes.push({ min: [x, 0, z], max: [x + 0.06, 0.12, z + 0.06], material: 'dark', solid: false });
@@ -362,16 +382,19 @@ const BUILD = {
     F.obstacles.push({ minX: 1.2, maxX: 1.5, minZ: -4.45, maxZ: -4.15 });
   },
 
-  screening(L, F, episodes) {
+  screening(L, F, episodes, by) {
     // The tapes round the way in, nine rows high and close together: the 1920s and 1930s on the
     // doorway's wall from beside the room's panel toward the corner, the 1940s and 1950s down the
     // left wall from out of it (their first tapes past the front of the doorway's wall's shelves, not
     // hidden by their end, with room to stand in front of them), ending before the first row of
-    // seats, and the 1960s and 1970s on the right, short of the window's curtains.
-    const tall = { rows: 9, rowH: 0.28 };
-    shelves(L, F, episodes, { ...tall, side: 'near', start: -L.panel.x - L.panel.width / 2 - 0.06, decades: ['1920s', '1930s'] });
-    shelves(L, F, episodes, { ...tall, side: 'left', start: -0.3, decades: ['1940s', '1950s'] });
-    shelves(L, F, episodes, { ...tall, side: 'right', start: -0.03, decades: ['1960s', '1970s'] });
+    // seats, and the 1960s and 1970s on the right, short of the window's curtains. By kind, the few
+    // silent films and cartoons on the doorway's wall, the television down the left, and the short
+    // films and the newsreels on the right.
+    const tall = { rows: 9, rowH: 0.28, by };
+    const [near, left, right] = by === 'kind' ? [['silent', 'cartoon'], ['tv'], ['film', 'newsreel']] : [['1920s', '1930s'], ['1940s', '1950s'], ['1960s', '1970s']];
+    shelves(L, F, episodes, { ...tall, side: 'near', start: -L.panel.x - L.panel.width / 2 - 0.06, bays: near });
+    shelves(L, F, episodes, { ...tall, side: 'left', start: -0.3, bays: left });
+    shelves(L, F, episodes, { ...tall, side: 'right', start: -0.03, bays: right });
     const back = L.z1;
     F.boxes.push({ min: [-2.4, 0, back], max: [2.4, 0.3, back + 0.6], material: 'stage' });
     F.boxes.push({ min: [-1.58, 0.58, back], max: [1.58, Math.min(3.04, L.height - 0.08), back + 0.03], material: 'black' });
@@ -460,24 +483,26 @@ const BUILD = {
 
 /**
  * The room furnished as `mode` (else the default), for the layout L (room.js layoutRoom) and the
- * episodes (catalogue.js), whose tapes it shelves by decade. Set it as L.furniture for castRay and
- * clampWalk to see it.
+ * episodes (catalogue.js), whose tapes it shelves as `shelving` says (SHELVINGS: by decade unless it
+ * says by kind). Set it as L.furniture for castRay and clampWalk to see it.
  * @param {VideoLayout} L
  * @param {string} mode
- * @param {{ decade: string }[]} episodes
+ * @param {Shelved[]} episodes
+ * @param {string} [shelving]
  * @returns {Furniture}
  */
-export function furnish(L, mode, episodes) {
+export function furnish(L, mode, episodes, shelving = DEFAULT_SHELVING) {
   const m = /** @type {readonly string[]} */ (MODES).includes(mode) ? /** @type {Mode} */ (mode) : DEFAULT_MODE;
+  const by = /** @type {readonly string[]} */ (SHELVINGS).includes(shelving) ? /** @type {Shelving} */ (shelving) : DEFAULT_SHELVING;
   const P = L.panel;
   /** @type {Furniture} */
   const F = {
-    mode: m, boxes: [], obstacles: [], faces: [], tapes: [], screens: [], signs: [], seats: [], bar: null, curtain: false, dim: 1,
+    mode: m, shelving: by, boxes: [], obstacles: [], faces: [], tapes: [], screens: [], signs: [], seats: [], bar: null, curtain: false, dim: 1,
     // On the doorway's wall to the left of the doorway, as the control panel is to its right.
     panel: face('roompanel', 'room', null, 'z', -P.depth, -1, -P.x - P.width / 2, -P.x + P.width / 2, P.y - P.height / 2, P.y + P.height / 2),
   };
   F.faces.push(F.panel);
-  BUILD[m](L, F, episodes);
+  BUILD[m](L, F, episodes, by);
   for (const s of F.screens) F.faces.push(s.face);
   F.bar = F.screens.find((s) => s.id === 'main')?.bar ?? null;
   return F;

@@ -65,22 +65,29 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   Coordinates: metres, the doorway's wall at z = 0, the room along -z, the doorway at x = 0, yaw 0
   faces -z, left is -x.
 - `modes.js`: pure. The four modes (`MODES`, `MODE_NAMES`, `DEFAULT_MODE` 'store') furnished
-  (`furnish(L, mode, episodes)`) into `L.furniture`: boxes, faces (`{kind, id, use, axis, at, ...}`:
+  (`furnish(L, mode, episodes, shelving)`) into `L.furniture`: boxes, faces (`{kind, id, use, axis, at, ...}`:
   tapes, screens, bars, signs, the room panel), obstacles (rects, `MARGIN` from them), seats
   (`{x, z, yaw, out}`) and screens (`{id, decade, face, bar}`). The tapes' shelves (`SHELF`,
   `shelves`), a bay to a decade, in the catalogue's order as one reads them facing the wall (so
-  each kind's together, as `public/catalogue/` below has them): in the
-  store and the den down the left wall, as many rows as it takes (four to eight, six now) to end
-  0.3 short of the back wall, room for about fifty more; in the screening room nine rows, closer
+  each kind's together, as `public/catalogue/` below has them), or shelved by kind (`SHELVINGS`
+  'decade' and 'kind', `SHELVING_NAMES` "By decade" and "By category", `DEFAULT_SHELVING`
+  'decade'), a bay to a kind, its decades in order; `F.tapes` in the order one reads them, which
+  Next follows, and a sign's face's id its bay's decade or kind. In the
+  store and the den down the left wall, as many rows as it takes (four to eight, six now; by kind
+  six in the store, seven in the den) to end 0.3 short of the back wall, room for about fifty more
+  (by kind 41 more TV in the store, 33 in the den); in the screening room nine rows, closer
   together (`rowH`): the 1920s and 1930s on the doorway's wall beside the room panel, the 1940s and
   1950s down the left wall from past the front of those (nearer the corner their end would hide
   the first tapes) to before the seats, and the 1960s and 1970s on the right short of the window's
   curtains (`CURTAINS`: how far past the window furniture.js hangs them and their rail), with room
   for one more 1920s, six more 1930s, 21 more 1940s, 24 more 1950s, 41 more 1960s and 36 more
-  1970s, as the catalogue stands (`test/modes.test.js` fails when one runs past: a tape hidden, out
+  1970s, as the catalogue stands; by kind the silent films and cartoons on the doorway's wall, the
+  television down the left and the short films and newsreels on the right, with room for 14 more
+  silent films, 12 cartoons, 20 TV, 45 short films and 47 newsreels (`test/modes.test.js`, each
+  mode by decade and by kind, fails when one runs past: a tape hidden, out
   of reach or in the way, or shelves running into each other). A bay's sign stays under the ceiling.
-  The room panel's and a screen bar's buttons (`ROOM_PANEL_BUTTONS`, `roomPanelButtonAt`,
-  `BAR_BUTTONS`, `barButtonAt`); and `castRay` and `clampWalk` as room.js's with the furniture in
+  The room panel's and a screen bar's buttons (`ROOM_PANEL_BUTTONS`, `roomPanelButtonAt`: the
+  modes, the shelvings, the player's; `BAR_BUTTONS`, `barButtonAt`); and `castRay` and `clampWalk` as room.js's with the furniture in
   the way (one stood in it after a mode change is put out, at the nearest clear place where its
   nearest side is blocked too). `SEATED_EYE` 1.15.
   Its types: `VideoLayout` (room.js's `Layout` with `furniture`) and `VideoHit` (room.js's
@@ -92,13 +99,16 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   card, the captions) from the stills; a cover in its decade's colour (`DECADE_COLORS`), made as
   its kind was shown (`KIND_COVERS`: TV on a set's glass, a silent film an intertitle with an oval,
   a cartoon a ring on a sunburst, a short film a frame on a strip of film, a newsreel a newspaper's
-  front page), its kind, year and length along its foot. `roompanel.js`: the room panel (`RoomPanel`, at -x beside
-  the doorway, across it from the control panel) and a screen's bar (`ScreenBar`), redrawn only on a change.
+  front page), its kind, year and length along its foot; a sign (`SignAtlas`, of modes.js's signs)
+  with its decade's colour either side, or its kind's icon (`KIND_ICONS`, a `Path2D`). `roompanel.js`: the room panel (`RoomPanel`, at -x beside
+  the doorway, across it from the control panel: the modes, Shelves by decade or by category, drawn
+  disabled in the gallery, and the player) and a screen's bar (`ScreenBar`), redrawn only on a change.
 - `player.js`: one `<video crossorigin>` through the archive proxy into a `VideoTexture`, with
   captions (`cueAt`); where that fails, out of VR it plays the direct archive.org URL on the page
   (`section.player`, `<video controls>` and a `<track>`), in VR it says so; a blocked autoplay waits
-  for Play. `catalogue.js`: `DECADES`, `KINDS` (tv, silent, cartoon, film, newsreel: their order in
-  a decade) and `KIND_NAMES` (one, all), `readCatalogue` of `public/catalogue/episodes.json` (a kind
+  for Play. `catalogue.js` (pure, strict): `DECADES`, `KINDS` (tv, silent, cartoon, film, newsreel: their order in
+  a decade), `KIND_NAMES` (one, all) and `KIND_ICONS` (an SVG path each on a 16 × 16 grid, the
+  card's and the signs'), `readCatalogue` of `public/catalogue/episodes.json` (a kind
   it doesn't know is tv), `proxyOf` (`?videoproxy=`, `none`), `videoUrl`, `detailsUrl`, `parseVtt`,
   `cueAt`, `clock`.
 - `scene.js` builds the room as a few merged meshes with light baked into vertex colours (`bake.js`
@@ -136,10 +146,13 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   card (the page's `<nav>`: the title, ← Hallway, the description, On the walls (a link to where
   each piece leads, `pieceHref`, else a button, `onPiece`), Start / Leave shared session, in
   a session its status and the visitor's name (`onName`), and Settings with the panel's choices as
-  radio buttons and checkboxes; before them, in the room, the modes as radios, what is showing,
-  Play, Next, Captions, Stop and the episodes by decade, and in each by kind under its name and its
-  icon (`KIND_ICONS`, drawn as its tapes are, `aria-hidden`): `setMode`, `setEpisodes`, `setShowing`,
-  `onMode`, `onPlayer`, `onEpisode`), the hint (`#hint`, kept clear of the buttons, `_placeHint`),
+  radio buttons and checkboxes; before them, in the room, the modes and Shelves (by decade or by
+  category, the fieldset disabled in the gallery) as radios, what is showing,
+  Play, Next, Captions, Stop and the episodes grouped as the shelves are, by decade and in each by
+  kind, or by kind and in each by decade, a kind under its name and its
+  icon (catalogue.js `KIND_ICONS`, drawn as its tapes are, `aria-hidden`; made again, `_list`
+  keeps the focused button's focus): `setMode`, `setShelving`, `setEpisodes`, `setShowing`,
+  `onMode`, `onShelving`, `onPlayer`, `onEpisode`), the hint (`#hint`, kept clear of the buttons, `_placeHint`),
   the label beside the aiming dot (`setLabel`), Wave,
   Copy invite link, Fullscreen, Enter VR, the aiming dot, and toasts (`role="status"`, polite). With
   `tv`, Wave is in the card and the invite is text there (`inviteText`), and the hints are the
@@ -160,12 +173,15 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   class on `<html>`), the TV (common's `tv.js`: `tvMode()`, the `tv` class on `<html>`, a `Remote`
   over the card and the canvas with `use` = `controls.useMiddle()` and `step` = `stepBack`, the
   room's own step back for Back: stop a show, then stand up; `answerApp`; no fullscreen or XR), the
-  modes (`video.room` in localStorage, `?mode=`; `setMode`, `furnishRoom`), the player and what is
+  modes and the shelving (`video.room` in localStorage: mode, shelving, captions; `?mode=`,
+  `?shelving=`; `setMode(m, { by })`, `setShelving`, not in the gallery, `furnishRoom`, which
+  stands the visitor up only for a new mode), the player and what is
   showing (`playEpisode`, `playerAction`: Play with nothing chosen plays the 1950s' first, or in the
-  gallery what that set shows, not the shelves' first, a silent film; `sitOn`, `showShowing`,
+  gallery what that set shows, not the shelves' first, a silent film; Next the next of `F.tapes`,
+  the shelves' order, or in the gallery the set's; `sitOn`, `showShowing`,
   `updateShowing` each frame), the
-  show shared in a session (`video:show`: mode, episode, playing, where, when; `shareShow`,
-  `takeShow`), and the frame loop.
+  show shared in a session (`video:show`: mode, shelving, episode, playing, where, when; `shareShow`,
+  `takeShow`, which keeps its own shelves for a show without them), and the frame loop.
 - `public/catalogue/`: `episodes.json`, `stills/<id>.jpg` and `captions/<id>.vtt`, written by
   `tools/catalogue.mjs` from `tools/picks.js` (132 picks, 1920s–1970s, each decade's in the kinds'
   order, its television, silent films, cartoons, short films, then newsreels, a pick's `kind` said
@@ -197,14 +213,14 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   rather than skips without TypeScript. What TypeScript's DOM library leaves out (WebKit's
   fullscreen names, `window.__room`, `window.roomXrGranted`) is in `types/globals.d.ts`, never
   served. `strict` comes a file at a time: `tsconfig.strict.json` (it, with `strict` on) includes
-  only the files that pass it, `config.js`, `presence.js`, `room.js`, `modes.js` and `controls.js`
+  only the files that pass it, `config.js`, `presence.js`, `room.js`, `catalogue.js`, `modes.js` and `controls.js`
   so far, and `test/types.test.js` runs it too. A file joins its `include` when a change makes it
   pass; what an included file imports is checked strictly with it. The rest has a few hundred
   errors with it, mostly untyped parameters and values that may be null (a canvas's 2D context).
   `tools/` and `test/` wait for `@types/node`.
 - Scripted testing: `window.__room` (THREE, renderer, scene, camera, rig, room, layout, controls,
   overlay, fade, vignette, xrDevice, go, enterVR, together, remote, tv, way, visit, setAccess, access,
-  player, roomPanel, setMode, playEpisode, playerAction, sitOn, mode, furniture, episodes,
+  player, roomPanel, setMode, setShelving, playEpisode, playerAction, sitOn, mode, shelving, furniture, episodes,
   `preview()`, `social()`, `tick(dt, n)`, `ready`, true once the catalogue and stills have loaded
   and the pieces' pictures have loaded or failed). A hidden browser pane gets no animation frames:
   drive it with `tick()`. XR frames under `?xr=emulate` need frames too; headless Chrome (below)

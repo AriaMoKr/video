@@ -1,10 +1,11 @@
 // The room's own panel on the doorway's wall, left of the doorway as the control panel is right of
-// it (modes.js ROOM_PANEL_BUTTONS): which of the four modes the room is in, what is showing, and
-// Play / Pause, Next, Captions and Stop; and the bar of the same buttons under the screen in use
-// (modes.js BAR_BUTTONS). Drawn as the control panel is (panel.js), only when what they show
-// changes: the time shown moves on a second at a time.
+// it (modes.js ROOM_PANEL_BUTTONS): which of the four modes the room is in, how its tapes are
+// shelved (by decade or by category, not to be chosen in the gallery, which has no shelves), what is
+// showing, and Play / Pause, Next, Captions and Stop; and the bar of the same buttons under the
+// screen in use (modes.js BAR_BUTTONS). Drawn as the control panel is (panel.js), only when what
+// they show changes: the time shown moves on a second at a time.
 import * as THREE from 'three';
-import { BAR_BUTTONS, BAR_PX, MODE_NAMES, ROOM_PANEL_BUTTONS, ROOM_PANEL_PX, faceFrame } from './modes.js';
+import { BAR_BUTTONS, BAR_PX, MODE_NAMES, ROOM_PANEL_BUTTONS, ROOM_PANEL_PX, SHELVING_NAMES, faceFrame } from './modes.js';
 import { GOLD, SANS, SERIF, enamel } from './textures.js';
 import { canvasTexture, fitFont, wrap } from './covers.js';
 
@@ -17,11 +18,12 @@ const ABOUT = {
 };
 
 /**
- * What the panel and the bar show: the room's mode, the episode chosen (its name, or null), how it
- * is going (status), and whether it plays and the captions are on.
- * @typedef {{ mode: string, name: string | null, status: string, time: string, playing: boolean, captions: boolean, hasCaptions: boolean }} Showing
+ * What the panel and the bar show: the room's mode and how its tapes are shelved (modes.js
+ * SHELVINGS), the episode chosen (its name, or null), how it is going (status), and whether it
+ * plays and the captions are on.
+ * @typedef {{ mode: string, shelving: string, name: string | null, status: string, time: string, playing: boolean, captions: boolean, hasCaptions: boolean }} Showing
  */
-const KEYS = ['mode', 'name', 'status', 'time', 'playing', 'captions', 'hasCaptions'];
+const KEYS = ['mode', 'shelving', 'name', 'status', 'time', 'playing', 'captions', 'hasCaptions'];
 
 /** A button as the control panel draws its own. */
 function button(g, [x0, y0, x1, y1], label, { selected = false, hover = false, disabled = false, size = 26 } = {}) {
@@ -65,7 +67,7 @@ class CanvasPanel {
     this.canvas.height = px.height;
     this.ctx = this.canvas.getContext('2d');
     /** @type {Showing} */
-    this.state = { mode: 'store', name: null, status: '', time: '', playing: false, captions: false, hasCaptions: false };
+    this.state = { mode: 'store', shelving: 'decade', name: null, status: '', time: '', playing: false, captions: false, hasCaptions: false };
     this.hover = null;
     this.texture = null;
   }
@@ -107,48 +109,56 @@ export class RoomPanel extends CanvasPanel {
     g.fillStyle = GOLD;
     g.font = `600 30px ${SERIF}`;
     g.fillText('The room', 32, 58);
+    // The gallery has no shelves: there the way they are shelved is not to be chosen.
+    const shelves = s.mode !== 'gallery';
     for (const [id, ...box] of ROOM_PANEL_BUTTONS) {
-      const [, what, mode] = id.split(':');
+      const [, what, value] = id.split(':');
       if (what === 'mode') {
-        button(g, box, MODE_NAMES[mode], { selected: s.mode === mode, hover: this.hover === id, size: 24 });
+        button(g, box, MODE_NAMES[value], { selected: s.mode === value, hover: this.hover === id, size: 24 });
+      } else if (what === 'shelving') {
+        button(g, box, SHELVING_NAMES[value], { selected: shelves && s.shelving === value, hover: this.hover === id, disabled: !shelves, size: 22 });
       } else {
         const disabled = (what === 'stop' && !s.name);
         button(g, box, labelOf(what, s), { selected: what === 'captions' && s.captions, hover: this.hover === id, disabled });
       }
     }
-    g.textAlign = 'center';
+    g.textAlign = 'left';
     g.textBaseline = 'middle';
+    g.fillStyle = shelves ? GOLD : 'rgba(224,187,114,0.45)';
+    g.font = `600 22px ${SERIF}`;
+    g.fillText('Shelves', 32, 234);
+    g.textAlign = 'center';
     g.fillStyle = '#b9a98d';
     fitFont(g, ABOUT[s.mode] ?? '', W - 64, 19);
-    g.fillText(ABOUT[s.mode] ?? '', W / 2, 238);
+    g.fillText(ABOUT[s.mode] ?? '', W / 2, 278);
 
     g.fillStyle = 'rgba(224,187,114,0.35)';
-    g.fillRect(32, 262, W - 64, 2);
+    g.fillRect(32, 298, W - 64, 2);
     g.textAlign = 'left';
     g.fillStyle = GOLD;
     g.font = `600 26px ${SERIF}`;
-    g.fillText('Now showing', 32, 294);
+    g.fillText('Now showing', 32, 330);
     if (s.time) {
       g.textAlign = 'right';
       g.fillStyle = '#efe5cf';
       g.font = `20px ${SANS}`;
-      g.fillText(s.time, W - 32, 295);
+      g.fillText(s.time, W - 32, 331);
     }
     g.textAlign = 'center';
     g.fillStyle = '#efe5cf';
     const name = s.name ?? 'Nothing yet';
     fitFont(g, name, W - 64, 25, { weight: '600', min: 18 });
     const lines = wrap(g, name, W - 64, 2);
-    lines.forEach((line, k) => g.fillText(line, W / 2, (lines.length === 1 ? 348 : 334) + k * 32));
+    lines.forEach((line, k) => g.fillText(line, W / 2, (lines.length === 1 ? 384 : 370) + k * 32));
     g.fillStyle = '#b9a98d';
     fitFont(g, s.status, W - 64, 20);
-    g.fillText(s.status, W / 2, 406);
+    g.fillText(s.status, W / 2, 442);
 
     g.fillStyle = 'rgba(224,187,114,0.35)';
-    g.fillRect(32, 602, W - 64, 2);
+    g.fillRect(32, 618, W - 64, 2);
     g.fillStyle = '#b9a98d';
     /** @type {[string, number][]} */
-    const about = [['Classic TV, newsreels and films from archive.org', 640], ['Public domain, streamed from the Internet Archive', 672], ['Captions are archive.org’s speech to text', 704]];
+    const about = [['Classic TV, newsreels and films from archive.org', 650], ['Public domain, streamed from the Internet Archive', 678], ['Captions are archive.org’s speech to text', 706]];
     for (const [text, y] of about) {
       fitFont(g, text, W - 64, 18);
       g.fillText(text, W / 2, y);

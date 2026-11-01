@@ -1,10 +1,10 @@
 // What the room's canvases show, painted once or when it changes, never per frame: the tapes'
 // covers (one atlas for every tape, a cell each: its decade's colour, made as its kind was shown,
 // the show, a still from it, the episode, its kind and its year), the signs over the shelves and
-// the sets (one atlas), a screen's picture while nothing plays on it (a still and its name, or what
-// to do), and the captions under a show.
+// the sets (one atlas: a decade's in its colour, a kind's with its icon), a screen's picture while
+// nothing plays on it (a still and its name, or what to do), and the captions under a show.
 import * as THREE from 'three';
-import { KIND_NAMES } from './catalogue.js';
+import { KIND_ICONS, KIND_NAMES } from './catalogue.js';
 import { GOLD, SANS, SERIF, enamel } from './textures.js';
 
 /** Each decade's colour, on its tapes' spines and covers, its sign and its shelf's label. */
@@ -356,31 +356,51 @@ function shade(hex, k) {
 /** A sign's cell, 4:1 as every sign's face is. */
 export const SIGN = { width: 512, height: 128 };
 
-/** The signs' words in one canvas, a cell each, top to bottom; uv(i) as CoverAtlas's. */
+/**
+ * The signs' words in one canvas, a cell each, top to bottom; uv(i) as CoverAtlas's. Either side of
+ * them, a decade's sign (its face's id a decade) has its colour, and a kind's (its id a kind) its
+ * icon (catalogue.js KIND_ICONS), in gold.
+ */
 export class SignAtlas {
-  constructor(texts, anisotropy = 1) {
-    this.canvas = canvas(SIGN.width, SIGN.height * Math.max(1, texts.length));
+  /** @param {{ text: string, face: { id: string | number } }[]} signs modes.js's */
+  constructor(signs, anisotropy = 1) {
+    this.canvas = canvas(SIGN.width, SIGN.height * Math.max(1, signs.length));
     this.texture = canvasTexture(this.canvas, anisotropy);
     const g = this.canvas.getContext('2d');
-    texts.forEach((text, i) => {
+    signs.forEach(({ text, face }, i) => {
       g.save();
       g.translate(0, i * SIGN.height);
       enamel(g, SIGN.width, SIGN.height, 6);
-      const color = DECADE_COLORS[text];
+      const color = DECADE_COLORS[face.id], icon = KIND_ICONS[face.id];
+      let room = SIGN.width - 110;
       if (color) {
         g.fillStyle = color;
         g.fillRect(24, 24, 18, SIGN.height - 48);
         g.fillRect(SIGN.width - 42, 24, 18, SIGN.height - 48);
+      } else if (icon) {
+        // Its 16 × 16 icon 56 px high, stroked as the list's is.
+        const path = new Path2D(icon), k = 3.5, size = 16 * k;
+        g.strokeStyle = GOLD;
+        g.lineWidth = 1.5;
+        g.lineCap = g.lineJoin = 'round';
+        for (const x of [26, SIGN.width - 26 - size]) {
+          g.save();
+          g.translate(x, (SIGN.height - size) / 2);
+          g.scale(k, k);
+          g.stroke(path);
+          g.restore();
+        }
+        room = SIGN.width - 2 * (26 + size + 14);
       }
       g.fillStyle = GOLD;
       g.textAlign = 'center';
       g.textBaseline = 'middle';
-      fitFont(g, text, SIGN.width - 110, 64, { weight: '600', family: SERIF });
+      fitFont(g, text, room, 64, { weight: '600', family: SERIF });
       g.fillText(text, SIGN.width / 2, SIGN.height / 2 + 3);
       g.restore();
     });
     this.texture.needsUpdate = true;
-    this.count = texts.length;
+    this.count = signs.length;
   }
 
   uv(i) {

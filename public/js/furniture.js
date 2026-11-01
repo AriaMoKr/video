@@ -121,7 +121,7 @@ export function buildFurniture(L, F, { lighting, occlusion, covers, anisotropy =
   }
 
   // The signs.
-  const signs = new SignAtlas(F.signs.map((s) => s.text), anisotropy);
+  const signs = new SignAtlas(F.signs, anisotropy);
   owned.push(signs.texture);
   let signMesh = null;
   if (F.signs.length) {

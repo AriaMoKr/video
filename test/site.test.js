@@ -9,7 +9,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ROOM, hallwayDoor } from '../public/js/config.js';
 import { PANEL_BUTTONS } from '../public/js/room.js';
-import { BAR_BUTTONS, MODES, ROOM_PANEL_BUTTONS } from '../public/js/modes.js';
+import { BAR_BUTTONS, MODES, ROOM_PANEL_BUTTONS, SHELVINGS } from '../public/js/modes.js';
 import { installDom } from './helpers/dom.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..', 'public');
@@ -124,18 +124,19 @@ test("every button of the room's panel and of the bars under the screens is a co
     const o = new Overlay(ROOM, { url: 'https://ariamokr.github.io/hallway/', label: '← Hallway', title: 'Back to the Hallway' });
     const did = [];
     o.onMode = (m) => did.push(`mode:${m}`);
+    o.onShelving = (by) => did.push(`shelving:${by}`);
     o.onPlayer = (a) => did.push(a);
     o.onEpisode = (i) => did.push(`episode:${i}`);
     const buttons = { play: o.play, next: o.next, captions: o.captions, stop: o.stop };
     for (const [id] of [...ROOM_PANEL_BUTTONS, ...BAR_BUTTONS]) {
       did.length = 0;
-      const [, what, mode] = id.split(':');
-      if (what === 'mode') {
-        const input = o.modeChoices.get(mode);
+      const [, what, value] = id.split(':');
+      if (what === 'mode' || what === 'shelving') {
+        const input = (what === 'mode' ? o.modeChoices : o.shelvingChoices).get(value);
         assert.ok(input, `no choice on the page for ${id}`);
         input.checked = true;
         input.fire('change');
-        assert.deepEqual(did, [`mode:${mode}`], id);
+        assert.deepEqual(did, [`${what}:${value}`], id);
       } else {
         assert.ok(buttons[what], `no button on the page for ${id}`);
         buttons[what].fire('click');
@@ -145,6 +146,15 @@ test("every button of the room's panel and of the bars under the screens is a co
     assert.deepEqual([...o.modeChoices.keys()], [...MODES]);
     o.setMode('den');
     assert.deepEqual([...o.modeChoices].filter(([, i]) => i.checked).map(([m]) => m), ['den']);
+    // The shelves, by decade or by category; not to be chosen in the gallery, which has none.
+    assert.deepEqual([...o.shelvingChoices.keys()], [...SHELVINGS]);
+    assert.equal(o.shelving.disabled, false);
+    o.setMode('gallery');
+    assert.equal(o.shelving.disabled, true);
+    o.setMode('den');
+    assert.equal(o.shelving.disabled, false);
+    o.setShelving('decade');
+    assert.deepEqual([...o.shelvingChoices].filter(([, i]) => i.checked).map(([s]) => s), ['decade']);
     // The episodes, by decade and in each by kind (named, its icon for the eye only), each a
     // button; the one showing is marked, and its page linked. The icons are SVG, whose elements
     // the helper's will do for.
@@ -160,6 +170,15 @@ test("every button of the room's panel and of the bars under the screens is a co
     const icons = o.episodes.findAll((n) => n.tagName === 'SVG');
     assert.equal(icons.length, 3);
     for (const svg of icons) assert.equal(svg.getAttribute('aria-hidden'), 'true');
+    // Shelved by category, the list is too: by kind, and in each by decade; the buttons as they were.
+    o.setShelving('kind');
+    assert.deepEqual([...o.shelvingChoices].filter(([, i]) => i.checked).map(([s]) => s), ['kind']);
+    assert.equal(o.episodes.textContent, 'Television1950sA: One (1951)Cartoons1940sC: Three (1942)Newsreels1940sB: Two (1940s)');
+    assert.deepEqual(o.episodes.children.map((s) => s.getAttribute('aria-label')), ['Television', 'Cartoons', 'Newsreels']);
+    assert.equal(o.episodes.findAll((n) => n.tagName === 'SVG').length, 3);
+    assert.deepEqual(o.episodeButtons.map((b) => b.textContent), ['A: One (1951)', 'B: Two (1940s)', 'C: Three (1942)']);
+    o.setShelving('decade');
+    assert.equal(o.episodes.textContent, '1940sCartoonsC: Three (1942)NewsreelsB: Two (1940s)1950sTelevisionA: One (1951)');
     did.length = 0;
     o.episodeButtons[1].fire('click');
     assert.deepEqual(did, ['episode:1']);

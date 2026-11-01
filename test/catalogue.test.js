@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { PICKS } from '../tools/picks.js';
 import { ROOM } from '../public/js/config.js';
-import { ARCHIVE, DECADES, KINDS, KIND_NAMES, clock, cueAt, detailsUrl, episodeName, parseVtt, proxyOf, readCatalogue, videoUrl } from '../public/js/catalogue.js';
+import { ARCHIVE, DECADES, KINDS, KIND_ICONS, KIND_NAMES, clock, cueAt, detailsUrl, episodeName, parseVtt, proxyOf, readCatalogue, videoUrl } from '../public/js/catalogue.js';
 import { refusal } from '../tools/archive-proxy/worker.js';
 
 const PUBLIC = new URL('../public/', import.meta.url);
@@ -29,8 +29,13 @@ test('every pick is in the catalogue, in order, and nothing else', () => {
   // Grouped by decade, as the shelves are, and in each decade by kind: its television first, its newsreels last.
   const order = episodes.map((e) => DECADES.indexOf(e.decade) * KINDS.length + KINDS.indexOf(e.kind));
   assert.deepEqual(order, [...order].sort((a, b) => a - b));
-  // Every kind named, and those the room shows each in it.
+  // Every kind named and with its icon (an SVG path on a 16 × 16 grid), and those the room shows each in it.
   assert.deepEqual(Object.keys(KIND_NAMES), KINDS);
+  assert.deepEqual(Object.keys(KIND_ICONS), KINDS);
+  for (const kind of KINDS) {
+    assert.match(KIND_ICONS[kind], /^M[\d. MLHVACZmlhvacz-]+$/, kind);
+    for (const n of KIND_ICONS[kind].match(/\d+(\.\d+)?/g)) assert.ok(Number(n) <= 16, `${kind}: ${n} on its 16 × 16 grid`);
+  }
   assert.deepEqual(KINDS.filter((k) => episodes.some((e) => e.kind === k)), KINDS);
 });
 
