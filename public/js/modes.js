@@ -203,21 +203,22 @@ export const CURTAINS = { open: 0.3, rail: 0.34 };
 /**
  * Shelves of tapes against a side wall from zStart on along -z, a bay to a decade with its sign
  * over it, holding the tapes of `decades`, in their order as one reads them facing the wall (left
- * to right, row by row): `rows` high, or as the catalogue grows as many more, up to `maxRows`, as
- * it takes to end short of zEnd. Returns where they end (the far z).
+ * to right, row by row): `rows` high, a row every `rowH` (SHELF's unless given), or as the
+ * catalogue grows as many more, up to `maxRows`, as it takes to end short of zEnd. Returns where
+ * they end (the far z).
  * @param {VideoLayout} L
  * @param {Furniture} F
  * @param {{ decade: string }[]} episodes
- * @param {{ side?: 'left' | 'right', zStart: number, zEnd?: number, rows?: number, maxRows?: number, decades?: string[] }} options
+ * @param {{ side?: 'left' | 'right', zStart: number, zEnd?: number, rows?: number, maxRows?: number, rowH?: number, decades?: string[] }} options
  */
-function shelves(L, F, episodes, { side = 'left', zStart, zEnd = -Infinity, rows: fewest = 4, maxRows = fewest, decades = DECADES }) {
+function shelves(L, F, episodes, { side = 'left', zStart, zEnd = -Infinity, rows: fewest = 4, maxRows = fewest, rowH = SHELF.rowH, decades = DECADES }) {
   const w = wall(L, side);
   const bays = decades.map((decade) => ({ decade, eps: episodes.map((e, i) => ({ e, i })).filter(({ e }) => e.decade === decade) })).filter((b) => b.eps.length);
   /** How far the bays run along the wall, `n` rows high. @param {number} n */
   const span = (n) => bays.reduce((sum, bay) => sum + Math.ceil(bay.eps.length / n) * SHELF.pitch + 2 * SHELF.pad, 0);
   let rows = fewest;
   while (rows < maxRows && zStart - span(rows) < zEnd) rows++;
-  const top = SHELF.bottom + rows * SHELF.rowH + 0.04;
+  const top = SHELF.bottom + rows * rowH + 0.04;
   // Facing the left wall, left to right runs along -z; facing the right wall, along +z: there the
   // first bay is the far one.
   let z = zStart;
@@ -234,7 +235,7 @@ function shelves(L, F, episodes, { side = 'left', zStart, zEnd = -Infinity, rows
     eps.forEach(({ i }, k) => {
       const row = Math.floor(k / cols), col = k % cols;
       const mid = left + step * (SHELF.pad + (col + 0.5) * SHELF.pitch);
-      const y0 = SHELF.bottom + (rows - 1 - row) * SHELF.rowH;
+      const y0 = SHELF.bottom + (rows - 1 - row) * rowH;
       const f = w.face('tape', i, `tape:${i}`, SHELF.depth + 0.004, mid - SHELF.tapeW / 2, mid + SHELF.tapeW / 2, y0, y0 + SHELF.tapeH);
       F.tapes.push({ episode: i, face: f });
       F.faces.push(f);
@@ -244,11 +245,12 @@ function shelves(L, F, episodes, { side = 'left', zStart, zEnd = -Infinity, rows
     F.boxes.push(w.box(far, near, 0, 0.015, 0, top, 'shelfBack', { solid: false }));
     for (const a of [near, far]) F.boxes.push(w.box(a - 0.0125, a + 0.0125, 0, SHELF.depth, 0, top, 'shelf', { solid: false }));
     for (let r = 0; r <= rows; r++) {
-      const y = r === rows ? top - SHELF.board : SHELF.bottom + r * SHELF.rowH - SHELF.board;
+      const y = r === rows ? top - SHELF.board : SHELF.bottom + r * rowH - SHELF.board;
       F.boxes.push(w.box(far, near, 0, SHELF.depth, Math.max(0, y), y + SHELF.board, 'shelf', { solid: false }));
     }
     F.boxes.push(w.box(far, near, SHELF.depth - 0.02, SHELF.depth, 0, Math.max(SHELF.bottom - SHELF.board, 0.08), 'shelfBack', { solid: false })); // the plinth
-    const mid = (near + far) / 2, half = Math.min(0.42, (near - far) / 2 - 0.03);
+    // The sign over it, half as high as wide, and below the ceiling over a tall bay.
+    const mid = (near + far) / 2, half = Math.min(0.42, (near - far) / 2 - 0.03, 2 * (L.height - 0.05 - top - 0.06));
     F.signs.push({ text: decade, face: w.face('sign', decade, null, 0.012, mid - half, mid + half, top + 0.06, top + 0.06 + half / 2) });
     F.obstacles.push(footprint(w.box(far, near, 0, SHELF.depth, 0, top, 'shelf')));
   }
@@ -353,11 +355,11 @@ const BUILD = {
   },
 
   screening(L, F, episodes) {
-    // The tapes either side of the way in, from the doorway's wall: the 1940s and 1950s on the left,
-    // ending before the first row of seats, and the 1960s and 1970s on the right, short of the
-    // window's curtains.
-    shelves(L, F, episodes, { side: 'left', zStart: -0.03, rows: 6, decades: ['1940s', '1950s'] });
-    shelves(L, F, episodes, { side: 'right', zStart: -0.03, rows: 6, decades: ['1960s', '1970s'] });
+    // The tapes either side of the way in, from the doorway's wall, seven rows high and close
+    // together: the 1940s and 1950s on the left, ending before the first row of seats, and the
+    // 1960s and 1970s on the right, short of the window's curtains.
+    shelves(L, F, episodes, { side: 'left', zStart: -0.03, rows: 7, rowH: 0.36, decades: ['1940s', '1950s'] });
+    shelves(L, F, episodes, { side: 'right', zStart: -0.03, rows: 7, rowH: 0.36, decades: ['1960s', '1970s'] });
     const back = L.z1;
     F.boxes.push({ min: [-2.4, 0, back], max: [2.4, 0.3, back + 0.6], material: 'stage' });
     F.boxes.push({ min: [-1.58, 0.58, back], max: [1.58, Math.min(3.04, L.height - 0.08), back + 0.03], material: 'black' });

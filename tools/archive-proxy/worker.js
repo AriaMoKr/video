@@ -1,16 +1,17 @@
-// The archive proxy: a Cloudflare Worker that relays the classic TV episodes the room plays from
-// archive.org, with the CORS headers archive.org's video servers don't send, so the page may draw
-// a video into WebGL (a THREE.VideoTexture on the room's screens, in VR too). Without them a video
-// plays only as itself on the page: its frames taint WebGL, and with crossOrigin it doesn't load.
-// vrlbry's tools/zim-proxy/worker.js, for video.
+// The archive proxy: a Cloudflare Worker that relays the classic TV episodes and the newsreels the
+// room plays from archive.org, with the CORS headers archive.org's video servers don't send, so the
+// page may draw a video into WebGL (a THREE.VideoTexture on the room's screens, in VR too). Without
+// them a video plays only as itself on the page: its frames taint WebGL, and with crossOrigin it
+// doesn't load. vrlbry's tools/zim-proxy/worker.js, for video.
 //
 // GET /download/<item>/<file> with a Range header, as a <video crossorigin> asks: archive.org's
 // answer (206, the part), streamed through. Only the video files (.mp4, .webm, .ogv) of items in
-// archive.org's classic_tv collection (or one of its decades, classic_tv_1950s and so on) that are
-// marked public domain: each item's metadata is read once and the answer kept for a while, and
-// anything else is refused, so it relays nothing else and goes nowhere else. The page uses it when
-// config.js names it (ROOM.videoProxy, or ?videoproxy=), and plays a video straight from
-// archive.org, on the page, when it fails.
+// archive.org's classic_tv collection (or one of its decades, classic_tv_1950s and so on) or in its
+// universal_newsreels (which Universal gave to the public in 1976) that are marked public domain:
+// each item's metadata is read once and the answer kept for a while, and anything else is refused,
+// so it relays nothing else and goes nowhere else. The page uses it when config.js names it
+// (ROOM.videoProxy, or ?videoproxy=), and plays a video straight from archive.org, on the page,
+// when it fails.
 //
 // Only the pages of the sites in ALLOWED_ORIGINS (wrangler.toml) may use it: a browser names the
 // page's origin in every cross-origin request, so another site's page cannot spend this one's
@@ -31,8 +32,8 @@ export const ARCHIVE = 'https://archive.org';
 /** /download/<item>/<file>: an item's identifier, and a video file at its top. */
 const FILE_PATH = /^\/download\/([A-Za-z0-9._-]+)\/([^/]+\.(?:mp4|m4v|webm|ogv))$/i;
 const RANGE = /^bytes=(\d+)-(\d*)$/;
-/** The collections whose items it relays: classic_tv, and its decades. */
-const COLLECTION = /^classic_tv(?:_\d{4}s)?$/;
+/** The collections whose items it relays: classic_tv and its decades, and Universal's newsreels. */
+const COLLECTION = /^(?:classic_tv(?:_\d{4}s)?|universal_newsreels)$/;
 /** What marks an item public domain on archive.org (its licenseurl): Creative Commons' mark, CC0, or the old dedication. */
 const PUBLIC_DOMAIN = /^https?:\/\/creativecommons\.org\/(?:publicdomain\/(?:mark|zero)\/|licenses\/publicdomain\/?)/;
 
@@ -74,12 +75,13 @@ export function allowOrigin(origin, allowed) {
 
 /**
  * Whether an item's metadata (archive.org's /metadata/<id>/metadata `result`) lets it be relayed:
- * in classic_tv or one of its decades, and marked public domain. Returns null when it may, else why not.
+ * in classic_tv (or one of its decades) or universal_newsreels, and marked public domain. Returns
+ * null when it may, else why not.
  * @param {{ collection?: string | string[], licenseurl?: string } | null | undefined} md
  */
 export function refusal(md) {
   if (!md || typeof md !== 'object') return 'no such item';
-  if (![].concat(md.collection ?? []).some((c) => COLLECTION.test(String(c)))) return 'not in classic_tv';
+  if (![].concat(md.collection ?? []).some((c) => COLLECTION.test(String(c)))) return 'not in classic_tv or universal_newsreels';
   if (!PUBLIC_DOMAIN.test(String(md.licenseurl ?? ''))) return 'not marked public domain';
   return null;
 }
@@ -145,7 +147,7 @@ export async function handle(request, {
   }
   if (request.method !== 'GET' && request.method !== 'HEAD') return done(answer(405, 'only GET and HEAD', { ...CORS, allow: 'GET, HEAD, OPTIONS' }), { refused: 'method' });
   const m = FILE_PATH.exec(url.pathname);
-  if (!m || url.pathname.includes('..')) return done(answer(404, 'only the video files of archive.org\'s classic TV: /download/<item>/<file>.mp4', CORS), { refused: 'path' });
+  if (!m || url.pathname.includes('..')) return done(answer(404, 'only the video files of archive.org\'s classic TV and newsreels: /download/<item>/<file>.mp4', CORS), { refused: 'path' });
   const [, id, file] = m;
   entry.item = id;
   try {

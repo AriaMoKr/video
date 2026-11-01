@@ -148,7 +148,7 @@ export class RoomPanel extends CanvasPanel {
     g.fillRect(32, 602, W - 64, 2);
     g.fillStyle = '#b9a98d';
     /** @type {[string, number][]} */
-    const about = [['From archive.org’s Classic TV collection', 640], ['Public domain, streamed from the Internet Archive', 672], ['Captions are archive.org’s speech to text', 704]];
+    const about = [['From archive.org’s Classic TV and Universal Newsreels', 640], ['Public domain, streamed from the Internet Archive', 672], ['Captions are archive.org’s speech to text', 704]];
     for (const [text, y] of about) {
       fitFont(g, text, W - 64, 18);
       g.fillText(text, W / 2, y);

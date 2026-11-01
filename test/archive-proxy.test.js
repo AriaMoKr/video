@@ -1,6 +1,6 @@
 // The archive proxy (tools/archive-proxy/worker.js): it relays parts of the video files of
-// archive.org's public-domain classic TV, with CORS, for the pages of the sites only, and nothing
-// else.
+// archive.org's public-domain classic TV and newsreels, with CORS, for the pages of the sites only,
+// and nothing else.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -49,14 +49,17 @@ test('it answers a preflight, and refuses what is not a part of a video file of 
   assert.equal(refused.headers.get('access-control-allow-origin'), '*', 'a page can read why');
 });
 
-test('it relays only items in classic_tv or one of its decades that are marked public domain', async () => {
+test('it relays only items in classic_tv or one of its decades, or in universal_newsreels, that are marked public domain', async () => {
   assert.equal(refusal(PD), null);
   assert.equal(refusal({ collection: 'classic_tv', licenseurl: 'http://creativecommons.org/publicdomain/mark/1.0/' }), null);
   assert.equal(refusal({ collection: ['classic_tv_1970s'], licenseurl: 'https://creativecommons.org/publicdomain/zero/1.0/' }), null);
+  assert.equal(refusal({ collection: ['universal_newsreels', 'newsandpublicaffairs'], licenseurl: PD.licenseurl }), null, 'a newsreel: 1958-02-03_First_US_Satellite_Launched');
   assert.equal(refusal({ collection: ['classic_tv'] }), 'not marked public domain', 'no licence: Bonanza_-_The_Trail_Gang');
+  assert.equal(refusal({ collection: ['universal_newsreels'] }), 'not marked public domain', 'the few newsreels not marked');
   assert.equal(refusal({ collection: ['classic_tv'], licenseurl: 'http://creativecommons.org/licenses/by-nc/3.0/' }), 'not marked public domain');
-  assert.equal(refusal({ collection: ['feature_films'], licenseurl: PD.licenseurl }), 'not in classic_tv');
-  assert.equal(refusal({ collection: ['classic_tv_commercials'], licenseurl: PD.licenseurl }), 'not in classic_tv');
+  for (const other of ['feature_films', 'classic_tv_commercials', 'newsandpublicaffairs', 'universal_newsreels_extra']) {
+    assert.equal(refusal({ collection: [other], licenseurl: PD.licenseurl }), 'not in classic_tv or universal_newsreels', other);
+  }
   assert.equal(refusal(undefined), 'no such item');
   const { fetch, asked } = archive({ items: { Bonanza_x: { collection: ['classic_tv'] } } });
   const items = new Map();

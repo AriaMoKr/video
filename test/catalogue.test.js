@@ -36,8 +36,11 @@ test('each episode has its still and, where it has captions, them; and nothing l
     const jpg = readFileSync(new URL(e.still, PUBLIC));
     assert.ok(jpg[0] === 0xff && jpg[1] === 0xd8, `${e.id}: a JPEG`);
     if (e.captions) {
+      // Four a minute at least, as long as a newsreel or an episode, and words in them: the speech
+      // to text can make a cue of "..." over music, or a file of none over a silent film.
       const cues = parseVtt(readFileSync(new URL(e.captions, PUBLIC), 'utf8'));
-      assert.ok(cues.length > 20, `${e.id}: ${cues.length} cues`);
+      assert.ok(cues.length >= 4 * e.minutes, `${e.id}: ${cues.length} cues in ${e.minutes} min`);
+      assert.ok(cues.filter((c) => /\p{L}/u.test(c.text)).length >= cues.length * 0.8, `${e.id}: cues without words`);
     }
   }
   const named = new Set(episodes.flatMap((e) => [e.still, e.captions]).filter(Boolean));
@@ -67,6 +70,7 @@ test('names, and where the video and its page are', () => {
   // Every episode's video is one the proxy relays (its path matches, and its item is allowed).
   for (const ep of episodes) assert.match(new URL(videoUrl(ep, 'https://p.example/')).pathname, /^\/download\/[A-Za-z0-9._-]+\/[^/]+\.(?:mp4|m4v|webm|ogv)$/i);
   assert.equal(refusal({ collection: ['classic_tv'], licenseurl: 'http://creativecommons.org/publicdomain/mark/1.0/' }), null);
+  assert.equal(refusal({ collection: ['universal_newsreels'], licenseurl: 'http://creativecommons.org/licenses/publicdomain/' }), null);
 });
 
 test('the proxy: config.js, or ?videoproxy= to try another, or none', () => {

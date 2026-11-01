@@ -10,6 +10,14 @@
 // government's (The Big Picture, Vision USA). tools/catalogue.mjs reads each one's metadata and
 // writes public/catalogue/ from it.
 //
+// After each decade's shows, newsreels from archive.org's universal_newsreels
+// (https://archive.org/details/universal_newsreels): Universal gave its newsreels to the public in
+// 1976, and their film to the National Archives. Only those marked public domain, and of those only
+// stories fit for the whole family (no war footage) that have their sound, a video browsers play
+// (many have only older formats) and captions that follow it. Each is titled with its headline, or
+// with the line under it where the headline says little, or for what it shows where archive.org
+// gives neither.
+//
 // Each: the item's id, the show and the episode's title as the room shows them, the year it was
 // first shown where it is known (else the decade alone), and, where the tool's own choice is not
 // the right one, `file` (the video) or `still` (the frame on its tape, in seconds), and
@@ -31,6 +39,11 @@ export const PICKS = [
   { id: 'S1E12-Life_Of_Riley-12_20_1949_-_Juniors_Birthday_Party', show: 'The Life of Riley', title: "Junior's Birthday Party", decade: '1940s', year: 1949 },
   { id: 'Public_Prosecutor--Missing_Hour', show: 'Public Prosecutor', title: 'The Case of the Missing Hour', decade: '1940s', year: 1947 },
   { id: 'Public_Prosecutor--Dead_Mans_Voice', show: 'Public Prosecutor', title: "The Case of the Dead Man's Voice", decade: '1940s', year: 1948 },
+  { id: '1945-12-10_Christmas_Brings_Joy_To_Everyone', show: 'Universal Newsreel', title: 'Christmas Brings Joy to Everyone', decade: '1940s', year: 1945 },
+  { id: '1946-01-31_Radar_makes_Round_Trip_To_Moon', show: 'Universal Newsreel', title: 'Radar Makes Round Trip to Moon', decade: '1940s', year: 1946 },
+  { id: '1946-06-10_Allied_Victory_Parade', show: 'Universal Newsreel', title: 'Allied Victory Parade', decade: '1940s', year: 1946 },
+  { id: '1946-08-19_President_on_Vacation', show: 'Universal Newsreel', title: 'President on Vacation', decade: '1940s', year: 1946, still: 90 },
+  { id: '1946-11-21_White_Sands_NM_V-2_rocket', show: 'Universal Newsreel', title: 'V-2 Rocket Films the Earth', decade: '1940s', year: 1946, still: 60 },
 
   { id: 'Mama1950', show: 'Mama', title: "Mama's Bad Day", decade: '1950s', year: 1950 },
   { id: 'Cavalcade_Of_Stars', show: 'Cavalcade of Stars', title: 'Jackie Gleason and the Honeymooners', decade: '1950s', year: 1951 },
@@ -61,6 +74,11 @@ export const PICKS = [
   { id: 'OzzieAndHarriet-BusyChristmas', show: 'Ozzie and Harriet', title: 'Busy Christmas', decade: '1950s' },
   { id: 'You_Bet_Your_Life_Groucho', show: 'You Bet Your Life', title: 'With Groucho Marx', decade: '1950s' },
   { id: 'OSB-02_Night_Of_April_14th', show: 'One Step Beyond', title: 'Night of April 14th', decade: '1950s', year: 1959 },
+  { id: '1957-10-07_New_Moon', show: 'Universal Newsreel', title: 'Reds Launch First Space Satellite', decade: '1950s', year: 1957, still: 40 },
+  { id: '1958-02-03_First_US_Satellite_Launched', show: 'Universal Newsreel', title: 'First U.S. Satellite Launched!', decade: '1950s', year: 1958 },
+  { id: '1958-03-17_Brussels_Worlds_Fair', show: 'Universal Newsreel', title: "Brussels World's Fair", decade: '1950s', year: 1958, still: 50 },
+  { id: '1958-08-11_A-Sub_Epic', show: 'Universal Newsreel', title: 'Nautilus Pioneers North Pole Seaway', decade: '1950s', year: 1958 },
+  { id: '1959-03-16_Aloha_Hawaii', show: 'Universal Newsreel', title: 'Aloha Hawaii', decade: '1950s', year: 1959 },
 
   { id: 'Bonanza_pd', show: 'Bonanza', title: 'San Francisco', decade: '1960s', year: 1960, file: 'Bonanza s01e28.mp4' },
   { id: 'Bonanza-TheAbductionEp2x08', show: 'Bonanza', title: 'The Abduction', decade: '1960s', year: 1960 },
@@ -91,6 +109,11 @@ export const PICKS = [
   { id: 'OurHeritage_', show: 'The Big Picture', title: 'Our Great American Heritage', decade: '1960s', still: 300, captions: false },
   { id: 'TheBigPicture723', show: 'The Big Picture', title: 'When the Chips Are Down', decade: '1960s', year: 1968, still: 210 },
   { id: 'DDayAnniversary', show: 'The Big Picture', title: 'D-Day Anniversary', decade: '1960s', year: 1969, still: 1470 },
+  { id: '1960-07-21_missile_milestone', show: 'Universal Newsreel', title: 'First Polaris Firing by Submerged U-Boat', decade: '1960s', year: 1960 },
+  { id: '1962-07-23_First_Lady_At_Play', show: 'Universal Newsreel', title: 'First Lady at Play', decade: '1960s', year: 1962, still: 30 },
+  { id: '1963-11-14_Space_Movie', show: 'Universal Newsreel', title: 'Camera Records Missile in Flight', decade: '1960s', year: 1963, still: 40 },
+  { id: '1964-03-02_New_York_Worlds_Fair', show: 'Universal Newsreel', title: "New York World's Fair", decade: '1960s', year: 1964 },
+  { id: '1964-10-26_Olympics_End', show: 'Universal Newsreel', title: 'Olympics End', decade: '1960s', year: 1964 },
 
   { id: 'TheBigPicture-USArmyinSpaceandUndertheSea', show: 'The Big Picture', title: 'The Army in Space and Under the Sea', decade: '1970s', year: 1971 },
   { id: 'FortBliss', show: 'The Big Picture', title: 'Fort Bliss, Heart of Army Air Defense', decade: '1970s', year: 1972, still: 300 },
