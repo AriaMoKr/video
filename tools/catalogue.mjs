@@ -7,8 +7,8 @@
 //   captions/<id>.vtt  its captions, archive.org's speech to text, where the item has them (and its
 //                      pick doesn't say they are no use)
 // Each item is checked as the archive proxy checks it (worker.js refusal: in classic_tv or one of
-// its decades, universal_newsreels or prelinger and marked public domain, or listed by name), and
-// its video chosen: an mp4 that browsers play (h.264, or the upload itself), the one its captions
+// its decades, universal_newsreels or prelinger and marked public domain, or listed by name), its
+// pick's kind against where it is (kindsOf), and its video chosen: an mp4 that browsers play (h.264, or the upload itself), the one its captions
 // were made from where there is one. Only the video itself is not copied: the page streams it from
 // archive.org through the proxy.
 //   node tools/catalogue.mjs [--only <id>]
@@ -18,7 +18,7 @@ import { join } from 'node:path';
 import { parseArgs } from 'node:util';
 import { PUBLIC } from './serve.mjs';
 import { PICKS } from './picks.js';
-import { refusal } from './archive-proxy/worker.js';
+import { LISTED, refusal } from './archive-proxy/worker.js';
 
 const ARCHIVE = 'https://archive.org';
 const OUT = join(PUBLIC, 'catalogue');
@@ -60,6 +60,20 @@ export function chooseFiles(files, named) {
   return { video, captions: captioned(video) ?? (named ? null : captions[0] ?? null) };
 }
 
+/**
+ * The kinds (public/js/catalogue.js KINDS) an item's pick may say it is, by where it is: newsreels
+ * from universal_newsreels, short films from the Prelinger Archives, television from classic_tv;
+ * a film the proxy lists by name is a silent film or a cartoon.
+ * @param {{ identifier?: string, collection?: string | string[] }} md
+ */
+export function kindsOf(md) {
+  if (LISTED.has(String(md.identifier))) return ['silent', 'cartoon'];
+  const collections = [].concat(md.collection ?? []).map(String);
+  if (collections.includes('universal_newsreels')) return ['newsreel'];
+  if (collections.includes('prelinger')) return ['film'];
+  return ['tv'];
+}
+
 async function get(url, type = 'json') {
   for (let attempt = 1; ; attempt++) {
     try {
@@ -77,6 +91,8 @@ async function catalogue(pick) {
   const item = await get(`${ARCHIVE}/metadata/${pick.id}`);
   const why = refusal(item.metadata);
   if (why) throw new Error(`${pick.id}: ${why}`);
+  const kind = pick.kind ?? 'tv';
+  if (!kindsOf(item.metadata).includes(kind)) throw new Error(`${pick.id}: not a ${kind}, by where it is: ${kindsOf(item.metadata).join(' or ')}`);
   const chosen = chooseFiles(item.files ?? [], pick.file);
   if (!chosen) throw new Error(`${pick.id}: no video a browser plays`);
   const { video } = chosen;
@@ -99,6 +115,7 @@ async function catalogue(pick) {
     show: pick.show,
     title: pick.title,
     decade: pick.decade,
+    kind,
     year: pick.year ?? null,
     file: video.name,
     minutes: Math.round(length / 60),

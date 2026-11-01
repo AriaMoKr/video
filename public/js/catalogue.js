@@ -3,16 +3,27 @@
 // and the tests.
 
 export const DECADES = ['1920s', '1930s', '1940s', '1950s', '1960s', '1970s'];
+/** The kinds of video, in their order in each decade on the shelves: television first, the newsreels last. */
+export const KINDS = ['tv', 'silent', 'cartoon', 'film', 'newsreel'];
+/** What each kind is called: one of them (on its tape), and all of them (over them in the card's list). */
+export const KIND_NAMES = {
+  tv: ['TV', 'Television'],
+  silent: ['Silent film', 'Silent films'],
+  cartoon: ['Cartoon', 'Cartoons'],
+  film: ['Short film', 'Short films'],
+  newsreel: ['Newsreel', 'Newsreels'],
+};
 /** archive.org, where the videos are: through the archive proxy (config.js videoProxy), or straight. */
 export const ARCHIVE = 'https://archive.org/';
 
 /**
- * @typedef {{ id: string, show: string, title: string, decade: string, year: number | null, file: string,
+ * @typedef {{ id: string, show: string, title: string, decade: string, kind: string, year: number | null, file: string,
  *   minutes: number, width: number | null, height: number | null, still: string, captions: string | null }} Episode
  */
 
 /**
- * The episodes in episodes.json that can be shown: those with what the room needs, in its order.
+ * The episodes in episodes.json that can be shown: those with what the room needs, in its order,
+ * each of a kind (KINDS: television, if it says none the room knows).
  * @param {unknown} json
  * @returns {Episode[]}
  */
@@ -20,7 +31,8 @@ export function readCatalogue(json) {
   const list = /** @type {any} */ (json)?.episodes;
   if (!Array.isArray(list)) return [];
   return list.filter((e) => e && typeof e.id === 'string' && /^[A-Za-z0-9._-]+$/.test(e.id) && typeof e.file === 'string' && /\.(mp4|m4v|webm|ogv)$/i.test(e.file)
-    && typeof e.show === 'string' && typeof e.title === 'string' && DECADES.includes(e.decade) && typeof e.still === 'string');
+    && typeof e.show === 'string' && typeof e.title === 'string' && DECADES.includes(e.decade) && typeof e.still === 'string')
+    .map((e) => (KINDS.includes(e.kind) ? e : { ...e, kind: 'tv' }));
 }
 
 /** "Dragnet: The Big Little Jesus (1953)", the year or else the decade. */

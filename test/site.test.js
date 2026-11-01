@@ -145,14 +145,21 @@ test("every button of the room's panel and of the bars under the screens is a co
     assert.deepEqual([...o.modeChoices.keys()], [...MODES]);
     o.setMode('den');
     assert.deepEqual([...o.modeChoices].filter(([, i]) => i.checked).map(([m]) => m), ['den']);
-    // The episodes, by decade, each a button; the one showing is marked, and its page linked.
+    // The episodes, by decade and in each by kind (named, its icon for the eye only), each a
+    // button; the one showing is marked, and its page linked. The icons are SVG, whose elements
+    // the helper's will do for.
+    document.createElementNS = (ns, tag) => document.createElement(tag);
     const episodes = [
-      { id: 'a', show: 'A', title: 'One', decade: '1950s', year: 1951 },
-      { id: 'b', show: 'B', title: 'Two', decade: '1940s', year: null },
+      { id: 'a', show: 'A', title: 'One', decade: '1950s', kind: 'tv', year: 1951 },
+      { id: 'b', show: 'B', title: 'Two', decade: '1940s', kind: 'newsreel', year: null },
+      { id: 'c', show: 'C', title: 'Three', decade: '1940s', kind: 'cartoon', year: 1942 },
     ];
     o.setEpisodes(episodes);
-    assert.equal(o.episodeButtons.length, 2);
-    assert.equal(o.episodes.textContent, '1940sB: Two (1940s)1950sA: One (1951)');
+    assert.equal(o.episodeButtons.length, 3);
+    assert.equal(o.episodes.textContent, '1940sCartoonsC: Three (1942)NewsreelsB: Two (1940s)1950sTelevisionA: One (1951)');
+    const icons = o.episodes.findAll((n) => n.tagName === 'SVG');
+    assert.equal(icons.length, 3);
+    for (const svg of icons) assert.equal(svg.getAttribute('aria-hidden'), 'true');
     did.length = 0;
     o.episodeButtons[1].fire('click');
     assert.deepEqual(did, ['episode:1']);

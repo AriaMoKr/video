@@ -3,7 +3,7 @@
 // screen readers and browsers without WebGL), its description, what the room is (its four modes,
 // modes.js) and what is showing in it (the episode, a link to it on archive.org, how it's going,
 // and Play / Pause, Next, Captions and Stop, with every episode on the shelves in a list to choose
-// from), what hangs on its walls (each one that leads somewhere a link there, the rest buttons
+// from, by decade and kind, each kind with an icon drawn as its tapes are), what hangs on its walls (each one that leads somewhere a link there, the rest buttons
 // that walk up to them), Start / Leave shared session (and, in one, how it's going), and Settings,
 // the control panel's choices: motion (common/access.js, for a screen too), how to move and turn in
 // VR, the comfort vignette and seated mode. The view is the page's <main>, with a hint on how to
@@ -16,7 +16,7 @@
 // (common's tv.js) the remote reaches only the card, so Wave is in it, and there is nothing to copy
 // a link to: the invite link is shown to type on another device. Fullscreen and Enter VR are not
 // offered there (main.js).
-import { DECADES, episodeName } from './catalogue.js';
+import { DECADES, KINDS, KIND_NAMES, episodeName } from './catalogue.js';
 import { MODES, MODE_NAMES } from './modes.js';
 
 function el(tag, attrs = {}, ...children) {
@@ -28,6 +28,33 @@ function el(tag, attrs = {}, ...children) {
   }
   for (const c of children) e.append(c);
   return e;
+}
+
+/** An eight-pointed star round (8, 8), for the cartoons. */
+const STAR = `M${Array.from({ length: 16 }, (_, k) => {
+  const a = (k / 16) * Math.PI * 2 - Math.PI / 2, r = k % 2 ? 3.2 : 6.6;
+  return `${(8 + r * Math.cos(a)).toFixed(1)} ${(8 + r * Math.sin(a)).toFixed(1)}`;
+}).join('L')}Z`;
+/** Each kind's sign beside its name in the episodes' list, drawn as its tapes are (covers.js): [tag, attributes] on a 16 × 16 grid. */
+const KIND_ICONS = {
+  tv: [['rect', { x: 1.5, y: 4.5, width: 13, height: 10, rx: 2 }], ['rect', { x: 3.5, y: 6.5, width: 7, height: 6, rx: 1 }], ['path', { d: 'M5 1.5l3 3 3-3M12.5 8v.01M12.5 11v.01' }]],
+  silent: [['rect', { x: 1.5, y: 2.5, width: 13, height: 11, rx: 1 }], ['ellipse', { cx: 8, cy: 8, rx: 4, ry: 3 }]],
+  cartoon: [['path', { d: STAR }]],
+  film: [['rect', { x: 1.5, y: 2.5, width: 13, height: 11, rx: 1 }], ['rect', { x: 5, y: 5, width: 6, height: 6 }], ['path', { d: 'M3.25 4.5v.01M3.25 8v.01M3.25 11.5v.01M12.75 4.5v.01M12.75 8v.01M12.75 11.5v.01' }]],
+  newsreel: [['path', { d: 'M2.5 2.5h11v11h-11z' }], ['path', { d: 'M4.5 5h7M4.5 8h3M4.5 10.5h3M9.5 8h2v2.5h-2z' }]],
+};
+
+/** A kind's icon (KIND_ICONS), in the text's colour, for the eye only: its name is beside it. */
+function kindIcon(kind) {
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  for (const [k, v] of Object.entries({ viewBox: '0 0 16 16', fill: 'none', stroke: 'currentColor', 'stroke-width': 1.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true', focusable: 'false' })) svg.setAttribute(k, String(v));
+  for (const [tag, attrs] of KIND_ICONS[kind] ?? []) {
+    const part = document.createElementNS(NS, tag);
+    for (const [k, v] of Object.entries(attrs)) part.setAttribute(k, String(v));
+    svg.append(part);
+  }
+  return svg;
 }
 
 // tv: walking with a remote, and a line for TalkBack, which keeps the arrows (the view is described
@@ -302,19 +329,22 @@ export class Overlay {
     for (const [m, input] of this.modeChoices) if (input.checked !== (m === mode)) input.checked = m === mode;
   }
 
-  /** The episodes to choose from (catalogue.js), by decade, as on the shelves. */
+  /** The episodes to choose from (catalogue.js), by decade and in each by kind, as on the shelves. */
   setEpisodes(episodes) {
     this.episodeButtons = [];
     const groups = DECADES.map((decade) => {
-      const items = [];
-      episodes.forEach((e, i) => {
-        if (e.decade !== decade) return;
-        const b = el('button', { class: 'episode', type: 'button' }, episodeName(e));
-        b.addEventListener('click', () => this.onEpisode(i));
-        this.episodeButtons[i] = b;
-        items.push(el('li', {}, b));
+      const kinds = KINDS.flatMap((kind) => {
+        const items = [];
+        episodes.forEach((e, i) => {
+          if (e.decade !== decade || e.kind !== kind) return;
+          const b = el('button', { class: 'episode', type: 'button' }, episodeName(e));
+          b.addEventListener('click', () => this.onEpisode(i));
+          this.episodeButtons[i] = b;
+          items.push(el('li', {}, b));
+        });
+        return items.length ? [el('h3', { class: 'kind' }, kindIcon(kind), KIND_NAMES[kind][1]), el('ul', {}, ...items)] : [];
       });
-      return items.length ? el('section', { 'aria-label': decade }, el('h2', { class: 'decade' }, decade), el('ul', {}, ...items)) : null;
+      return kinds.length ? el('section', { 'aria-label': decade }, el('h2', { class: 'decade' }, decade), ...kinds) : null;
     }).filter(Boolean);
     this.episodes.replaceChildren(...groups);
   }

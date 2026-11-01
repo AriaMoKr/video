@@ -68,7 +68,8 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   (`furnish(L, mode, episodes)`) into `L.furniture`: boxes, faces (`{kind, id, use, axis, at, ...}`:
   tapes, screens, bars, signs, the room panel), obstacles (rects, `MARGIN` from them), seats
   (`{x, z, yaw, out}`) and screens (`{id, decade, face, bar}`). The tapes' shelves (`SHELF`,
-  `shelves`), a bay to a decade, in the catalogue's order as one reads them facing the wall: in the
+  `shelves`), a bay to a decade, in the catalogue's order as one reads them facing the wall (so
+  each kind's together, as `public/catalogue/` below has them): in the
   store and the den down the left wall, as many rows as it takes (four to eight, six now) to end
   0.3 short of the back wall, room for about fifty more; in the screening room nine rows, closer
   together (`rowH`): the 1920s and 1930s on the doorway's wall beside the room panel, the 1940s and
@@ -88,13 +89,18 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   on `covers.js`'s atlas, the signs, the screens (a `VideoTexture` or a card), the bar, the
   captions strip, the hover frame and the screening room's curtains; `setDim` (k**2.2, colours
   being linear) and `setCurtains`. `covers.js`: the canvas textures (tape covers, signs, a screen's
-  card, the captions) from the stills. `roompanel.js`: the room panel (`RoomPanel`, at -x beside
+  card, the captions) from the stills; a cover in its decade's colour (`DECADE_COLORS`), made as
+  its kind was shown (`KIND_COVERS`: TV on a set's glass, a silent film an intertitle with an oval,
+  a cartoon a ring on a sunburst, a short film a frame on a strip of film, a newsreel a newspaper's
+  front page), its kind, year and length along its foot. `roompanel.js`: the room panel (`RoomPanel`, at -x beside
   the doorway, across it from the control panel) and a screen's bar (`ScreenBar`), redrawn only on a change.
 - `player.js`: one `<video crossorigin>` through the archive proxy into a `VideoTexture`, with
   captions (`cueAt`); where that fails, out of VR it plays the direct archive.org URL on the page
   (`section.player`, `<video controls>` and a `<track>`), in VR it says so; a blocked autoplay waits
-  for Play. `catalogue.js`: `readCatalogue` of `public/catalogue/episodes.json`, `proxyOf`
-  (`?videoproxy=`, `none`), `videoUrl`, `detailsUrl`, `parseVtt`, `cueAt`, `clock`.
+  for Play. `catalogue.js`: `DECADES`, `KINDS` (tv, silent, cartoon, film, newsreel: their order in
+  a decade) and `KIND_NAMES` (one, all), `readCatalogue` of `public/catalogue/episodes.json` (a kind
+  it doesn't know is tv), `proxyOf` (`?videoproxy=`, `none`), `videoUrl`, `detailsUrl`, `parseVtt`,
+  `cueAt`, `clock`.
 - `scene.js` builds the room as a few merged meshes with light baked into vertex colours (`bake.js`
   and `builder.js`, the hallway's): the lamps, the window's daylight and the doorway's glow. The
   window's glass is common's `sky.js` (`skyMaterial`, turned by `skyYaw`); the doorway is common's
@@ -131,7 +137,8 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   each piece leads, `pieceHref`, else a button, `onPiece`), Start / Leave shared session, in
   a session its status and the visitor's name (`onName`), and Settings with the panel's choices as
   radio buttons and checkboxes; before them, in the room, the modes as radios, what is showing,
-  Play, Next, Captions, Stop and the episodes by decade: `setMode`, `setEpisodes`, `setShowing`,
+  Play, Next, Captions, Stop and the episodes by decade, and in each by kind under its name and its
+  icon (`KIND_ICONS`, drawn as its tapes are, `aria-hidden`): `setMode`, `setEpisodes`, `setShowing`,
   `onMode`, `onPlayer`, `onEpisode`), the hint (`#hint`, kept clear of the buttons, `_placeHint`),
   the label beside the aiming dot (`setLabel`), Wave,
   Copy invite link, Fullscreen, Enter VR, the aiming dot, and toasts (`role="status"`, polite). With
@@ -160,8 +167,10 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   show shared in a session (`video:show`: mode, episode, playing, where, when; `shareShow`,
   `takeShow`), and the frame loop.
 - `public/catalogue/`: `episodes.json`, `stills/<id>.jpg` and `captions/<id>.vtt`, written by
-  `tools/catalogue.mjs` from `tools/picks.js` (132 picks, 1920s–1970s, each decade's newsreels after
-  its shows and films: public domain, checked as its opening says, and fit for the family, a
+  `tools/catalogue.mjs` from `tools/picks.js` (132 picks, 1920s–1970s, each decade's in the kinds'
+  order, its television, silent films, cartoons, short films, then newsreels, a pick's `kind` said
+  where it is not tv and checked by the tool against where its item is (`kindsOf`): public domain,
+  checked as its opening says, and fit for the family, a
   newsreel's every story, not only its first; the silent films' copies with no sound; a pick's `file`
   for one of an item's several episodes, with that file's own thumbs and captions, `still` where
   the tool's own frame was not right, and `captions: false` where archive.org's are no use) and

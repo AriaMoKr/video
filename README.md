@@ -34,12 +34,19 @@ that visit. The first visit is the video store.
 | **Screening room** | A screen across the far wall over a low stage, three rows of seats on either side of an aisle, and the tapes round the way in: on the doorway's wall and down both sides. While a show plays, the lights go down and the window's curtains close. |
 | **Decades gallery** | A TV set from each decade, styled for its time, from a 1920s televisor on a table to a 1970s set on its cart, each showing that decade's shows (a still from each in turn). Using one plays what it shows. |
 
+Each tape's sleeve is in its decade's colour, and made the way its kind was shown: a TV show on a
+television set's glass, a silent film as an intertitle with its picture in an oval, a cartoon in a
+ring on a sunburst, a short film as a frame on a strip of film, a newsreel as a newspaper's front
+page. Along its foot are its kind, its year and how long it runs. On the shelves each decade's
+tapes stand in that order: its television, then its silent films, cartoons and short films, then its
+newsreels.
+
 ## Watching
 
 - **Choose a tape**: click or tap it, point at it in VR and pull the trigger, or put the dot on it
   and press A (a gamepad) or OK (a TV remote). The room's screen plays it, with its name and the
-  time on the room's panel. The card's **Episodes** lists every episode by decade too, for a
-  keyboard or a screen reader.
+  time on the room's panel. The card's **Episodes** lists every episode too, for a keyboard or a
+  screen reader: by decade, and in each by kind, under its name and an icon drawn like its tapes.
 - **Under the screen** is a bar of buttons: Play or Pause, Next, Captions, Stop. The room's panel
   and the card have the same.
 - **Sit down** on a seat (the couch, the sofa, a seat in the screening room) the same way: you sit
@@ -230,7 +237,7 @@ automatic, so a later show is free only if it carried no notice, or if the US go
 
 The newsreels are Universal's, which it gave to the public in 1976 with their film to the National
 Archives, from archive.org's [Universal Newsreels](https://archive.org/details/universal_newsreels).
-There are 34, from 1933 to 1964, shelved after each decade's shows: stories fit for the whole
+There are 34, from 1933 to 1964, shelved after each decade's shows and films: stories fit for the whole
 family and no war footage (a reel's every story, not only its first), such as Roosevelt's
 inauguration, the coronation of George VI, the United Nations' charter signed, radar reaching the
 Moon, the first film of the Earth from a rocket, Sputnik and Explorer, the Nautilus under the North
@@ -250,8 +257,9 @@ Willie, Plane Crazy and The Skeleton Dance, all public domain 95 years after the
 three of Fleischer's Superman cartoons of 1941 and 1942, whose copyrights were not renewed. The silent
 films' copies have no sound at all: a score added since is not the film's, and may not be free.
 
-`tools/picks.js` lists them (the item, the show, the episode's title, the year, and where the tool
-would choose wrong, which of the item's videos, the frame for its tape, or no captions), and
+`tools/picks.js` lists them (the item, the show, the episode's title, its kind if it is not TV, the
+year, and where the tool would choose wrong, which of the item's videos, the frame for its tape, or
+no captions), and
 `node tools/catalogue.mjs` writes `public/catalogue/` from it and from archive.org's metadata: the
 page's `episodes.json`, a still of each (on its tape and its set), and its captions. These are
 committed (3.4 MB), so the page never searches archive.org. Only the videos come from archive.org,

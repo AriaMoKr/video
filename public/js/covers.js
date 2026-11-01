@@ -1,8 +1,10 @@
 // What the room's canvases show, painted once or when it changes, never per frame: the tapes'
-// covers (one atlas for every tape, a cell each: its decade's colour, the show, a still from it, the
-// episode and its year), the signs over the shelves and the sets (one atlas), a screen's picture
-// while nothing plays on it (a still and its name, or what to do), and the captions under a show.
+// covers (one atlas for every tape, a cell each: its decade's colour, made as its kind was shown,
+// the show, a still from it, the episode, its kind and its year), the signs over the shelves and
+// the sets (one atlas), a screen's picture while nothing plays on it (a still and its name, or what
+// to do), and the captions under a show.
 import * as THREE from 'three';
+import { KIND_NAMES } from './catalogue.js';
 import { GOLD, SANS, SERIF, enamel } from './textures.js';
 
 /** Each decade's colour, on its tapes' spines and covers, its sign and its shelf's label. */
@@ -129,41 +131,225 @@ export class CoverAtlas {
   }
 }
 
-/** One cover, COVER's size, at the origin: a case's sleeve in its decade's colour. */
+/**
+ * One cover, COVER's size, at the origin: a case's sleeve in its decade's colour, made as its kind
+ * (catalogue.js KINDS) was shown (KIND_COVERS), and along its bottom what it is and when.
+ */
 function drawCover(g, e, still) {
   const W = COVER.width, H = COVER.height, color = DECADE_COLORS[e.decade] ?? '#444';
+  g.save();
+  g.beginPath();
+  g.rect(0, 0, W, H);
+  g.clip();
   const grad = g.createLinearGradient(0, 0, 0, H);
   grad.addColorStop(0, color);
   grad.addColorStop(1, shade(color, 0.55));
   g.fillStyle = grad;
   g.fillRect(0, 0, W, H);
-  // The show's name across the top.
-  g.fillStyle = '#fff6e6';
   g.textAlign = 'center';
   g.textBaseline = 'middle';
-  fitFont(g, e.show, W - 20, 24, { weight: '700', family: SERIF, min: 15 });
-  const show = wrap(g, e.show, W - 16, 2);
-  show.forEach((line, k) => g.fillText(line, W / 2, (show.length === 1 ? 34 : 22) + k * 24));
-  // A still from it, framed.
-  g.fillStyle = 'rgba(0,0,0,0.5)';
-  g.fillRect(6, 62, W - 12, 144);
-  cover(g, still, 9, 65, W - 18, 138);
-  // The episode, and when.
-  g.fillStyle = '#f3e6cc';
-  fitFont(g, e.title, W - 16, 17, { weight: '600', min: 12 });
-  const title = wrap(g, e.title, W - 14, 2);
-  title.forEach((line, k) => g.fillText(line, W / 2, (title.length === 1 ? 228 : 218) + k * 19));
-  g.fillStyle = 'rgba(0,0,0,0.35)';
+  (KIND_COVERS[e.kind] ?? KIND_COVERS.tv)(g, e, still, color);
+  g.fillStyle = 'rgba(0,0,0,0.45)';
   g.fillRect(0, H - 20, W, 20);
   g.fillStyle = GOLD;
-  g.font = `600 13px ${SANS}`;
-  g.fillText(`${e.year ?? e.decade} · ${e.minutes} min`, W / 2, H - 10);
+  const text = `${(KIND_NAMES[e.kind] ?? KIND_NAMES.tv)[0]} · ${e.year ?? e.decade} · ${e.minutes} min`;
+  fitFont(g, text, W - 12, 13, { weight: '600', min: 10 });
+  g.fillText(text, W / 2, H - 10);
+  g.restore();
+}
+
+/** The cream of the sleeves' words, and the ink of a newspaper's. */
+const CREAM = '#fff6e6', INK = '#15120e';
+
+/**
+ * Each kind's sleeve over its decade's colour (drawCover's, which adds the bottom): the show's name
+ * across the top, a still from it in the middle, and the episode under it.
+ * @type {Record<string, (g: CanvasRenderingContext2D, e: any, still: HTMLImageElement | undefined, color: string) => void>}
+ */
+const KIND_COVERS = {
+  // Television: the picture on a set's rounded glass, two knobs and the speaker's slots beside it.
+  tv(g, e, still) {
+    lines(g, e.show, 34, { size: 24, min: 15, weight: '700', family: SERIF });
+    g.beginPath();
+    roundRect(g, 8, 60, 184, 148, 12);
+    g.fillStyle = '#1f1a16';
+    g.fill();
+    g.strokeStyle = 'rgba(255,246,230,0.22)';
+    g.lineWidth = 2;
+    g.stroke();
+    g.save();
+    g.beginPath();
+    roundRect(g, 16, 68, 140, 132, 18);
+    g.clip();
+    cover(g, still, 16, 68, 140, 132);
+    const sheen = g.createLinearGradient(16, 68, 110, 200);
+    sheen.addColorStop(0, 'rgba(255,255,255,0.22)');
+    sheen.addColorStop(0.4, 'rgba(255,255,255,0)');
+    g.fillStyle = sheen;
+    g.fillRect(16, 68, 140, 132);
+    g.restore();
+    for (const y of [94, 126]) {
+      g.beginPath();
+      g.arc(174, y, 8, 0, Math.PI * 2);
+      g.fillStyle = '#c9b58f';
+      g.fill();
+      g.fillStyle = '#3a2f25';
+      g.fillRect(173, y - 7, 2, 7);
+    }
+    g.fillStyle = 'rgba(201,181,143,0.6)';
+    for (let y = 150; y <= 192; y += 7) g.fillRect(166, y, 16, 3);
+    lines(g, e.title, 229, { size: 17, min: 12, color: '#f3e6cc' });
+  },
+
+  // A silent film: an intertitle, black in a ruled frame, the picture in an oval as the iris shows it.
+  silent(g, e, still) {
+    const W = COVER.width, H = COVER.height;
+    g.fillStyle = '#0c0b0a';
+    g.fillRect(10, 10, W - 20, H - 40);
+    g.strokeStyle = '#e9dfc9';
+    g.lineWidth = 2;
+    g.strokeRect(17, 17, W - 34, H - 54);
+    g.lineWidth = 1;
+    g.strokeRect(22, 22, W - 44, H - 64);
+    for (const [x, y] of [[17, 17], [W - 17, 17], [17, H - 37], [W - 17, H - 37]]) {
+      g.beginPath();
+      g.moveTo(x, y - 6);
+      g.lineTo(x + 6, y);
+      g.lineTo(x, y + 6);
+      g.lineTo(x - 6, y);
+      g.closePath();
+      g.fillStyle = '#e9dfc9';
+      g.fill();
+    }
+    lines(g, e.show, 44, { size: 19, min: 13, weight: 'italic 600', family: SERIF, color: '#e9dfc9', width: W - 52 });
+    // The oval, 140 × 112, darkening to its edge.
+    g.save();
+    g.translate(W / 2, 128);
+    g.scale(1, 0.8);
+    g.beginPath();
+    g.arc(0, 0, 70, 0, Math.PI * 2);
+    g.clip();
+    g.scale(1, 1.25);
+    cover(g, still, -70, -56, 140, 112);
+    g.scale(1, 0.8);
+    const iris = g.createRadialGradient(0, 0, 40, 0, 0, 70);
+    iris.addColorStop(0, 'rgba(12,11,10,0)');
+    iris.addColorStop(1, 'rgba(12,11,10,0.92)');
+    g.fillStyle = iris;
+    g.fillRect(-70, -70, 140, 140);
+    g.restore();
+    lines(g, e.title, 211, { size: 18, min: 12, weight: 'italic 600', family: SERIF, color: '#f5ecd8', width: W - 52 });
+  },
+
+  // A cartoon: the picture in a ring on a sunburst of its decade's colour, the words outlined.
+  cartoon(g, e, still, color) {
+    const W = COVER.width, cx = W / 2, cy = 134;
+    g.fillStyle = shade(color, 1.5);
+    for (let k = 0; k < 18; k += 2) {
+      g.beginPath();
+      g.moveTo(cx, cy);
+      g.arc(cx, cy, 300, (k / 18) * Math.PI * 2, ((k + 1) / 18) * Math.PI * 2);
+      g.closePath();
+      g.fill();
+    }
+    g.beginPath();
+    g.arc(cx, cy, 72, 0, Math.PI * 2);
+    g.fillStyle = CREAM;
+    g.fill();
+    g.lineWidth = 3;
+    g.strokeStyle = INK;
+    g.stroke();
+    g.save();
+    g.beginPath();
+    g.arc(cx, cy, 64, 0, Math.PI * 2);
+    g.clip();
+    cover(g, still, cx - 64, cy - 64, 128, 128);
+    g.restore();
+    g.beginPath();
+    g.arc(cx, cy, 64, 0, Math.PI * 2);
+    g.stroke();
+    lines(g, e.show, 34, { size: 24, min: 15, weight: 'italic 800', stroke: INK });
+    lines(g, e.title, 229, { size: 17, min: 12, weight: '700', stroke: INK });
+  },
+
+  // A short film: the picture a frame on a strip of film across the sleeve, its sprocket holes along both edges.
+  film(g, e, still) {
+    const W = COVER.width;
+    lines(g, e.show, 34, { size: 24, min: 15, weight: '700', family: SERIF });
+    g.fillStyle = '#121110';
+    g.fillRect(0, 60, W, 148);
+    g.fillStyle = '#ddd3bd';
+    for (let x = 4; x < W; x += 19) {
+      for (const y of [65, 194]) {
+        g.beginPath();
+        roundRect(g, x, y, 10, 9, 2);
+        g.fill();
+      }
+    }
+    g.fillStyle = '#2b2722';
+    g.fillRect(0, 80, 18, 110);
+    g.fillRect(W - 18, 80, 18, 110);
+    g.save();
+    g.beginPath();
+    roundRect(g, 26, 80, 148, 110, 4);
+    g.clip();
+    cover(g, still, 26, 80, 148, 110);
+    g.restore();
+    lines(g, e.title, 229, { size: 17, min: 12, color: '#f3e6cc' });
+  },
+
+  // A newsreel: a newspaper's front page, its masthead across the top, the picture a photograph in
+  // its margin and the headline under it.
+  newsreel(g, e, still) {
+    const W = COVER.width;
+    g.fillStyle = '#efe7d4';
+    g.fillRect(0, 0, W, 58);
+    lines(g, e.show.toUpperCase(), 26, { size: 22, min: 13, weight: '800', family: SERIF, color: INK, width: W - 20 });
+    g.fillStyle = INK;
+    g.fillRect(8, 50, W - 16, 2);
+    g.fillRect(8, 54, W - 16, 1);
+    g.fillStyle = '#efe7d4';
+    g.fillRect(10, 66, W - 20, 136);
+    cover(g, still, 14, 70, W - 28, 128);
+    lines(g, e.title.toUpperCase(), 228, { size: 16, min: 11, weight: '800', family: SERIF });
+  },
+};
+
+/**
+ * `text` across the sleeve in a line or two centred on y, as large as fits from `size` px down to
+ * `min` (outlined in `stroke` if given).
+ */
+function lines(g, text, y, { size, min, weight = '600', family = SANS, color = CREAM, width = COVER.width - 16, stroke = '' }) {
+  const words = String(text).split(/\s+/).filter(Boolean).join(' ');
+  let out = [], s = size;
+  for (; s >= min; s--) {
+    g.font = `${weight} ${s}px ${family}`;
+    out = wrap(g, words, width, 2);
+    if (out.join(' ') === words) break;
+  }
+  const lead = Math.max(s, min) * 1.1, top = y - ((out.length - 1) * lead) / 2;
+  out.forEach((line, k) => {
+    if (stroke) {
+      g.lineWidth = 4;
+      g.lineJoin = 'round';
+      g.strokeStyle = stroke;
+      g.strokeText(line, COVER.width / 2, top + k * lead);
+    }
+    g.fillStyle = color;
+    g.fillText(line, COVER.width / 2, top + k * lead);
+  });
+}
+
+/** A rounded rectangle into the path (a plain one where the browser has no roundRect). */
+function roundRect(g, x, y, w, h, r) {
+  if (g.roundRect) g.roundRect(x, y, w, h, r);
+  else g.rect(x, y, w, h);
 }
 
 /** A '#rrggbb' colour times k. */
 function shade(hex, k) {
   const n = parseInt(hex.slice(1), 16);
-  const c = [n >> 16, (n >> 8) & 255, n & 255].map((v) => Math.round(v * k));
+  const c = [n >> 16, (n >> 8) & 255, n & 255].map((v) => Math.min(255, Math.round(v * k)));
   return `rgb(${c.join(',')})`;
 }
 

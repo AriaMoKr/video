@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { PICKS } from '../tools/picks.js';
 import { ROOM } from '../public/js/config.js';
-import { ARCHIVE, DECADES, clock, cueAt, detailsUrl, episodeName, parseVtt, proxyOf, readCatalogue, videoUrl } from '../public/js/catalogue.js';
+import { ARCHIVE, DECADES, KINDS, KIND_NAMES, clock, cueAt, detailsUrl, episodeName, parseVtt, proxyOf, readCatalogue, videoUrl } from '../public/js/catalogue.js';
 import { refusal } from '../tools/archive-proxy/worker.js';
 
 const PUBLIC = new URL('../public/', import.meta.url);
@@ -21,13 +21,17 @@ test('every pick is in the catalogue, in order, and nothing else', () => {
     assert.equal(e.show, p.show);
     assert.equal(e.title, p.title);
     assert.equal(e.decade, p.decade);
+    assert.equal(json.episodes[i].kind, p.kind ?? 'tv', p.id);
     assert.equal(e.year, p.year ?? null);
     if (p.year) assert.equal(`${Math.floor(p.year / 10) * 10}s`, p.decade, p.id);
     assert.ok(e.minutes > 0, p.id);
   }
-  // Grouped by decade, as the shelves are.
-  const decades = episodes.map((e) => e.decade);
-  assert.deepEqual(decades, [...decades].sort((a, b) => DECADES.indexOf(a) - DECADES.indexOf(b)));
+  // Grouped by decade, as the shelves are, and in each decade by kind: its television first, its newsreels last.
+  const order = episodes.map((e) => DECADES.indexOf(e.decade) * KINDS.length + KINDS.indexOf(e.kind));
+  assert.deepEqual(order, [...order].sort((a, b) => a - b));
+  // Every kind named, and those the room shows each in it.
+  assert.deepEqual(Object.keys(KIND_NAMES), KINDS);
+  assert.deepEqual(KINDS.filter((k) => episodes.some((e) => e.kind === k)), KINDS);
 });
 
 test('each episode has its still and, where it has captions, them; and nothing left over', () => {
@@ -51,8 +55,11 @@ test('each episode has its still and, where it has captions, them; and nothing l
 });
 
 test('readCatalogue keeps only what the page can show', () => {
-  const good = { id: 'a_b-1.c', show: 'S', title: 'T', decade: '1950s', file: 'x y.mp4', still: 's.jpg' };
+  const good = { id: 'a_b-1.c', show: 'S', title: 'T', decade: '1950s', kind: 'newsreel', file: 'x y.mp4', still: 's.jpg' };
   assert.equal(readCatalogue({ episodes: [good] }).length, 1);
+  // A kind it doesn't know, or none, is television's.
+  assert.equal(readCatalogue({ episodes: [good] })[0].kind, 'newsreel');
+  for (const kind of [undefined, 'opera', 7]) assert.equal(readCatalogue({ episodes: [{ ...good, kind }] })[0].kind, 'tv', String(kind));
   for (const bad of [{ id: '../x' }, { id: 'a/b' }, { file: 'x.mkv' }, { decade: '1980s' }, { show: 1 }, { still: null }]) {
     assert.equal(readCatalogue({ episodes: [{ ...good, ...bad }] }).length, 0, JSON.stringify(bad));
   }

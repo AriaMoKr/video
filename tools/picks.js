@@ -10,7 +10,7 @@
 // government's (The Big Picture, Vision USA). tools/catalogue.mjs reads each one's metadata and
 // writes public/catalogue/ from it.
 //
-// After each decade's shows, newsreels from archive.org's universal_newsreels
+// After each decade's shows and films, newsreels from archive.org's universal_newsreels
 // (https://archive.org/details/universal_newsreels): Universal gave its newsreels to the public in
 // 1976, and their film to the National Archives. Only those marked public domain, and of those only
 // stories fit for the whole family (no war footage) that have their sound, a video browsers play
@@ -30,41 +30,40 @@
 // not the film's), and nothing burnt in over it.
 //
 // Each: the item's id, the show (or the star, studio or sponsor) and the episode's title as the
-// room shows them, the year it was first shown where it is known (else the decade alone), and,
-// where the tool's own choice is not the right one, `file` (the video) or `still` (the frame on its
-// tape, in seconds), and `captions: false` where archive.org's speech to text is no use.
+// room shows them, its kind where it is not television (public/js/catalogue.js KINDS: 'silent' and
+// 'cartoon' for the films the proxy lists, 'film' for the Prelinger Archives', 'newsreel'), the
+// year it was first shown where it is known (else the decade alone), and, where the tool's own
+// choice is not the right one, `file` (the video) or `still` (the frame on its tape, in seconds),
+// and `captions: false` where archive.org's speech to text is no use. Each decade's in the kinds'
+// order, as its tapes stand on the shelves: its television, its silent films, cartoons and short
+// films, then its newsreels.
 
-/** @typedef {{ id: string, show: string, title: string, decade: '1920s' | '1930s' | '1940s' | '1950s' | '1960s' | '1970s', year?: number, file?: string, still?: number, captions?: false }} Pick */
+/** @typedef {{ id: string, show: string, title: string, decade: '1920s' | '1930s' | '1940s' | '1950s' | '1960s' | '1970s', kind?: 'silent' | 'cartoon' | 'film' | 'newsreel', year?: number, file?: string, still?: number, captions?: false }} Pick */
 
 /** @type {Pick[]} */
 export const PICKS = [
-  { id: 'silent-safety-last', show: 'Harold Lloyd', title: 'Safety Last!', decade: '1920s', year: 1923, still: 3834 },
-  { id: 'yorkmba99_hotmail_TA', show: 'Buster Keaton', title: 'Three Ages', decade: '1920s', year: 1923, still: 3414 },
-  { id: 'SteamboatBillJr_201411', show: 'Buster Keaton', title: 'Steamboat Bill, Jr.', decade: '1920s', year: 1928 },
-  { id: 'the-gold-rush-film-1925', show: 'Charlie Chaplin', title: 'The Gold Rush', decade: '1920s', year: 1925 },
-  { id: 'steamboat-willie-16mm-film-scan-4k-lossless', show: 'Mickey Mouse', title: 'Steamboat Willie', decade: '1920s', year: 1928, still: 57 },
-  { id: 'PlaneCrazy_201511', show: 'Mickey Mouse', title: 'Plane Crazy', decade: '1920s', year: 1929 },
-  { id: 'the-skeleton-dance-1929', show: 'Silly Symphonies', title: 'The Skeleton Dance', decade: '1920s', year: 1929 },
-  { id: 'FindingH1929', show: 'Western Electric', title: 'Finding His Voice', decade: '1920s', year: 1929 },
+  { id: 'silent-safety-last', show: 'Harold Lloyd', title: 'Safety Last!', decade: '1920s', kind: 'silent', year: 1923, still: 3834 },
+  { id: 'yorkmba99_hotmail_TA', show: 'Buster Keaton', title: 'Three Ages', decade: '1920s', kind: 'silent', year: 1923, still: 3414 },
+  { id: 'SteamboatBillJr_201411', show: 'Buster Keaton', title: 'Steamboat Bill, Jr.', decade: '1920s', kind: 'silent', year: 1928 },
+  { id: 'the-gold-rush-film-1925', show: 'Charlie Chaplin', title: 'The Gold Rush', decade: '1920s', kind: 'silent', year: 1925 },
+  { id: 'steamboat-willie-16mm-film-scan-4k-lossless', show: 'Mickey Mouse', title: 'Steamboat Willie', decade: '1920s', kind: 'cartoon', year: 1928, still: 57 },
+  { id: 'PlaneCrazy_201511', show: 'Mickey Mouse', title: 'Plane Crazy', decade: '1920s', kind: 'cartoon', year: 1929 },
+  { id: 'the-skeleton-dance-1929', show: 'Silly Symphonies', title: 'The Skeleton Dance', decade: '1920s', kind: 'cartoon', year: 1929 },
+  { id: 'FindingH1929', show: 'Western Electric', title: 'Finding His Voice', decade: '1920s', kind: 'film', year: 1929 },
 
-  { id: 'Aroundth1937', show: 'Chevrolet', title: 'Around the Corner', decade: '1930s', year: 1937 },
-  { id: 'RideforC1937', show: 'Chevrolet', title: 'A Ride for Cinderella', decade: '1930s', year: 1937 },
-  { id: 'Breakfas1939', show: "Kellogg's", title: 'Breakfast Pals', decade: '1930s', year: 1939 },
-  { id: '1933-03-05_Extra_Special_Roosevelt_Inaugurated', show: 'Universal Newsreel', title: 'Roosevelt Inaugurated', decade: '1930s', year: 1933 },
-  { id: '1933-08-14_President_Visits_Foresters', show: 'Universal Newsreel', title: 'President Visits Foresters', decade: '1930s', year: 1933 },
-  { id: '1933-10-11_Farmer_Plays_Tune_With_Hands', show: 'Universal Newsreel', title: 'Farmer Plays Tune with Hands', decade: '1930s', year: 1933 },
-  { id: '1933-11-06_Ancient_Mexican_Dances_for_President', show: 'Universal Newsreel', title: 'Ancient Mexican Dances for President', decade: '1930s', year: 1933 },
-  { id: '1933-11_Ancient_Chinese_Field_Games', show: 'Universal Newsreel', title: 'Ancient Chinese Field Games', decade: '1930s', year: 1933 },
-  { id: '1935-02-11_Roosevelt_Addresses_Boy_Scouts', show: 'Universal Newsreel', title: 'Roosevelt Addresses Boy Scouts', decade: '1930s', year: 1935, still: 40 },
-  { id: '1935-03-04_FDR_Buys_First_Baby_Bond', show: 'Universal Newsreel', title: 'FDR Buys First Baby Bond', decade: '1930s', year: 1935 },
-  { id: '1937-05-18_The_Coronation_of_King_George_VI', show: 'Universal Newsreel', title: 'The Coronation of King George VI', decade: '1930s', year: 1937 },
-  { id: '1939-05-15_King_and_Queen_Leave_For_American_Tour', show: 'Universal Newsreel', title: 'King and Queen Leave Britain on American Tour', decade: '1930s', year: 1939, still: 25 },
+  { id: 'Aroundth1937', show: 'Chevrolet', title: 'Around the Corner', decade: '1930s', kind: 'film', year: 1937 },
+  { id: 'RideforC1937', show: 'Chevrolet', title: 'A Ride for Cinderella', decade: '1930s', kind: 'film', year: 1937 },
+  { id: 'Breakfas1939', show: "Kellogg's", title: 'Breakfast Pals', decade: '1930s', kind: 'film', year: 1939 },
+  { id: '1933-03-05_Extra_Special_Roosevelt_Inaugurated', show: 'Universal Newsreel', title: 'Roosevelt Inaugurated', decade: '1930s', kind: 'newsreel', year: 1933 },
+  { id: '1933-08-14_President_Visits_Foresters', show: 'Universal Newsreel', title: 'President Visits Foresters', decade: '1930s', kind: 'newsreel', year: 1933 },
+  { id: '1933-10-11_Farmer_Plays_Tune_With_Hands', show: 'Universal Newsreel', title: 'Farmer Plays Tune with Hands', decade: '1930s', kind: 'newsreel', year: 1933 },
+  { id: '1933-11-06_Ancient_Mexican_Dances_for_President', show: 'Universal Newsreel', title: 'Ancient Mexican Dances for President', decade: '1930s', kind: 'newsreel', year: 1933 },
+  { id: '1933-11_Ancient_Chinese_Field_Games', show: 'Universal Newsreel', title: 'Ancient Chinese Field Games', decade: '1930s', kind: 'newsreel', year: 1933 },
+  { id: '1935-02-11_Roosevelt_Addresses_Boy_Scouts', show: 'Universal Newsreel', title: 'Roosevelt Addresses Boy Scouts', decade: '1930s', kind: 'newsreel', year: 1935, still: 40 },
+  { id: '1935-03-04_FDR_Buys_First_Baby_Bond', show: 'Universal Newsreel', title: 'FDR Buys First Baby Bond', decade: '1930s', kind: 'newsreel', year: 1935 },
+  { id: '1937-05-18_The_Coronation_of_King_George_VI', show: 'Universal Newsreel', title: 'The Coronation of King George VI', decade: '1930s', kind: 'newsreel', year: 1937 },
+  { id: '1939-05-15_King_and_Queen_Leave_For_American_Tour', show: 'Universal Newsreel', title: 'King and Queen Leave Britain on American Tour', decade: '1930s', kind: 'newsreel', year: 1939, still: 25 },
 
-  { id: 'ToNewHor1940', show: 'General Motors', title: 'To New Horizons', decade: '1940s', year: 1940 },
-  { id: 'LeaveItt1940', show: 'Chevrolet', title: 'Leave It to Roll-Oh', decade: '1940s', year: 1940 },
-  { id: 'superman_mechanical_monsters', show: 'Superman', title: 'The Mechanical Monsters', decade: '1940s', year: 1941 },
-  { id: 'superman_arctic_giant', show: 'Superman', title: 'The Arctic Giant', decade: '1940s', year: 1942 },
-  { id: 'superman_bulleteers', show: 'Superman', title: 'The Bulleteers', decade: '1940s', year: 1942, still: 177 },
   { id: 'the-lone-ranger-1949-s-01-e-02-the-lone-ranger-fights-on', show: 'The Lone Ranger', title: 'The Lone Ranger Fights On', decade: '1940s', year: 1949 },
   { id: 'the-lone-ranger-1949-s-01-e-04-legion-of-old-timers', show: 'The Lone Ranger', title: 'Legion of Old Timers', decade: '1940s', year: 1949 },
   { id: 'the-lone-ranger-1949-s-01-e-05-rustlers-hideout', show: 'The Lone Ranger', title: "Rustlers' Hideout", decade: '1940s', year: 1949 },
@@ -77,16 +76,20 @@ export const PICKS = [
   { id: 'S1E12-Life_Of_Riley-12_20_1949_-_Juniors_Birthday_Party', show: 'The Life of Riley', title: "Junior's Birthday Party", decade: '1940s', year: 1949 },
   { id: 'Public_Prosecutor--Missing_Hour', show: 'Public Prosecutor', title: 'The Case of the Missing Hour', decade: '1940s', year: 1947 },
   { id: 'Public_Prosecutor--Dead_Mans_Voice', show: 'Public Prosecutor', title: "The Case of the Dead Man's Voice", decade: '1940s', year: 1948 },
-  { id: '1945-06-28_San_Francisco_Parley_Ends', show: 'Universal Newsreel', title: 'San Francisco Parley Ends', decade: '1940s', year: 1945, still: 30 },
-  { id: '1945-12-10_Christmas_Brings_Joy_To_Everyone', show: 'Universal Newsreel', title: 'Christmas Brings Joy to Everyone', decade: '1940s', year: 1945 },
-  { id: '1946-01-31_Radar_makes_Round_Trip_To_Moon', show: 'Universal Newsreel', title: 'Radar Makes Round Trip to Moon', decade: '1940s', year: 1946 },
-  { id: '1946-06-10_Allied_Victory_Parade', show: 'Universal Newsreel', title: 'Allied Victory Parade', decade: '1940s', year: 1946 },
-  { id: '1946-08-19_President_on_Vacation', show: 'Universal Newsreel', title: 'President on Vacation', decade: '1940s', year: 1946, still: 90 },
-  { id: '1946-08-30_UN_Starts_Session_At_New_Home', show: 'Universal Newsreel', title: 'UN Starts Session at New Home', decade: '1940s', year: 1946, still: 25 },
-  { id: '1946-11-21_White_Sands_NM_V-2_rocket', show: 'Universal Newsreel', title: 'V-2 Rocket Films the Earth', decade: '1940s', year: 1946, still: 60 },
+  { id: 'superman_mechanical_monsters', show: 'Superman', title: 'The Mechanical Monsters', decade: '1940s', kind: 'cartoon', year: 1941 },
+  { id: 'superman_arctic_giant', show: 'Superman', title: 'The Arctic Giant', decade: '1940s', kind: 'cartoon', year: 1942 },
+  { id: 'superman_bulleteers', show: 'Superman', title: 'The Bulleteers', decade: '1940s', kind: 'cartoon', year: 1942, still: 177 },
+  { id: 'ToNewHor1940', show: 'General Motors', title: 'To New Horizons', decade: '1940s', kind: 'film', year: 1940 },
+  { id: 'LeaveItt1940', show: 'Chevrolet', title: 'Leave It to Roll-Oh', decade: '1940s', kind: 'film', year: 1940 },
+  { id: '1945-06-28_San_Francisco_Parley_Ends', show: 'Universal Newsreel', title: 'San Francisco Parley Ends', decade: '1940s', kind: 'newsreel', year: 1945, still: 30 },
+  { id: '1945-12-10_Christmas_Brings_Joy_To_Everyone', show: 'Universal Newsreel', title: 'Christmas Brings Joy to Everyone', decade: '1940s', kind: 'newsreel', year: 1945 },
+  { id: '1946-01-31_Radar_makes_Round_Trip_To_Moon', show: 'Universal Newsreel', title: 'Radar Makes Round Trip to Moon', decade: '1940s', kind: 'newsreel', year: 1946 },
+  { id: '1946-06-10_Allied_Victory_Parade', show: 'Universal Newsreel', title: 'Allied Victory Parade', decade: '1940s', kind: 'newsreel', year: 1946 },
+  { id: '1946-08-19_President_on_Vacation', show: 'Universal Newsreel', title: 'President on Vacation', decade: '1940s', kind: 'newsreel', year: 1946, still: 90 },
+  { id: '1946-08-30_UN_Starts_Session_At_New_Home', show: 'Universal Newsreel', title: 'UN Starts Session at New Home', decade: '1940s', kind: 'newsreel', year: 1946, still: 25 },
+  { id: '1946-11-21_White_Sands_NM_V-2_rocket', show: 'Universal Newsreel', title: 'V-2 Rocket Films the Earth', decade: '1940s', kind: 'newsreel', year: 1946, still: 60 },
 
   { id: 'Mama1950', show: 'Mama', title: "Mama's Bad Day", decade: '1950s', year: 1950 },
-  { id: 'DateWith1950', show: 'Simmel-Meservey', title: 'A Date with Your Family', decade: '1950s', year: 1950 },
   { id: 'Cavalcade_Of_Stars', show: 'Cavalcade of Stars', title: 'Jackie Gleason and the Honeymooners', decade: '1950s', year: 1951 },
   { id: 'Jack_Benny_11_04_1951', show: 'The Jack Benny Program', title: 'With Dorothy Shay', decade: '1950s', year: 1951 },
   { id: 'SpacePatrolS01e43TheSpacePatrolCodeBelt', show: 'Space Patrol', title: 'The Space Patrol Code Belt', decade: '1950s', year: 1951 },
@@ -108,8 +111,6 @@ export const PICKS = [
   { id: 'TheAdventuresOfFlashGordon', show: 'Flash Gordon', title: 'An episode from 1955', decade: '1950s', year: 1955 },
   { id: 'OurMissBrooks-HomeCookedMeal', show: 'Our Miss Brooks', title: 'Home Cooked Meal', decade: '1950s', year: 1955 },
   { id: 'Super-Circus_1956', show: 'Super Circus', title: 'An episode from 1956', decade: '1950s', year: 1956, still: 1380 },
-  { id: 'Designfo1956', show: 'General Motors', title: 'Design for Dreaming', decade: '1950s', year: 1956 },
-  { id: 'OnceUpon1956', show: 'Bell System', title: 'Once Upon a Honeymoon', decade: '1950s', year: 1956 },
   { id: 'Annie_Oakley_Sharp_Shootin_Annie', show: 'Annie Oakley', title: "Sharp Shootin' Annie", decade: '1950s' },
   { id: 'Cisco_Kid_-_Buried_Treasure', show: 'The Cisco Kid', title: 'Buried Treasure', decade: '1950s' },
   { id: 'I_Married_Joan_EP79_Neighbors', show: 'I Married Joan', title: 'Neighbors', decade: '1950s' },
@@ -117,13 +118,16 @@ export const PICKS = [
   { id: 'OzzieAndHarriet-BusyChristmas', show: 'Ozzie and Harriet', title: 'Busy Christmas', decade: '1950s' },
   { id: 'You_Bet_Your_Life_Groucho', show: 'You Bet Your Life', title: 'With Groucho Marx', decade: '1950s' },
   { id: 'OSB-02_Night_Of_April_14th', show: 'One Step Beyond', title: 'Night of April 14th', decade: '1950s', year: 1959 },
-  { id: '1957-10-07_New_Moon', show: 'Universal Newsreel', title: 'Reds Launch First Space Satellite', decade: '1950s', year: 1957, still: 40 },
-  { id: '1958-02-03_First_US_Satellite_Launched', show: 'Universal Newsreel', title: 'First U.S. Satellite Launched!', decade: '1950s', year: 1958 },
-  { id: '1958-03-17_Brussels_Worlds_Fair', show: 'Universal Newsreel', title: "Brussels World's Fair", decade: '1950s', year: 1958, still: 50 },
-  { id: '1958-08-11_A-Sub_Epic', show: 'Universal Newsreel', title: 'Nautilus Pioneers North Pole Seaway', decade: '1950s', year: 1958 },
-  { id: '1959-03-16_Aloha_Hawaii', show: 'Universal Newsreel', title: 'Aloha Hawaii', decade: '1950s', year: 1959 },
-  { id: '1959-04-30_California', show: 'Universal Newsreel', title: 'Cubs and Kids Cutting Capers', decade: '1950s', year: 1959 },
-  { id: '1959-11-02_Good-Will_Swap', show: 'Universal Newsreel', title: 'Good-Will Swap', decade: '1950s', year: 1959 },
+  { id: 'DateWith1950', show: 'Simmel-Meservey', title: 'A Date with Your Family', decade: '1950s', kind: 'film', year: 1950 },
+  { id: 'Designfo1956', show: 'General Motors', title: 'Design for Dreaming', decade: '1950s', kind: 'film', year: 1956 },
+  { id: 'OnceUpon1956', show: 'Bell System', title: 'Once Upon a Honeymoon', decade: '1950s', kind: 'film', year: 1956 },
+  { id: '1957-10-07_New_Moon', show: 'Universal Newsreel', title: 'Reds Launch First Space Satellite', decade: '1950s', kind: 'newsreel', year: 1957, still: 40 },
+  { id: '1958-02-03_First_US_Satellite_Launched', show: 'Universal Newsreel', title: 'First U.S. Satellite Launched!', decade: '1950s', kind: 'newsreel', year: 1958 },
+  { id: '1958-03-17_Brussels_Worlds_Fair', show: 'Universal Newsreel', title: "Brussels World's Fair", decade: '1950s', kind: 'newsreel', year: 1958, still: 50 },
+  { id: '1958-08-11_A-Sub_Epic', show: 'Universal Newsreel', title: 'Nautilus Pioneers North Pole Seaway', decade: '1950s', kind: 'newsreel', year: 1958 },
+  { id: '1959-03-16_Aloha_Hawaii', show: 'Universal Newsreel', title: 'Aloha Hawaii', decade: '1950s', kind: 'newsreel', year: 1959 },
+  { id: '1959-04-30_California', show: 'Universal Newsreel', title: 'Cubs and Kids Cutting Capers', decade: '1950s', kind: 'newsreel', year: 1959 },
+  { id: '1959-11-02_Good-Will_Swap', show: 'Universal Newsreel', title: 'Good-Will Swap', decade: '1950s', kind: 'newsreel', year: 1959 },
 
   { id: 'Bonanza_pd', show: 'Bonanza', title: 'San Francisco', decade: '1960s', year: 1960, file: 'Bonanza s01e28.mp4' },
   { id: 'Bonanza-TheAbductionEp2x08', show: 'Bonanza', title: 'The Abduction', decade: '1960s', year: 1960 },
@@ -154,17 +158,17 @@ export const PICKS = [
   { id: 'OurHeritage_', show: 'The Big Picture', title: 'Our Great American Heritage', decade: '1960s', still: 300, captions: false },
   { id: 'TheBigPicture723', show: 'The Big Picture', title: 'When the Chips Are Down', decade: '1960s', year: 1968, still: 210 },
   { id: 'DDayAnniversary', show: 'The Big Picture', title: 'D-Day Anniversary', decade: '1960s', year: 1969, still: 1470 },
-  { id: '1960-07-21_missile_milestone', show: 'Universal Newsreel', title: 'First Polaris Firing by Submerged U-Boat', decade: '1960s', year: 1960 },
-  { id: '1960-10-31_Satchmo_Swings_In_Congo', show: 'Universal Newsreel', title: 'Satchmo Swings in Congo', decade: '1960s', year: 1960, still: 45 },
-  { id: '1961-03-13_Peace_Corps', show: 'Universal Newsreel', title: 'Peace Corps', decade: '1960s', year: 1961 },
-  { id: '1962-07-23_First_Lady_At_Play', show: 'Universal Newsreel', title: 'First Lady at Play', decade: '1960s', year: 1962, still: 30 },
-  { id: '1962-09-13_Kennedy_Tour', show: 'Universal Newsreel', title: 'Kennedy Calls for U.S. Lead in Space', decade: '1960s', year: 1962, still: 30 },
-  { id: '1963-03-18_Suspense_Story', show: 'Universal Newsreel', title: 'National Press Club Hears Hitchcock', decade: '1960s', year: 1963 },
-  { id: '1963-11-14_Space_Movie', show: 'Universal Newsreel', title: 'Camera Records Missile in Flight', decade: '1960s', year: 1963, still: 40 },
-  { id: '1964-03-02_New_York_Worlds_Fair', show: 'Universal Newsreel', title: "New York World's Fair", decade: '1960s', year: 1964 },
-  { id: '1964-10-19_The_Olympics', show: 'Universal Newsreel', title: 'U.S. Widens Tokyo Lead', decade: '1960s', year: 1964 },
-  { id: '1964-10-26_Olympics_End', show: 'Universal Newsreel', title: 'Olympics End', decade: '1960s', year: 1964 },
-  { id: '1964-10-26_Fashions', show: 'Universal Newsreel', title: 'American Fashions in Rome', decade: '1960s', year: 1964 },
+  { id: '1960-07-21_missile_milestone', show: 'Universal Newsreel', title: 'First Polaris Firing by Submerged U-Boat', decade: '1960s', kind: 'newsreel', year: 1960 },
+  { id: '1960-10-31_Satchmo_Swings_In_Congo', show: 'Universal Newsreel', title: 'Satchmo Swings in Congo', decade: '1960s', kind: 'newsreel', year: 1960, still: 45 },
+  { id: '1961-03-13_Peace_Corps', show: 'Universal Newsreel', title: 'Peace Corps', decade: '1960s', kind: 'newsreel', year: 1961 },
+  { id: '1962-07-23_First_Lady_At_Play', show: 'Universal Newsreel', title: 'First Lady at Play', decade: '1960s', kind: 'newsreel', year: 1962, still: 30 },
+  { id: '1962-09-13_Kennedy_Tour', show: 'Universal Newsreel', title: 'Kennedy Calls for U.S. Lead in Space', decade: '1960s', kind: 'newsreel', year: 1962, still: 30 },
+  { id: '1963-03-18_Suspense_Story', show: 'Universal Newsreel', title: 'National Press Club Hears Hitchcock', decade: '1960s', kind: 'newsreel', year: 1963 },
+  { id: '1963-11-14_Space_Movie', show: 'Universal Newsreel', title: 'Camera Records Missile in Flight', decade: '1960s', kind: 'newsreel', year: 1963, still: 40 },
+  { id: '1964-03-02_New_York_Worlds_Fair', show: 'Universal Newsreel', title: "New York World's Fair", decade: '1960s', kind: 'newsreel', year: 1964 },
+  { id: '1964-10-19_The_Olympics', show: 'Universal Newsreel', title: 'U.S. Widens Tokyo Lead', decade: '1960s', kind: 'newsreel', year: 1964 },
+  { id: '1964-10-26_Olympics_End', show: 'Universal Newsreel', title: 'Olympics End', decade: '1960s', kind: 'newsreel', year: 1964 },
+  { id: '1964-10-26_Fashions', show: 'Universal Newsreel', title: 'American Fashions in Rome', decade: '1960s', kind: 'newsreel', year: 1964 },
 
   { id: 'TheBigPicture-USArmyinSpaceandUndertheSea', show: 'The Big Picture', title: 'The Army in Space and Under the Sea', decade: '1970s', year: 1971 },
   { id: 'FortBliss', show: 'The Big Picture', title: 'Fort Bliss, Heart of Army Air Defense', decade: '1970s', year: 1972, still: 300 },
