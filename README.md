@@ -245,16 +245,16 @@ Finding His Voice (1929), a cartoon about how sound gets onto film, to General M
 Dreaming (1956): only the Prelinger's own copies, which it marks public domain. The other ten are
 cartoons and silent comedies whose copies are archive.org users' uploads, mostly unmarked, which
 the proxy relays by name: Harold Lloyd's Safety Last!, Buster Keaton's Three Ages and Steamboat
-Bill, Jr., and Charlie Chaplin's The Gold Rush as it first came out, silent; Disney's Steamboat
-Willie, Plane Crazy and The Skeleton Dance, public domain 95 years after they came out; and three
-of Fleischer's Superman cartoons of 1941 and 1942, whose copyrights were not renewed. The silent
+Bill, Jr., Charlie Chaplin's The Gold Rush as it first came out, silent, and Disney's Steamboat
+Willie, Plane Crazy and The Skeleton Dance, all public domain 95 years after they came out; and
+three of Fleischer's Superman cartoons of 1941 and 1942, whose copyrights were not renewed. The silent
 films' copies have no sound at all: a score added since is not the film's, and may not be free.
 
 `tools/picks.js` lists them (the item, the show, the episode's title, the year, and where the tool
 would choose wrong, which of the item's videos, the frame for its tape, or no captions), and
 `node tools/catalogue.mjs` writes `public/catalogue/` from it and from archive.org's metadata: the
 page's `episodes.json`, a still of each (on its tape and its set), and its captions. These are
-committed (3 MB), so the page never searches archive.org. Only the videos come from archive.org,
+committed (3.4 MB), so the page never searches archive.org. Only the videos come from archive.org,
 streamed as they play. Run the tool again after changing the picks.
 
 ## The archive proxy
