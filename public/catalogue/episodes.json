@@ -2,16 +2,16 @@
  "about": "The episodes the room shows (tools/picks.js, written by tools/catalogue.mjs), from https://archive.org/details/classic_tv, https://archive.org/details/universal_newsreels, https://archive.org/details/prelinger and the films tools/archive-proxy/worker.js lists",
  "episodes": [
   {
-   "id": "dfwiv-Safety_Last_-_Harold_Lloyd_1923_-_Old_Time_Movie",
+   "id": "silent-safety-last",
    "show": "Harold Lloyd",
    "title": "Safety Last!",
    "decade": "1920s",
    "year": 1923,
-   "file": "Safety_Last_-_Harold_Lloyd_1923_-_Old_Time_Movie.HD.mp4",
+   "file": "Safety Last!.mp4",
    "minutes": 74,
    "width": 853,
    "height": 480,
-   "still": "catalogue/stills/dfwiv-Safety_Last_-_Harold_Lloyd_1923_-_Old_Time_Movie.jpg",
+   "still": "catalogue/stills/silent-safety-last.jpg",
    "captions": null
   },
   {

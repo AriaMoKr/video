@@ -43,7 +43,7 @@ const PUBLIC_DOMAIN = /^https?:\/\/creativecommons\.org\/(?:publicdomain\/(?:mar
  * added since is not the film's), each looked at before it was added (tools/picks.js). Why each is.
  */
 export const LISTED = new Map([
-  ['dfwiv-Safety_Last_-_Harold_Lloyd_1923_-_Old_Time_Movie', 'Safety Last! (Harold Lloyd, 1923): 95 years on, public domain from 2019'],
+  ['silent-safety-last', 'Safety Last! (Harold Lloyd, 1923), with no sound: 95 years on, public domain from 2019'],
   ['yorkmba99_hotmail_TA', 'Three Ages (Buster Keaton, 1923): public domain from 2019'],
   ['the-gold-rush-film-1925', 'The Gold Rush (Charlie Chaplin, 1925), as it came out, silent: public domain from 2021'],
   ['SteamboatBillJr_201411', 'Steamboat Bill, Jr. (Buster Keaton, 1928): public domain from 2024'],

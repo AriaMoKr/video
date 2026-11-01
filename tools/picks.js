@@ -26,7 +26,8 @@
 // 1928 and 1929 and Keaton's, Lloyd's and Chaplin's features of the 1920s, public domain since 95
 // years after they came out, and Fleischer's Superman of 1941 and 1942, whose copyrights were not
 // renewed. Each such copy has the film's own sound or none (the silent films' copies here have no
-// sound track: a score added since is not the film's), and nothing burnt in over it.
+// sound, as ffmpeg's volumedetect shows of one with a sound track at all: a score added since is
+// not the film's), and nothing burnt in over it.
 //
 // Each: the item's id, the show (or the star, studio or sponsor) and the episode's title as the
 // room shows them, the year it was first shown where it is known (else the decade alone), and,
@@ -37,7 +38,7 @@
 
 /** @type {Pick[]} */
 export const PICKS = [
-  { id: 'dfwiv-Safety_Last_-_Harold_Lloyd_1923_-_Old_Time_Movie', show: 'Harold Lloyd', title: 'Safety Last!', decade: '1920s', year: 1923 },
+  { id: 'silent-safety-last', show: 'Harold Lloyd', title: 'Safety Last!', decade: '1920s', year: 1923, still: 3834 },
   { id: 'yorkmba99_hotmail_TA', show: 'Buster Keaton', title: 'Three Ages', decade: '1920s', year: 1923, still: 3414 },
   { id: 'SteamboatBillJr_201411', show: 'Buster Keaton', title: 'Steamboat Bill, Jr.', decade: '1920s', year: 1928 },
   { id: 'the-gold-rush-film-1925', show: 'Charlie Chaplin', title: 'The Gold Rush', decade: '1920s', year: 1925 },
