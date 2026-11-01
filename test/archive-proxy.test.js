@@ -1,10 +1,10 @@
 // The archive proxy (tools/archive-proxy/worker.js): it relays parts of the video files of
-// archive.org's public-domain classic TV and newsreels, with CORS, for the pages of the sites only,
-// and nothing else.
+// archive.org's public-domain classic TV, newsreels and films, with CORS, for the pages of the
+// sites only, and nothing else.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import worker, { ARCHIVE, allowOrigin, handle, refusal } from '../tools/archive-proxy/worker.js';
+import worker, { ARCHIVE, LISTED, allowOrigin, handle, refusal } from '../tools/archive-proxy/worker.js';
 
 const FILE = 'https://proxy.example/download/Dragnet_A_Gun_For_Christmas/S02E07_A_Gun_For_Christmas.mp4';
 const PD = { collection: ['classic_tv_1950s', 'classic_tv', 'television'], licenseurl: 'http://creativecommons.org/licenses/publicdomain/' };
@@ -49,17 +49,25 @@ test('it answers a preflight, and refuses what is not a part of a video file of 
   assert.equal(refused.headers.get('access-control-allow-origin'), '*', 'a page can read why');
 });
 
-test('it relays only items in classic_tv or one of its decades, or in universal_newsreels, that are marked public domain', async () => {
+test('it relays only items in classic_tv or one of its decades, universal_newsreels or prelinger that are marked public domain, and those it lists', async () => {
+  const OTHER = 'not in classic_tv, universal_newsreels or prelinger, nor listed';
   assert.equal(refusal(PD), null);
   assert.equal(refusal({ collection: 'classic_tv', licenseurl: 'http://creativecommons.org/publicdomain/mark/1.0/' }), null);
   assert.equal(refusal({ collection: ['classic_tv_1970s'], licenseurl: 'https://creativecommons.org/publicdomain/zero/1.0/' }), null);
   assert.equal(refusal({ collection: ['universal_newsreels', 'newsandpublicaffairs'], licenseurl: PD.licenseurl }), null, 'a newsreel: 1958-02-03_First_US_Satellite_Launched');
+  assert.equal(refusal({ collection: ['prelinger'], licenseurl: PD.licenseurl }), null, "Prelinger's own copy: Designfo1956");
   assert.equal(refusal({ collection: ['classic_tv'] }), 'not marked public domain', 'no licence: Bonanza_-_The_Trail_Gang');
   assert.equal(refusal({ collection: ['universal_newsreels'] }), 'not marked public domain', 'the few newsreels not marked');
+  assert.equal(refusal({ collection: ['prelinger'] }), 'not marked public domain', 'a newer copy: 2306_Design_for_Dreaming_21_26_14_00');
   assert.equal(refusal({ collection: ['classic_tv'], licenseurl: 'http://creativecommons.org/licenses/by-nc/3.0/' }), 'not marked public domain');
-  for (const other of ['feature_films', 'classic_tv_commercials', 'newsandpublicaffairs', 'universal_newsreels_extra']) {
-    assert.equal(refusal({ collection: [other], licenseurl: PD.licenseurl }), 'not in classic_tv or universal_newsreels', other);
+  for (const other of ['feature_films', 'classic_tv_commercials', 'newsandpublicaffairs', 'universal_newsreels_extra', 'prelingerhomemovies']) {
+    assert.equal(refusal({ collection: [other], licenseurl: PD.licenseurl }), OTHER, other);
   }
+  // A listed item, wherever it is and marked or not; and only those named.
+  assert.ok(LISTED.size > 0);
+  for (const id of LISTED.keys()) assert.equal(refusal({ identifier: id, collection: ['silenthalloffame'] }), null, id);
+  assert.equal(refusal({ identifier: 'SteamboatBillJr_2014', collection: ['silenthalloffame'] }), OTHER);
+  assert.equal(refusal({ collection: ['opensource_movies'], licenseurl: PD.licenseurl }), OTHER, 'marked, but neither in those nor listed');
   assert.equal(refusal(undefined), 'no such item');
   const { fetch, asked } = archive({ items: { Bonanza_x: { collection: ['classic_tv'] } } });
   const items = new Map();

@@ -1,17 +1,18 @@
-// The archive proxy: a Cloudflare Worker that relays the classic TV episodes and the newsreels the
-// room plays from archive.org, with the CORS headers archive.org's video servers don't send, so the
-// page may draw a video into WebGL (a THREE.VideoTexture on the room's screens, in VR too). Without
-// them a video plays only as itself on the page: its frames taint WebGL, and with crossOrigin it
-// doesn't load. vrlbry's tools/zim-proxy/worker.js, for video.
+// The archive proxy: a Cloudflare Worker that relays the classic TV episodes, the newsreels and the
+// films the room plays from archive.org, with the CORS headers archive.org's video servers don't
+// send, so the page may draw a video into WebGL (a THREE.VideoTexture on the room's screens, in VR
+// too). Without them a video plays only as itself on the page: its frames taint WebGL, and with
+// crossOrigin it doesn't load. vrlbry's tools/zim-proxy/worker.js, for video.
 //
 // GET /download/<item>/<file> with a Range header, as a <video crossorigin> asks: archive.org's
 // answer (206, the part), streamed through. Only the video files (.mp4, .webm, .ogv) of items in
-// archive.org's classic_tv collection (or one of its decades, classic_tv_1950s and so on) or in its
-// universal_newsreels (which Universal gave to the public in 1976) that are marked public domain:
-// each item's metadata is read once and the answer kept for a while, and anything else is refused,
-// so it relays nothing else and goes nowhere else. The page uses it when config.js names it
-// (ROOM.videoProxy, or ?videoproxy=), and plays a video straight from archive.org, on the page,
-// when it fails.
+// archive.org's classic_tv collection (or one of its decades, classic_tv_1950s and so on), in its
+// universal_newsreels (which Universal gave to the public in 1976) or in the Prelinger Archives
+// that are marked public domain, and of the few items it names (LISTED: cartoons and silent
+// comedies that users uploaded, most of them unmarked, each checked by hand): each item's metadata
+// is read once and the answer kept for a while, and anything else is refused, so it relays nothing
+// else and goes nowhere else. The page uses it when config.js names it (ROOM.videoProxy, or
+// ?videoproxy=), and plays a video straight from archive.org, on the page, when it fails.
 //
 // Only the pages of the sites in ALLOWED_ORIGINS (wrangler.toml) may use it: a browser names the
 // page's origin in every cross-origin request, so another site's page cannot spend this one's
@@ -32,10 +33,27 @@ export const ARCHIVE = 'https://archive.org';
 /** /download/<item>/<file>: an item's identifier, and a video file at its top. */
 const FILE_PATH = /^\/download\/([A-Za-z0-9._-]+)\/([^/]+\.(?:mp4|m4v|webm|ogv))$/i;
 const RANGE = /^bytes=(\d+)-(\d*)$/;
-/** The collections whose items it relays: classic_tv and its decades, and Universal's newsreels. */
-const COLLECTION = /^(?:classic_tv(?:_\d{4}s)?|universal_newsreels)$/;
+/** The collections whose items it relays: classic_tv and its decades, Universal's newsreels, and the Prelinger Archives. */
+const COLLECTION = /^(?:classic_tv(?:_\d{4}s)?|universal_newsreels|prelinger)$/;
 /** What marks an item public domain on archive.org (its licenseurl): Creative Commons' mark, CC0, or the old dedication. */
 const PUBLIC_DOMAIN = /^https?:\/\/creativecommons\.org\/(?:publicdomain\/(?:mark|zero)\/|licenses\/publicdomain\/?)/;
+/**
+ * The items it relays by name, though in none of those collections or not marked: copies of films
+ * that are public domain in the US, the film alone (its own sound, or none: a silent film's score
+ * added since is not the film's), each looked at before it was added (tools/picks.js). Why each is.
+ */
+export const LISTED = new Map([
+  ['dfwiv-Safety_Last_-_Harold_Lloyd_1923_-_Old_Time_Movie', 'Safety Last! (Harold Lloyd, 1923): 95 years on, public domain from 2019'],
+  ['yorkmba99_hotmail_TA', 'Three Ages (Buster Keaton, 1923): public domain from 2019'],
+  ['the-gold-rush-film-1925', 'The Gold Rush (Charlie Chaplin, 1925), as it came out, silent: public domain from 2021'],
+  ['SteamboatBillJr_201411', 'Steamboat Bill, Jr. (Buster Keaton, 1928): public domain from 2024'],
+  ['steamboat-willie-16mm-film-scan-4k-lossless', 'Steamboat Willie (Disney, 1928): public domain from 2024'],
+  ['PlaneCrazy_201511', 'Plane Crazy (Disney, with sound in 1929): public domain from 2025'],
+  ['the-skeleton-dance-1929', 'The Skeleton Dance (Disney, 1929): public domain from 2025'],
+  ['superman_mechanical_monsters', 'The Mechanical Monsters (Fleischer, 1941): its copyright was not renewed'],
+  ['superman_arctic_giant', 'The Arctic Giant (Fleischer, 1942): its copyright was not renewed'],
+  ['superman_bulleteers', 'The Bulleteers (Fleischer, 1942): its copyright was not renewed'],
+]);
 
 /** How long archive.org may take to start answering. */
 const TIMEOUT_MS = 15000;
@@ -75,13 +93,14 @@ export function allowOrigin(origin, allowed) {
 
 /**
  * Whether an item's metadata (archive.org's /metadata/<id>/metadata `result`) lets it be relayed:
- * in classic_tv (or one of its decades) or universal_newsreels, and marked public domain. Returns
- * null when it may, else why not.
- * @param {{ collection?: string | string[], licenseurl?: string } | null | undefined} md
+ * listed (LISTED), or in classic_tv (or one of its decades), universal_newsreels or prelinger and
+ * marked public domain. Returns null when it may, else why not.
+ * @param {{ identifier?: string, collection?: string | string[], licenseurl?: string } | null | undefined} md
  */
 export function refusal(md) {
   if (!md || typeof md !== 'object') return 'no such item';
-  if (![].concat(md.collection ?? []).some((c) => COLLECTION.test(String(c)))) return 'not in classic_tv or universal_newsreels';
+  if (LISTED.has(String(md.identifier))) return null;
+  if (![].concat(md.collection ?? []).some((c) => COLLECTION.test(String(c)))) return 'not in classic_tv, universal_newsreels or prelinger, nor listed';
   if (!PUBLIC_DOMAIN.test(String(md.licenseurl ?? ''))) return 'not marked public domain';
   return null;
 }
@@ -147,7 +166,7 @@ export async function handle(request, {
   }
   if (request.method !== 'GET' && request.method !== 'HEAD') return done(answer(405, 'only GET and HEAD', { ...CORS, allow: 'GET, HEAD, OPTIONS' }), { refused: 'method' });
   const m = FILE_PATH.exec(url.pathname);
-  if (!m || url.pathname.includes('..')) return done(answer(404, 'only the video files of archive.org\'s classic TV and newsreels: /download/<item>/<file>.mp4', CORS), { refused: 'path' });
+  if (!m || url.pathname.includes('..')) return done(answer(404, 'only the video files of the room\'s shows and films on archive.org: /download/<item>/<file>.mp4', CORS), { refused: 'path' });
   const [, id, file] = m;
   entry.item = id;
   try {

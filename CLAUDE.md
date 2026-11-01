@@ -5,10 +5,12 @@ Guidance for Claude Code in this repository.
 ## What this is
 
 video: a WebXR room behind one of the Hallway's doors to watch old TV in, alone or in a shared
-session (three.js 0.186, plain ES modules, no bundler or build step): 94 public-domain episodes,
-79 from archive.org's Classic TV (https://archive.org/details/classic_tv) and 15 of Universal's
-newsreels (https://archive.org/details/universal_newsreels), on tapes, played on the room's
-screens, in four modes (video store, the default; den; screening room; decades gallery).
+session (three.js 0.186, plain ES modules, no bundler or build step): 132 public-domain episodes
+from the 1920s to the 1970s, 79 from archive.org's Classic TV (https://archive.org/details/classic_tv),
+34 of Universal's newsreels (https://archive.org/details/universal_newsreels), 9 films of the
+Prelinger Archives (https://archive.org/details/prelinger) and 10 cartoons and silent comedies that
+the archive proxy relays by name, on tapes, played on the room's screens, in four modes (video
+store, the default; den; screening room; decades gallery).
 The room is AriaMoKr/RoomTemplateEmpty's (a checkout at `../RoomTemplateEmpty`): a floor, four
 walls, a ceiling with lamps, a window in the right-hand wall onto common's afternoon sky, the
 doorway back to the Hallway, and the control panel beside it. Its own are `public/js/config.js`,
@@ -66,13 +68,16 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   (`furnish(L, mode, episodes)`) into `L.furniture`: boxes, faces (`{kind, id, use, axis, at, ...}`:
   tapes, screens, bars, signs, the room panel), obstacles (rects, `MARGIN` from them), seats
   (`{x, z, yaw, out}`) and screens (`{id, decade, face, bar}`). The tapes' shelves (`SHELF`,
-  `shelves`), a bay to a decade: in the store and the den down the left wall, as many rows as it
-  takes (four to six) to end 0.3 short of the back wall; in the screening room seven rows from the
-  doorway's wall, closer together (`rowH`), the 1940s and 1950s on the left ending before the seats
-  and the 1960s and 1970s on the right short of the window's curtains (`CURTAINS`: how far past the
-  window furniture.js hangs them and their rail), with room for four more 1940s, one more 1950s,
-  one more 1960s and five more 1970s, as the catalogue stands (`test/modes.test.js` fails when one
-  runs past). A bay's sign stays under the ceiling.
+  `shelves`), a bay to a decade, in the catalogue's order as one reads them facing the wall: in the
+  store and the den down the left wall, as many rows as it takes (four to eight, six now) to end
+  0.3 short of the back wall, room for about fifty more; in the screening room nine rows, closer
+  together (`rowH`): the 1920s and 1930s on the doorway's wall beside the room panel, the 1940s and
+  1950s down the left wall from past the front of those (nearer the corner their end would hide
+  the first tapes) to before the seats, and the 1960s and 1970s on the right short of the window's
+  curtains (`CURTAINS`: how far past the window furniture.js hangs them and their rail), with room
+  for one more 1920s, six more 1930s, 21 more 1940s, 24 more 1950s, 41 more 1960s and 36 more
+  1970s, as the catalogue stands (`test/modes.test.js` fails when one runs past: a tape hidden, out
+  of reach or in the way, or shelves running into each other). A bay's sign stays under the ceiling.
   The room panel's and a screen bar's buttons (`ROOM_PANEL_BUTTONS`, `roomPanelButtonAt`,
   `BAR_BUTTONS`, `barButtonAt`); and `castRay` and `clampWalk` as room.js's with the furniture in
   the way (one stood in it after a mode change is put out, at the nearest clear place where its
@@ -149,12 +154,15 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   over the card and the canvas with `use` = `controls.useMiddle()` and `step` = `stepBack`, the
   room's own step back for Back: stop a show, then stand up; `answerApp`; no fullscreen or XR), the
   modes (`video.room` in localStorage, `?mode=`; `setMode`, `furnishRoom`), the player and what is
-  showing (`playEpisode`, `playerAction`, `sitOn`, `showShowing`, `updateShowing` each frame), the
+  showing (`playEpisode`, `playerAction`: Play with nothing chosen plays the 1950s' first, or in the
+  gallery what that set shows, not the shelves' first, a silent film; `sitOn`, `showShowing`,
+  `updateShowing` each frame), the
   show shared in a session (`video:show`: mode, episode, playing, where, when; `shareShow`,
   `takeShow`), and the frame loop.
 - `public/catalogue/`: `episodes.json`, `stills/<id>.jpg` and `captions/<id>.vtt`, written by
-  `tools/catalogue.mjs` from `tools/picks.js` (94 picks, 1940s–1970s, each decade's newsreels after
-  its shows: public domain, checked as its opening says, and fit for the family; a pick's `file`
+  `tools/catalogue.mjs` from `tools/picks.js` (132 picks, 1920s–1970s, each decade's newsreels after
+  its shows and films: public domain, checked as its opening says, and fit for the family, a
+  newsreel's every story, not only its first; the silent films' copies with no sound; a pick's `file`
   for one of an item's several episodes, with that file's own thumbs and captions, `still` where
   the tool's own frame was not right, and `captions: false` where archive.org's are no use) and
   committed; the page never searches archive.org. A video's captions are its own, else its 512Kb
@@ -162,8 +170,9 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
 - `tools/archive-proxy/`: `worker.js`, the Cloudflare Worker `video-archive-proxy` on vrlbry's
   account (https://video-archive-proxy.vrlbry.workers.dev/, beside vrlbry-zim-proxy, sharing the
   free plan's 100,000 requests a day): Range GETs of video files of classic_tv and
-  universal_newsreels items marked public domain, for `ALLOWED_ORIGINS` (wrangler.toml) only, with
-  CORS. `serve.mjs` runs it locally. Deploy it by hand when it changes.
+  universal_newsreels and prelinger items marked public domain, and of the items it lists by name
+  (`LISTED`, each with why it is free: the cartoons and silent films, users' uploads, mostly
+  unmarked), for `ALLOWED_ORIGINS` (wrangler.toml) only, with CORS. `serve.mjs` runs it locally. Deploy it by hand when it changes.
 - `style.css`: the page over the view, and the 10-foot view under `html.tv` (the hallway's: 960 × 540
   at a pixel ratio of 2, 18 px text, 4 px focus rings, the TV's safe margins, the hint and toasts
   beside the card).

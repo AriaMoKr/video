@@ -48,7 +48,7 @@ export const ROOM = {
   pieces: /** @type {Piece[]} */ ([]),
   /**
    * video's own: the archive proxy (tools/archive-proxy/, a Cloudflare Worker), which relays
-   * archive.org's classic TV and newsreel videos with the CORS headers a 3D screen needs
+   * archive.org's classic TV, newsreel and film videos with the CORS headers a 3D screen needs
    * (catalogue.js videoUrl; ?videoproxy= tries another, ?videoproxy=none plays them on the page).
    */
   videoProxy: 'https://video-archive-proxy.vrlbry.workers.dev/',

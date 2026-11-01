@@ -1,5 +1,5 @@
 // video: a room behind one of the Hallway's doors to watch old television in, the public-domain
-// shows of archive.org's Classic TV collection, made from RoomTemplateEmpty (its README, "Making a
+// shows, newsreels and films of archive.org's, made from RoomTemplateEmpty (its README, "Making a
 // room from this template"; what a copy changes is config.js). Coming in through the door, the
 // visitor carries on from how they went through it (the Hallway's link: where in the doorway, which
 // way they faced); behind them the doorway glows and shows the hall, and going back through it
@@ -129,7 +129,7 @@ const DESCRIBED = {
   store: 'a video store: tapes face out on shelves down the left wall, a counter with a till by the door, and a television and a couch at the back',
   den: 'a den: a console television against the far wall, a sofa and a coffee table on a rug, a standard lamp, and shelves of tapes',
   screening: 'a screening room: a big screen over a low stage, three rows of seats either side of an aisle, and shelves of tapes by the door',
-  gallery: 'a gallery of television sets, one from each decade from the 1940s to the 1970s, each showing its own shows, and a bench',
+  gallery: 'a gallery of television sets, one from each decade from the 1920s to the 1970s, each showing its own shows, and a bench',
 };
 const onWalls = ROOM.pieces.map((p) => p.title).join(', ');
 const describe = (mode) => renderer.domElement.setAttribute('aria-label', `${ROOM.title}, ${DESCRIBED[mode]}, a window onto the afternoon sky, ${onWalls ? '' : 'and '}the doorway back to the ${leadsTo}${onWalls ? `, and on the walls: ${onWalls}` : ''}`);
@@ -532,7 +532,9 @@ function playerAction(name) {
     return;
   }
   if (name === 'play') {
-    if (player.episode < 0) playEpisode(mode === 'gallery' ? showsOn.get('1950s') ?? 0 : 0);
+    // Nothing chosen yet: the 1950s' first, television with its sound (in the gallery what that
+    // decade's set shows), rather than the shelves' first, a silent film.
+    if (player.episode < 0) playEpisode(mode === 'gallery' ? showsOn.get('1950s') ?? 0 : Math.max(0, episodes.findIndex((e) => e.decade === '1950s')));
     else player.toggle();
   } else if (name === 'next') {
     // In the gallery, the next on the same set; elsewhere the next tape on the shelves.

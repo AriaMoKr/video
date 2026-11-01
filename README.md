@@ -4,9 +4,10 @@
 
 A room behind one of the [Hallway](https://ariamokr.github.io/hallway/)'s doors to watch old TV in,
 alone or together: public-domain shows from archive.org's
-[Classic TV](https://archive.org/details/classic_tv) collection, and newsreels from its
-[Universal Newsreels](https://archive.org/details/universal_newsreels), on tapes on the shelves,
-played on the room's screens. The room can be a video store, a den, a screening room or a gallery
+[Classic TV](https://archive.org/details/classic_tv) collection, newsreels from its
+[Universal Newsreels](https://archive.org/details/universal_newsreels), films from the
+[Prelinger Archives](https://archive.org/details/prelinger), and cartoons and silent comedies of
+the 1920s, on tapes on the shelves, played on the room's screens. The room can be a video store, a den, a screening room or a gallery
 of TV sets. Watch in VR on a Meta Quest, on a desktop or on a phone. There is nothing to install.
 
 ![The video store as one comes in through the door](public/hallway-preview.jpg)
@@ -30,8 +31,8 @@ that visit. The first visit is the video store.
 |---|---|
 | **Video store** | Every tape face out on shelves down the left wall, a bay to each decade under its sign, a counter by the doorway, and a TV and a couch at the back. |
 | **Den** | A console TV against the far wall, a sofa and a coffee table on a rug, and the tapes on shelves. |
-| **Screening room** | A screen across the far wall over a low stage, three rows of seats on either side of an aisle, and the tapes by the doorway on both sides. While a show plays, the lights go down and the window's curtains close. |
-| **Decades gallery** | A TV set from each decade, styled for its time, each showing that decade's shows (a still from each in turn). Using one plays what it shows. |
+| **Screening room** | A screen across the far wall over a low stage, three rows of seats on either side of an aisle, and the tapes round the way in: on the doorway's wall and down both sides. While a show plays, the lights go down and the window's curtains close. |
+| **Decades gallery** | A TV set from each decade, styled for its time, from a 1920s televisor on a table to a 1970s set on its cart, each showing that decade's shows (a still from each in turn). Using one plays what it shows. |
 
 ## Watching
 
@@ -43,8 +44,8 @@ that visit. The first visit is the video store.
   and the card have the same.
 - **Sit down** on a seat (the couch, the sofa, a seat in the screening room) the same way: you sit
   at a seated height, facing the screen. Walking stands you up again beside it.
-- **Captions** come from archive.org's speech to text, where an item has it (87 of the 94
-  episodes), drawn under the screen. They are off until you turn them on, and the choice is kept
+- **Captions** come from archive.org's speech to text, where an item has it (106 of the 132
+  episodes, none of the films among them), drawn under the screen. They are off until you turn them on, and the choice is kept
   with the room's (an episode without them says so).
 - **If the video can't reach the screen** (the archive proxy, below, can't be reached), it plays on
   the page in a box with its own controls and captions instead, straight from archive.org. That
@@ -212,12 +213,12 @@ A room made from this template keeps the remote working if:
 
 ## The shows
 
-79 episodes of 42 shows, from the 1940s to the 1970s, chosen by hand from
-[Classic TV](https://archive.org/details/classic_tv), and 15 newsreels (below). Classic TV's users
-upload its items, so the room takes only those marked public domain, and of those only shows known
-to have lapsed into it and fit for the whole family. That is why the decades stop at the 1970s: the
-collection's most watched include shows still under copyright, and most of what is marked public
-domain from the 1980s and 1990s is not.
+132 episodes from the 1920s to the 1970s: 79 of 42 shows chosen by hand from
+[Classic TV](https://archive.org/details/classic_tv), 34 newsreels and 19 films (below). Classic
+TV's users upload its items, so the room takes only those marked public domain, and of those only
+shows known to have lapsed into it and fit for the whole family. That is why the decades stop at the
+1970s: the collection's most watched include shows still under copyright, and most of what is
+marked public domain from the 1980s and 1990s is not.
 
 Not everything marked public domain from before then is, either: NBC renewed Bonanza's 1959
 episodes, so only its 1960 ones are here. So each is checked before it goes on the shelves. The
@@ -229,12 +230,25 @@ automatic, so a later show is free only if it carried no notice, or if the US go
 
 The newsreels are Universal's, which it gave to the public in 1976 with their film to the National
 Archives, from archive.org's [Universal Newsreels](https://archive.org/details/universal_newsreels).
-There are five each from the 1940s, the 1950s and the 1960s, shelved after that decade's shows:
-stories fit for the whole family and no war footage, such as radar reaching the Moon, the first
-film of the Earth from a rocket, Sputnik and Explorer, the Nautilus under the North Pole, Hawaii
-becoming a state, two World's Fairs and the Tokyo Olympics. Each runs one to six minutes. Their
-captions are archive.org's too, made from each one's lower-quality 512Kb copy (the same film, so
-the same timings), which is the only copy that has them.
+There are 34, from 1933 to 1964, shelved after each decade's shows: stories fit for the whole
+family and no war footage (a reel's every story, not only its first), such as Roosevelt's
+inauguration, the coronation of George VI, the United Nations' charter signed, radar reaching the
+Moon, the first film of the Earth from a rocket, Sputnik and Explorer, the Nautilus under the North
+Pole, Hawaii becoming a state, Louis Armstrong in the Congo, the Peace Corps, two World's Fairs and
+the Tokyo Olympics. Each runs one to nine minutes. Their captions are archive.org's too, made from
+each one's lower-quality 512Kb copy (the same film, so the same timings), which is the only copy
+that has them.
+
+The films are of two kinds. Nine are from the [Prelinger Archives](https://archive.org/details/prelinger),
+films companies made to show and sell, shelved under their sponsors, from Western Electric's
+Finding His Voice (1929), a cartoon about how sound gets onto film, to General Motors' Design for
+Dreaming (1956): only the Prelinger's own copies, which it marks public domain. The other ten are
+cartoons and silent comedies whose copies are archive.org users' uploads, mostly unmarked, which
+the proxy relays by name: Harold Lloyd's Safety Last!, Buster Keaton's Three Ages and Steamboat
+Bill, Jr., and Charlie Chaplin's The Gold Rush as it first came out, silent; Disney's Steamboat
+Willie, Plane Crazy and The Skeleton Dance, public domain 95 years after they came out; and three
+of Fleischer's Superman cartoons of 1941 and 1942, whose copyrights were not renewed. The silent
+films' copies have no sound at all: a score added since is not the film's, and may not be free.
 
 `tools/picks.js` lists them (the item, the show, the episode's title, the year, and where the tool
 would choose wrong, which of the item's videos, the frame for its tape, or no captions), and
@@ -252,8 +266,10 @@ at https://video-archive-proxy.vrlbry.workers.dev/ (`config.js`'s `videoProxy`).
 same Cloudflare account as vrlbry's zim proxy, and they share its free plan's 100,000 requests a
 day (a viewing takes a handful, one per seek). It relays only:
 
-- the video files of items in archive.org's `classic_tv` collection (or one of its decades) or its
-  `universal_newsreels` that are marked public domain, which it checks in each item's metadata,
+- the video files of items in archive.org's `classic_tv` collection (or one of its decades), its
+  `universal_newsreels` or its `prelinger` that are marked public domain, which it checks in each
+  item's metadata, and of the items it lists by name (`LISTED` in `worker.js`: the cartoons and
+  silent films, whose copies are users' uploads and mostly unmarked, each with why it is free),
   and
 - for the pages of `ariamokr.github.io` and this machine (`ALLOWED_ORIGINS` in `wrangler.toml`).
 

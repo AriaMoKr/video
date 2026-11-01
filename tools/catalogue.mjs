@@ -7,10 +7,10 @@
 //   captions/<id>.vtt  its captions, archive.org's speech to text, where the item has them (and its
 //                      pick doesn't say they are no use)
 // Each item is checked as the archive proxy checks it (worker.js refusal: in classic_tv or one of
-// its decades, or in universal_newsreels, and marked public domain), and its video chosen: an mp4
-// that browsers play (h.264, or the upload itself), the one its captions were made from where there
-// is one. Only the video itself is not copied: the page streams it from archive.org through the
-// proxy.
+// its decades, universal_newsreels or prelinger and marked public domain, or listed by name), and
+// its video chosen: an mp4 that browsers play (h.264, or the upload itself), the one its captions
+// were made from where there is one. Only the video itself is not copied: the page streams it from
+// archive.org through the proxy.
 //   node tools/catalogue.mjs [--only <id>]
 // Run it again after changing tools/picks.js.
 import { mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
@@ -117,7 +117,7 @@ for (let i = 0; i < picks.length; i += 4) episodes.push(...(await Promise.all(pi
 if (values.only) {
   console.log(JSON.stringify(episodes[0], null, 2));
 } else {
-  const json = { about: 'The episodes the room shows (tools/picks.js, written by tools/catalogue.mjs), from https://archive.org/details/classic_tv and https://archive.org/details/universal_newsreels', episodes };
+  const json = { about: 'The episodes the room shows (tools/picks.js, written by tools/catalogue.mjs), from https://archive.org/details/classic_tv, https://archive.org/details/universal_newsreels, https://archive.org/details/prelinger and the films tools/archive-proxy/worker.js lists', episodes };
   writeFileSync(join(OUT, 'episodes.json'), `${JSON.stringify(json, null, 1)}\n`);
   console.log(`${episodes.length} episodes, ${readdirSync(join(OUT, 'captions')).length} with captions, into ${OUT}`);
 }

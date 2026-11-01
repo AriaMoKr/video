@@ -14,7 +14,7 @@ import { ScreenBar } from './roompanel.js';
 /** What everything is made of, as #rrggbb: the room's light is baked over it. */
 export const MATERIALS = {
   shelf: '#7a5434', shelfBack: '#4b3423', dark: '#2b221c', walnut: '#5d3b25', oak: '#a27a4b', teak: '#84542f',
-  woodgrain: '#93693f', chrome: '#cfd2d4', metal: '#5a5d61', plastic: '#333336', couch: '#7d3f2f', sofa: '#56705a',
+  woodgrain: '#93693f', mahogany: '#6a2f22', bakelite: '#3a2618', chrome: '#cfd2d4', metal: '#5a5d61', plastic: '#333336', couch: '#7d3f2f', sofa: '#56705a',
   seat: '#7a2028', stage: '#3e2c21', black: '#0b0b0c', rug: '#82322c', counter: '#7c5b3b', grille: '#8f7d60',
   shade: '#f2e5c6', case: '#1d1d20', glass: '#050607', curtain: '#6d1a22', rail: '#3a2a1e',
 };

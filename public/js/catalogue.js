@@ -2,7 +2,7 @@
 // tools/picks.js), what to call them, where their video is, and their captions. Pure, for the page
 // and the tests.
 
-export const DECADES = ['1940s', '1950s', '1960s', '1970s'];
+export const DECADES = ['1920s', '1930s', '1940s', '1950s', '1960s', '1970s'];
 /** archive.org, where the videos are: through the archive proxy (config.js videoProxy), or straight. */
 export const ARCHIVE = 'https://archive.org/';
 

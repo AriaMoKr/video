@@ -89,16 +89,24 @@ for (const mode of MODES) {
         assert.equal(h?.kind, 'tape', `tape ${episode} from in front: ${h?.kind}`);
         assert.equal(h.use, `tape:${episode}`);
       }
-      // Read left to right, row by row, a shelf's tapes go in the catalogue's order.
+      // Read left to right, row by row, facing its wall, a shelf's tapes go in the catalogue's order.
       const rows = new Map();
-      for (const t of F.tapes.filter((t) => t.face.axis === 'x' && t.face.facing === 1)) {
-        const key = t.face.y0.toFixed(3);
+      for (const t of F.tapes) {
+        const key = `${t.face.axis} ${t.face.at} ${t.face.y0.toFixed(3)}`;
         rows.set(key, [...(rows.get(key) ?? []), t]);
       }
       for (const row of rows.values()) {
-        const byPlace = [...row].sort((p, q) => q.face.a0 - p.face.a0); // facing the left wall, left is +z
-        const decades = byPlace.map((t) => episodes[t.episode].decade);
-        assert.deepEqual(decades, [...decades].sort(), 'decades left to right');
+        // Facing the left wall, left is +z, and facing the doorway's, +x; facing the right wall, -z.
+        const { axis, facing } = row[0].face, leftward = (axis === 'x') === (facing === 1) ? -1 : 1;
+        const order = [...row].sort((p, q) => leftward * (p.face.a0 - q.face.a0)).map((t) => t.episode);
+        assert.deepEqual(order, [...order].sort((a, b) => a - b), `left to right on the ${axis} ${facing} wall`);
+      }
+      // Nor do the shelves run into each other (a bay's solid box against the next one's is fine).
+      const solid = F.boxes.filter((b) => b.material === 'shelf' && b.solid !== false);
+      for (const [i, b] of solid.entries()) {
+        for (const c of solid.slice(i + 1)) {
+          assert.ok([0, 1, 2].some((k) => b.max[k] <= c.min[k] + 1e-9 || c.max[k] <= b.min[k] + 1e-9), `shelves overlap: ${b.min} ${b.max} and ${c.min} ${c.max}`);
+        }
       }
     }
     for (const s of F.screens) {
@@ -151,15 +159,17 @@ for (const mode of MODES) {
 test("the store's and the den's shelves take more rows as the catalogue grows, and stop short of the back wall", () => {
   const L = layoutRoom(ROOM);
   const rowsOf = (F) => new Set(F.tapes.map((t) => t.face.y0.toFixed(3))).size;
-  const many = Array.from({ length: 96 }, (_, i) => ({ decade: ['1940s', '1950s', '1960s', '1970s'][i % 4] }));
+  const decades = ['1920s', '1930s', '1940s', '1950s', '1960s', '1970s'];
+  const many = Array.from({ length: 192 }, (_, i) => ({ decade: decades[Math.floor((i * decades.length) / 192)] }));
   for (const mode of ['store', 'den']) {
     assert.equal(rowsOf(furnish(L, mode, episodes.slice(0, 40))), 4, `${mode}: four rows while they fit`);
     const F = furnish(L, mode, many);
     assert.equal(F.tapes.length, many.length);
-    assert.ok(rowsOf(F) > 4, `${mode}: ${rowsOf(F)} rows for ${many.length} tapes`);
+    assert.ok(rowsOf(F) > 4 && rowsOf(F) <= 8, `${mode}: ${rowsOf(F)} rows for ${many.length} tapes`);
     for (const b of F.boxes.filter((b) => b.material.startsWith('shelf'))) {
       assert.ok(b.min[2] >= L.z1 + 0.25 && b.max[1] <= L.height, `${mode}: a shelf at ${b.min} ${b.max}`);
     }
+    for (const s of F.signs) assert.ok(s.face.y1 <= L.height - 0.05, `${mode}: the ${s.text} sign under the ceiling`);
   }
 });
 

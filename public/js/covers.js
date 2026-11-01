@@ -6,10 +6,13 @@ import * as THREE from 'three';
 import { GOLD, SANS, SERIF, enamel } from './textures.js';
 
 /** Each decade's colour, on its tapes' spines and covers, its sign and its shelf's label. */
-export const DECADE_COLORS = { '1940s': '#7b2f2b', '1950s': '#1d6a6e', '1960s': '#b85d1c', '1970s': '#5f6a1f' };
+export const DECADE_COLORS = { '1920s': '#705634', '1930s': '#27466f', '1940s': '#7b2f2b', '1950s': '#1d6a6e', '1960s': '#b85d1c', '1970s': '#5f6a1f' };
 
-/** A cover's cell in the atlas, in pixels (the tapes' faces are 0.22 × 0.30 m), and how many to a row. */
-export const COVER = { width: 200, height: 272, columns: 10 };
+/**
+ * A cover's cell in the atlas, in pixels (the tapes' faces are 0.165 × 0.225 m), and how many to a
+ * row at least: more as the catalogue grows, so that the atlas stays within `high` pixels high.
+ */
+export const COVER = { width: 200, height: 272, columns: 10, high: 4096 };
 
 function canvas(w, h) {
   const c = document.createElement('canvas');
@@ -99,8 +102,9 @@ export async function loadStills(episodes, base = document.baseURI) {
 export class CoverAtlas {
   constructor(episodes, anisotropy = 1) {
     this.episodes = episodes;
-    const rows = Math.max(1, Math.ceil(episodes.length / COVER.columns));
-    this.canvas = canvas(COVER.width * COVER.columns, COVER.height * rows);
+    this.columns = Math.max(COVER.columns, Math.ceil(episodes.length / Math.floor(COVER.high / COVER.height)));
+    const rows = Math.max(1, Math.ceil(episodes.length / this.columns));
+    this.canvas = canvas(COVER.width * this.columns, COVER.height * rows);
     this.texture = canvasTexture(this.canvas, anisotropy);
     this.draw(new Map());
   }
@@ -108,14 +112,14 @@ export class CoverAtlas {
   /** Where episode i's cover is: [u0, v0, u1, v1] (v up, as the texture is flipped). */
   uv(i) {
     const W = this.canvas.width, H = this.canvas.height;
-    const x = (i % COVER.columns) * COVER.width, y = Math.floor(i / COVER.columns) * COVER.height;
+    const x = (i % this.columns) * COVER.width, y = Math.floor(i / this.columns) * COVER.height;
     return [x / W, 1 - (y + COVER.height) / H, (x + COVER.width) / W, 1 - y / H];
   }
 
   draw(stills) {
     const g = this.canvas.getContext('2d');
     this.episodes.forEach((e, i) => {
-      const x = (i % COVER.columns) * COVER.width, y = Math.floor(i / COVER.columns) * COVER.height;
+      const x = (i % this.columns) * COVER.width, y = Math.floor(i / this.columns) * COVER.height;
       g.save();
       g.translate(x, y);
       drawCover(g, e, stills.get(e.id));
