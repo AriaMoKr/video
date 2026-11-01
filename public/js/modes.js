@@ -345,9 +345,10 @@ const BUILD = {
   },
 
   screening(L, F, episodes) {
-    // The tapes either side of the way in: the 1940s and 1950s on the left, the 1960s and 1970s on the right.
-    shelves(L, F, episodes, { side: 'left', zStart: -0.75, rows: 6, decades: ['1940s', '1950s'] });
-    shelves(L, F, episodes, { side: 'right', zStart: -0.75, rows: 6, decades: ['1960s', '1970s'] });
+    // The tapes either side of the way in, from just inside it: the 1940s and 1950s on the left, ending
+    // before the first row of seats, and the 1960s and 1970s on the right, short of the window.
+    shelves(L, F, episodes, { side: 'left', zStart: -0.35, rows: 6, decades: ['1940s', '1950s'] });
+    shelves(L, F, episodes, { side: 'right', zStart: -0.35, rows: 6, decades: ['1960s', '1970s'] });
     const back = L.z1;
     F.boxes.push({ min: [-2.4, 0, back], max: [2.4, 0.3, back + 0.6], material: 'stage' });
     F.boxes.push({ min: [-1.58, 0.58, back], max: [1.58, Math.min(3.04, L.height - 0.08), back + 0.03], material: 'black' });

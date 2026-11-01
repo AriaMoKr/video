@@ -129,6 +129,23 @@ for (const mode of MODES) {
       assert.equal(h?.use, `seat:${i}`, `seat ${i}: ${h?.kind} ${h?.use}`);
     });
   });
+
+  test(`${mode}: one can walk up to every tape, however many there are`, () => {
+    const L = furnished(mode), F = L.furniture;
+    // Somewhere to stand within a step of the floor in front of it (the shelves run on as the
+    // catalogue grows, and must stop short of the seats and the window).
+    for (const { episode, face } of F.tapes) {
+      const fr = faceFrame(face);
+      let clear = false;
+      for (let d = MARGIN; d <= 0.8 && !clear; d += 0.05) {
+        for (let s = -0.4; s <= 0.4 && !clear; s += 0.05) {
+          const x = fr.center[0] + fr.normal[0] * d + fr.right[0] * s, z = fr.center[2] + fr.normal[2] * d + fr.right[2] * s;
+          clear = !blocked(F, x, z) && standable(L, x, z);
+        }
+      }
+      assert.ok(clear, `tape ${episode} (${episodes[episode].decade}): nowhere to stand in front of it`);
+    }
+  });
 }
 
 test('the floor behind furniture is not walkable, and a walk into it stops MARGIN short, sliding along', () => {

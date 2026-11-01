@@ -5,7 +5,7 @@ Guidance for Claude Code in this repository.
 ## What this is
 
 video: a WebXR room behind one of the Hallway's doors to watch old TV in, alone or in a shared
-session (three.js 0.186, plain ES modules, no bundler or build step): 42 public-domain episodes
+session (three.js 0.186, plain ES modules, no bundler or build step): 70 public-domain episodes
 from archive.org's Classic TV (https://archive.org/details/classic_tv), on tapes, played on the
 room's screens, in four modes (video store, the default; den; screening room; decades gallery).
 The room is AriaMoKr/RoomTemplateEmpty's (a checkout at `../RoomTemplateEmpty`): a floor, four
@@ -144,8 +144,9 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   show shared in a session (`video:show`: mode, episode, playing, where, when; `shareShow`,
   `takeShow`), and the frame loop.
 - `public/catalogue/`: `episodes.json`, `stills/<id>.jpg` and `captions/<id>.vtt`, written by
-  `tools/catalogue.mjs` from `tools/picks.js` (42 picks, 1940s–1970s: public domain and fit for the
-  family) and committed; the page never searches archive.org.
+  `tools/catalogue.mjs` from `tools/picks.js` (70 picks, 1940s–1970s: public domain and fit for the
+  family; a pick's `still` where the tool's own frame was not right) and committed; the page never
+  searches archive.org.
 - `tools/archive-proxy/`: `worker.js`, the Cloudflare Worker `video-archive-proxy` on vrlbry's
   account (https://video-archive-proxy.vrlbry.workers.dev/, beside vrlbry-zim-proxy, sharing the
   free plan's 100,000 requests a day): Range GETs of video files of classic_tv items marked public

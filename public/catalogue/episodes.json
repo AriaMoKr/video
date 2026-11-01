@@ -15,6 +15,19 @@
    "captions": null
   },
   {
+   "id": "the-lone-ranger-1949-s-01-e-04-legion-of-old-timers",
+   "show": "The Lone Ranger",
+   "title": "Legion of Old Timers",
+   "decade": "1940s",
+   "year": 1949,
+   "file": "The Lone Ranger 1949 (S01E04) Legion of old Timers.mp4",
+   "minutes": 23,
+   "width": 480,
+   "height": 360,
+   "still": "catalogue/stills/the-lone-ranger-1949-s-01-e-04-legion-of-old-timers.jpg",
+   "captions": null
+  },
+  {
    "id": "the-lone-ranger-1949-s-01-e-05-rustlers-hideout",
    "show": "The Lone Ranger",
    "title": "Rustlers' Hideout",
@@ -39,6 +52,19 @@
    "height": 240,
    "still": "catalogue/stills/1949NBC-Howdy_Doody_Uploaded-By-Jeice_The_Cuddly_Warrior.jpg",
    "captions": "catalogue/captions/1949NBC-Howdy_Doody_Uploaded-By-Jeice_The_Cuddly_Warrior.vtt"
+  },
+  {
+   "id": "Howdy_Doody_4",
+   "show": "Howdy Doody",
+   "title": "From August 3, 1949",
+   "decade": "1940s",
+   "year": 1949,
+   "file": "3rd_August1949.ia.mp4",
+   "minutes": 30,
+   "width": 320,
+   "height": 240,
+   "still": "catalogue/stills/Howdy_Doody_4.jpg",
+   "captions": "catalogue/captions/Howdy_Doody_4.vtt"
   },
   {
    "id": "captainvideo",
@@ -80,6 +106,32 @@
    "captions": "catalogue/captions/S1E01-Life_Of_Riley-10_04_49-Tonsils_824.vtt"
   },
   {
+   "id": "S1E03-Life_Of_Riley-10_18_1949_-_Egberts_Chemistry_Set",
+   "show": "The Life of Riley",
+   "title": "Egbert's Chemistry Set",
+   "decade": "1940s",
+   "year": 1949,
+   "file": "S1E03-Life_Of_Riley-10_18_1949-Egberts_Chemistry_Set.mp4",
+   "minutes": 22,
+   "width": 320,
+   "height": 240,
+   "still": "catalogue/stills/S1E03-Life_Of_Riley-10_18_1949_-_Egberts_Chemistry_Set.jpg",
+   "captions": "catalogue/captions/S1E03-Life_Of_Riley-10_18_1949_-_Egberts_Chemistry_Set.vtt"
+  },
+  {
+   "id": "S1E12-Life_Of_Riley-12_20_1949_-_Juniors_Birthday_Party",
+   "show": "The Life of Riley",
+   "title": "Junior's Birthday Party",
+   "decade": "1940s",
+   "year": 1949,
+   "file": "S1E12-Life_Of_Riley-12_20_1949-Juniors_Birthday_Party.mp4",
+   "minutes": 23,
+   "width": 320,
+   "height": 240,
+   "still": "catalogue/stills/S1E12-Life_Of_Riley-12_20_1949_-_Juniors_Birthday_Party.jpg",
+   "captions": "catalogue/captions/S1E12-Life_Of_Riley-12_20_1949_-_Juniors_Birthday_Party.vtt"
+  },
+  {
    "id": "Public_Prosecutor--Missing_Hour",
    "show": "Public Prosecutor",
    "title": "The Case of the Missing Hour",
@@ -91,6 +143,19 @@
    "height": 320,
    "still": "catalogue/stills/Public_Prosecutor--Missing_Hour.jpg",
    "captions": "catalogue/captions/Public_Prosecutor--Missing_Hour.vtt"
+  },
+  {
+   "id": "Public_Prosecutor--Dead_Mans_Voice",
+   "show": "Public Prosecutor",
+   "title": "The Case of the Dead Man's Voice",
+   "decade": "1940s",
+   "year": 1948,
+   "file": "PublicProsecutor--Dead_Mans_Voice.mp4",
+   "minutes": 17,
+   "width": 427,
+   "height": 320,
+   "still": "catalogue/stills/Public_Prosecutor--Dead_Mans_Voice.jpg",
+   "captions": "catalogue/captions/Public_Prosecutor--Dead_Mans_Voice.vtt"
   },
   {
    "id": "Mama1950",
@@ -132,6 +197,58 @@
    "captions": "catalogue/captions/Jack_Benny_11_04_1951.vtt"
   },
   {
+   "id": "SpacePatrolS01e43TheSpacePatrolCodeBelt",
+   "show": "Space Patrol",
+   "title": "The Space Patrol Code Belt",
+   "decade": "1950s",
+   "year": 1951,
+   "file": "Space Patrol - S01e43 - The Space Patrol Code Belt.mp4",
+   "minutes": 30,
+   "width": 617,
+   "height": 458,
+   "still": "catalogue/stills/SpacePatrolS01e43TheSpacePatrolCodeBelt.jpg",
+   "captions": null
+  },
+  {
+   "id": "RacketSquadTheSaltedMine1951",
+   "show": "Racket Squad",
+   "title": "The Salted Mine",
+   "decade": "1950s",
+   "year": 1951,
+   "file": "RacketSquad-TheSaltedMine.mp4",
+   "minutes": 25,
+   "width": 640,
+   "height": 480,
+   "still": "catalogue/stills/RacketSquadTheSaltedMine1951.jpg",
+   "captions": "catalogue/captions/RacketSquadTheSaltedMine1951.vtt"
+  },
+  {
+   "id": "Burns-Allen-Show_S2E7_Christmas",
+   "show": "Burns and Allen",
+   "title": "The Christmas Episode",
+   "decade": "1950s",
+   "year": 1951,
+   "file": "Burns-Allen-Show_S2E7_Christmas.mp4",
+   "minutes": 29,
+   "width": 640,
+   "height": 480,
+   "still": "catalogue/stills/Burns-Allen-Show_S2E7_Christmas.jpg",
+   "captions": "catalogue/captions/Burns-Allen-Show_S2E7_Christmas.vtt"
+  },
+  {
+   "id": "Tales_Of_Tomorrow_-_The_Search_For_The_Flying_Saucer",
+   "show": "Tales of Tomorrow",
+   "title": "The Search for the Flying Saucer",
+   "decade": "1950s",
+   "year": 1951,
+   "file": "TOT_The_Search_For_The_Flying_Saucer.mp4",
+   "minutes": 27,
+   "width": 512,
+   "height": 384,
+   "still": "catalogue/stills/Tales_Of_Tomorrow_-_The_Search_For_The_Flying_Saucer.jpg",
+   "captions": "catalogue/captions/Tales_Of_Tomorrow_-_The_Search_For_The_Flying_Saucer.vtt"
+  },
+  {
    "id": "Tales_Of_Tomorrow_-_Ahead_Of_His_Time",
    "show": "Tales of Tomorrow",
    "title": "Ahead of His Time",
@@ -143,6 +260,32 @@
    "height": 400,
    "still": "catalogue/stills/Tales_Of_Tomorrow_-_Ahead_Of_His_Time.jpg",
    "captions": "catalogue/captions/Tales_Of_Tomorrow_-_Ahead_Of_His_Time.vtt"
+  },
+  {
+   "id": "ColgateComedyHourWithAbbottAndCostelloAndErrolFlynn",
+   "show": "The Colgate Comedy Hour",
+   "title": "Abbott and Costello, with Errol Flynn",
+   "decade": "1950s",
+   "year": 1952,
+   "file": "ColgateComedyHour-abbottAndCostelloWithErrolFlyn.mp4",
+   "minutes": 50,
+   "width": 640,
+   "height": 480,
+   "still": "catalogue/stills/ColgateComedyHourWithAbbottAndCostelloAndErrolFlynn.jpg",
+   "captions": "catalogue/captions/ColgateComedyHourWithAbbottAndCostelloAndErrolFlynn.vtt"
+  },
+  {
+   "id": "My_Little_Margie--Friend_for_Roberta",
+   "show": "My Little Margie",
+   "title": "A Friend for Roberta",
+   "decade": "1950s",
+   "year": 1952,
+   "file": "MyLittleMargie101--Friend_for_Roberta.mp4",
+   "minutes": 26,
+   "width": 405,
+   "height": 304,
+   "still": "catalogue/stills/My_Little_Margie--Friend_for_Roberta.jpg",
+   "captions": "catalogue/captions/My_Little_Margie--Friend_for_Roberta.vtt"
   },
   {
    "id": "TheBigLittleJesus",
@@ -171,6 +314,32 @@
    "captions": "catalogue/captions/dingdongschool.vtt"
   },
   {
+   "id": "topper-s-01-e-01-topper-meets-the-ghosts-1953-10-09",
+   "show": "Topper",
+   "title": "Topper Meets the Ghosts",
+   "decade": "1950s",
+   "year": 1953,
+   "file": "Topper - S01E01 - Topper Meets The Ghosts (1953-10-09).mp4",
+   "minutes": 26,
+   "width": 640,
+   "height": 480,
+   "still": "catalogue/stills/topper-s-01-e-01-topper-meets-the-ghosts-1953-10-09.jpg",
+   "captions": null
+  },
+  {
+   "id": "Life_with_Elizabeth",
+   "show": "Life with Elizabeth",
+   "title": "An episode from 1953",
+   "decade": "1950s",
+   "year": 1953,
+   "file": "Life_With_Elizabeth.ia.mp4",
+   "minutes": 25,
+   "width": 320,
+   "height": 240,
+   "still": "catalogue/stills/Life_with_Elizabeth.jpg",
+   "captions": "catalogue/captions/Life_with_Elizabeth.vtt"
+  },
+  {
    "id": "SherlockHolmes-TheCaseofLadyBeryl",
    "show": "Sherlock Holmes",
    "title": "The Case of Lady Beryl",
@@ -195,6 +364,32 @@
    "height": 240,
    "still": "catalogue/stills/SherlockHolmes-TheCaseoftheShyBallerina.jpg",
    "captions": "catalogue/captions/SherlockHolmes-TheCaseoftheShyBallerina.vtt"
+  },
+  {
+   "id": "AdventuresOfSupermanStampDayForSchoolChildren",
+   "show": "Stamp Day for Superman",
+   "title": "With George Reeves",
+   "decade": "1950s",
+   "year": 1954,
+   "file": "Adventures of Superman Stamp Day For School Children.mp4",
+   "minutes": 22,
+   "width": 650,
+   "height": 480,
+   "still": "catalogue/stills/AdventuresOfSupermanStampDayForSchoolChildren.jpg",
+   "captions": "catalogue/captions/AdventuresOfSupermanStampDayForSchoolChildren.vtt"
+  },
+  {
+   "id": "Pinky_Lee_Show",
+   "show": "The Pinky Lee Show",
+   "title": "An episode from 1954",
+   "decade": "1950s",
+   "year": 1954,
+   "file": "Pinky_Lee.ia.mp4",
+   "minutes": 28,
+   "width": 320,
+   "height": 240,
+   "still": "catalogue/stills/Pinky_Lee_Show.jpg",
+   "captions": "catalogue/captions/Pinky_Lee_Show.vtt"
   },
   {
    "id": "Robin_Hood_01_The_Coming_Of_Robin_Hood",
@@ -236,6 +431,19 @@
    "captions": "catalogue/captions/OurMissBrooks-HomeCookedMeal.vtt"
   },
   {
+   "id": "Super-Circus_1956",
+   "show": "Super Circus",
+   "title": "An episode from 1956",
+   "decade": "1950s",
+   "year": 1956,
+   "file": "SuperCircus1956.mp4",
+   "minutes": 29,
+   "width": 640,
+   "height": 480,
+   "still": "catalogue/stills/Super-Circus_1956.jpg",
+   "captions": "catalogue/captions/Super-Circus_1956.vtt"
+  },
+  {
    "id": "Annie_Oakley_Sharp_Shootin_Annie",
    "show": "Annie Oakley",
    "title": "Sharp Shootin' Annie",
@@ -273,6 +481,19 @@
    "height": 464,
    "still": "catalogue/stills/I_Married_Joan_EP79_Neighbors.jpg",
    "captions": "catalogue/captions/I_Married_Joan_EP79_Neighbors.vtt"
+  },
+  {
+   "id": "OZZIE_AND_HARRIET_ep_Halloween_Party",
+   "show": "Ozzie and Harriet",
+   "title": "Halloween Party",
+   "decade": "1950s",
+   "year": null,
+   "file": "OZZIE_AND_HARRIET_ep_Halloween_Party.mp4",
+   "minutes": 25,
+   "width": 432,
+   "height": 320,
+   "still": "catalogue/stills/OZZIE_AND_HARRIET_ep_Halloween_Party.jpg",
+   "captions": "catalogue/captions/OZZIE_AND_HARRIET_ep_Halloween_Party.vtt"
   },
   {
    "id": "OzzieAndHarriet-BusyChristmas",
@@ -327,6 +548,45 @@
    "captions": "catalogue/captions/OSB-02_Night_Of_April_14th.vtt"
   },
   {
+   "id": "Bonanza-TheAbductionEp2x08",
+   "show": "Bonanza",
+   "title": "The Abduction",
+   "decade": "1960s",
+   "year": 1960,
+   "file": "Bonanza-TheAbductionEp2x08.mp4",
+   "minutes": 49,
+   "width": 626,
+   "height": 480,
+   "still": "catalogue/stills/Bonanza-TheAbductionEp2x08.jpg",
+   "captions": "catalogue/captions/Bonanza-TheAbductionEp2x08.vtt"
+  },
+  {
+   "id": "BarkingDog1961",
+   "show": "Ozzie and Harriet",
+   "title": "The Barking Dog",
+   "decade": "1960s",
+   "year": 1961,
+   "file": "BarkingDog.ia.mp4",
+   "minutes": 29,
+   "width": 320,
+   "height": 240,
+   "still": "catalogue/stills/BarkingDog1961.jpg",
+   "captions": "catalogue/captions/BarkingDog1961.vtt"
+  },
+  {
+   "id": "TheBigPicture516",
+   "show": "The Big Picture",
+   "title": "The Army Nurse Story",
+   "decade": "1960s",
+   "year": 1961,
+   "file": "The Big Picture 516 The Army Nurse Story 1961.mp4",
+   "minutes": 28,
+   "width": 474,
+   "height": 360,
+   "still": "catalogue/stills/TheBigPicture516.jpg",
+   "captions": "catalogue/captions/TheBigPicture516.vtt"
+  },
+  {
    "id": "Beverly_Hillbillies_Ep01_The_Clampetts_Strike_Oil",
    "show": "The Beverly Hillbillies",
    "title": "The Clampetts Strike Oil",
@@ -338,6 +598,32 @@
    "height": 384,
    "still": "catalogue/stills/Beverly_Hillbillies_Ep01_The_Clampetts_Strike_Oil.jpg",
    "captions": "catalogue/captions/Beverly_Hillbillies_Ep01_The_Clampetts_Strike_Oil.vtt"
+  },
+  {
+   "id": "Beverly_Hillbillies_Ep02_Getting_Settled",
+   "show": "The Beverly Hillbillies",
+   "title": "Getting Settled",
+   "decade": "1960s",
+   "year": 1962,
+   "file": "BH02_Getting_Settled.mp4",
+   "minutes": 25,
+   "width": 512,
+   "height": 384,
+   "still": "catalogue/stills/Beverly_Hillbillies_Ep02_Getting_Settled.jpg",
+   "captions": "catalogue/captions/Beverly_Hillbillies_Ep02_Getting_Settled.vtt"
+  },
+  {
+   "id": "Beverly_Hillbillies_Ep06_Trick_Or_Treat",
+   "show": "The Beverly Hillbillies",
+   "title": "Trick or Treat",
+   "decade": "1960s",
+   "year": 1962,
+   "file": "BH06_Trick_Or_Treat.mp4",
+   "minutes": 25,
+   "width": 496,
+   "height": 368,
+   "still": "catalogue/stills/Beverly_Hillbillies_Ep06_Trick_Or_Treat.jpg",
+   "captions": "catalogue/captions/Beverly_Hillbillies_Ep06_Trick_Or_Treat.vtt"
   },
   {
    "id": "Beverly_Hillbillies_Ep13_Home_For_Christmas",
@@ -418,6 +704,32 @@
    "captions": "catalogue/captions/TLS_Lucy_And_Viv_Put_In_A_Shower.vtt"
   },
   {
+   "id": "TLS_Lucys_Barbershop_Quartet",
+   "show": "The Lucy Show",
+   "title": "Lucy's Barbershop Quartet",
+   "decade": "1960s",
+   "year": 1963,
+   "file": "TLS_Lucys_Barbershop_Quartet.mp4",
+   "minutes": 26,
+   "width": 400,
+   "height": 304,
+   "still": "catalogue/stills/TLS_Lucys_Barbershop_Quartet.jpg",
+   "captions": "catalogue/captions/TLS_Lucys_Barbershop_Quartet.vtt"
+  },
+  {
+   "id": "Andy_Griffith_Opie_and_the_Spoiled_Kid",
+   "show": "The Andy Griffith Show",
+   "title": "Opie and the Spoiled Kid",
+   "decade": "1960s",
+   "year": 1963,
+   "file": "SPOILED.mp4",
+   "minutes": 24,
+   "width": 304,
+   "height": 228,
+   "still": "catalogue/stills/Andy_Griffith_Opie_and_the_Spoiled_Kid.jpg",
+   "captions": "catalogue/captions/Andy_Griffith_Opie_and_the_Spoiled_Kid.vtt"
+  },
+  {
    "id": "Andy-Griffith-Show_Andy-Discovers-America",
    "show": "The Andy Griffith Show",
    "title": "Andy Discovers America",
@@ -444,6 +756,45 @@
    "captions": "catalogue/captions/Andy_Griffith_The_Loaded_Goat.vtt"
   },
   {
+   "id": "Andy_Griffith_A_Wife_For_Andy",
+   "show": "The Andy Griffith Show",
+   "title": "A Wife for Andy",
+   "decade": "1960s",
+   "year": 1963,
+   "file": "WIFE.mp4",
+   "minutes": 24,
+   "width": 304,
+   "height": 228,
+   "still": "catalogue/stills/Andy_Griffith_A_Wife_For_Andy.jpg",
+   "captions": "catalogue/captions/Andy_Griffith_A_Wife_For_Andy.vtt"
+  },
+  {
+   "id": "Wacky_Wizardry",
+   "show": "Mack and Myer for Hire",
+   "title": "Wacky Wizardry",
+   "decade": "1960s",
+   "year": 1963,
+   "file": "Wacky_Wizardry.ia.mp4",
+   "minutes": 11,
+   "width": 320,
+   "height": 240,
+   "still": "catalogue/stills/Wacky_Wizardry.jpg",
+   "captions": "catalogue/captions/Wacky_Wizardry.vtt"
+  },
+  {
+   "id": "Mack_and_Myer_For_Hire_Dueling_Fools",
+   "show": "Mack and Myer for Hire",
+   "title": "Dueling Fools",
+   "decade": "1960s",
+   "year": 1963,
+   "file": "MackandMyerForHire-DuelingFools.mp4",
+   "minutes": 11,
+   "width": 640,
+   "height": 480,
+   "still": "catalogue/stills/Mack_and_Myer_For_Hire_Dueling_Fools.jpg",
+   "captions": "catalogue/captions/Mack_and_Myer_For_Hire_Dueling_Fools.vtt"
+  },
+  {
    "id": "PetticoatJunction",
    "show": "Petticoat Junction",
    "title": "From January 7, 1964",
@@ -468,6 +819,19 @@
    "height": 480,
    "still": "catalogue/stills/TheBigPicture-USArmyinSpaceandUndertheSea.jpg",
    "captions": "catalogue/captions/TheBigPicture-USArmyinSpaceandUndertheSea.vtt"
+  },
+  {
+   "id": "FortBliss",
+   "show": "The Big Picture",
+   "title": "Fort Bliss, Heart of Army Air Defense",
+   "decade": "1970s",
+   "year": 1972,
+   "file": "FortBliss.mp4",
+   "minutes": 28,
+   "width": 600,
+   "height": 480,
+   "still": "catalogue/stills/FortBliss.jpg",
+   "captions": "catalogue/captions/FortBliss.vtt"
   },
   {
    "id": "Dustys_Trail_2",
