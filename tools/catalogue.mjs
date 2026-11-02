@@ -8,8 +8,10 @@
 //                      older pass of it), where the item has them (and its pick doesn't say they are
 //                      no use)
 // Each item is checked as the archive proxy checks it (worker.js refusal: in classic_tv or one of
-// its decades, universal_newsreels or prelinger and marked public domain, or listed by name), its
-// pick's kind against where it is (kindsOf), and its video chosen: an mp4 that browsers play (h.264, or the upload itself), the one its captions
+// its decades, universal_newsreels or prelinger and marked public domain, listed by name, or in an
+// owner's collection under a Creative Commons licence), its pick's kind against where it is
+// (kindsOf), what it is shown under (licensing: public domain in the US, or its owner's licence and
+// whom to credit), and its video chosen: an mp4 that browsers play (h.264, or the upload itself), the one its captions
 // were made from where there is one. Only the video itself is not copied: the page streams it from
 // archive.org through the proxy.
 //   node tools/catalogue.mjs [--only <id>]
@@ -20,7 +22,7 @@ import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { PUBLIC } from './serve.mjs';
 import { PICKS } from './picks.js';
-import { LISTED, refusal } from './archive-proxy/worker.js';
+import { CREATIVE_COMMONS, LISTED, OWNERS, PUBLIC_DOMAIN, refusal } from './archive-proxy/worker.js';
 
 const ARCHIVE = 'https://archive.org';
 const OUT = join(PUBLIC, 'catalogue');
@@ -67,15 +69,34 @@ export function chooseFiles(files, named) {
 /**
  * The kinds (public/js/catalogue.js KINDS) an item's pick may say it is, by where it is: newsreels
  * from universal_newsreels, short films from the Prelinger Archives, television from classic_tv;
- * a film the proxy lists by name is a silent film or a cartoon.
+ * a film the proxy lists by name is a silent film or a cartoon, and an owner's (OWNERS) television
+ * or a short film.
  * @param {{ identifier?: string, collection?: string | string[] }} md
  */
 export function kindsOf(md) {
   if (LISTED.has(String(md.identifier))) return ['silent', 'cartoon'];
   const collections = [].concat(md.collection ?? []).map(String);
+  if (collections.some((c) => OWNERS.has(c))) return ['tv', 'film'];
   if (collections.includes('universal_newsreels')) return ['newsreel'];
   if (collections.includes('prelinger')) return ['film'];
   return ['tv'];
+}
+
+/**
+ * What the room shows an item under, as the proxy lets it through (worker.js refusal): public domain
+ * in the US (licence null) when the proxy lists it or it is marked so; else the Creative Commons
+ * licence its owner put it under (OWNERS), as its deed's https address, and whom to credit: the
+ * pick's `credit`, else the owner.
+ * @param {{ identifier?: string, collection?: string | string[], licenseurl?: string }} md
+ * @param {string} [credit]
+ * @returns {{ licence: string | null, credit: string | null }}
+ */
+export function licensing(md, credit) {
+  const url = String(md.licenseurl ?? '');
+  if (LISTED.has(String(md.identifier)) || PUBLIC_DOMAIN.test(url)) return { licence: null, credit: null };
+  const owner = [].concat(md.collection ?? []).map((c) => OWNERS.get(String(c))).find(Boolean);
+  if (!owner || !CREATIVE_COMMONS.test(url)) throw new Error(`${md.identifier}: neither public domain nor under its owner's Creative Commons licence`);
+  return { licence: url.replace(/^http:/, 'https:').replace(/\/?$/, '/'), credit: credit ?? owner };
 }
 
 async function get(url, type = 'json') {
@@ -97,6 +118,7 @@ async function catalogue(pick) {
   if (why) throw new Error(`${pick.id}: ${why}`);
   const kind = pick.kind ?? 'tv';
   if (!kindsOf(item.metadata).includes(kind)) throw new Error(`${pick.id}: not a ${kind}, by where it is: ${kindsOf(item.metadata).join(' or ')}`);
+  const { licence, credit } = licensing(item.metadata, pick.credit);
   const chosen = chooseFiles(item.files ?? [], pick.file);
   if (!chosen) throw new Error(`${pick.id}: no video a browser plays`);
   const { video } = chosen;
@@ -113,7 +135,7 @@ async function catalogue(pick) {
   const still = thumbs.reduce((best, t) => (Math.abs(t.at - at) < Math.abs(best.at - at) ? t : best));
   writeFileSync(join(OUT, 'stills', `${pick.id}.jpg`), await get(`${ARCHIVE}/download/${pick.id}/${encodeURI(still.name)}`, 'bytes'));
   if (captions) writeFileSync(join(OUT, 'captions', `${pick.id}.vtt`), await get(`${ARCHIVE}/download/${pick.id}/${encodeURI(captions.name)}`, 'text'));
-  console.log(`${pick.id}: ${video.name} [${video.format}] ${video.width}x${video.height}, ${Math.round(length / 60)} min, still at ${still.at} s${captions ? ', captions' : ''}`);
+  console.log(`${pick.id}: ${video.name} [${video.format}] ${video.width}x${video.height}, ${Math.round(length / 60)} min, still at ${still.at} s${captions ? ', captions' : ''}${licence ? `, ${licence} (${credit})` : ''}`);
   return {
     id: pick.id,
     show: pick.show,
@@ -127,6 +149,8 @@ async function catalogue(pick) {
     height: Number(video.height) || null,
     still: `catalogue/stills/${pick.id}.jpg`,
     captions: captions ? `catalogue/captions/${pick.id}.vtt` : null,
+    licence,
+    credit,
   };
 }
 
@@ -140,7 +164,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   if (values.only) {
     console.log(JSON.stringify(episodes[0], null, 2));
   } else {
-    const json = { about: 'The episodes the room shows (tools/picks.js, written by tools/catalogue.mjs), from https://archive.org/details/classic_tv, https://archive.org/details/universal_newsreels, https://archive.org/details/prelinger and the films tools/archive-proxy/worker.js lists', episodes };
+    const json = { about: "The episodes the room shows (tools/picks.js, written by tools/catalogue.mjs), from https://archive.org/details/classic_tv, https://archive.org/details/universal_newsreels, https://archive.org/details/prelinger, the films tools/archive-proxy/worker.js lists and its owners' collections; public domain in the US, or under the Creative Commons licence (licence) of their owner (credit)", episodes };
     writeFileSync(join(OUT, 'episodes.json'), `${JSON.stringify(json, null, 1)}\n`);
     console.log(`${episodes.length} episodes, ${readdirSync(join(OUT, 'captions')).length} with captions, into ${OUT}`);
   }

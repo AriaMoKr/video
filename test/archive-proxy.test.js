@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import worker, { ARCHIVE, LISTED, allowOrigin, handle, refusal } from '../tools/archive-proxy/worker.js';
+import worker, { ARCHIVE, LISTED, OWNERS, allowOrigin, handle, refusal } from '../tools/archive-proxy/worker.js';
 
 const FILE = 'https://proxy.example/download/Dragnet_A_Gun_For_Christmas/S02E07_A_Gun_For_Christmas.mp4';
 const PD = { collection: ['classic_tv_1950s', 'classic_tv', 'television'], licenseurl: 'http://creativecommons.org/licenses/publicdomain/' };
@@ -49,8 +49,8 @@ test('it answers a preflight, and refuses what is not a part of a video file of 
   assert.equal(refused.headers.get('access-control-allow-origin'), '*', 'a page can read why');
 });
 
-test('it relays only items in classic_tv or one of its decades, universal_newsreels or prelinger that are marked public domain, and those it lists', async () => {
-  const OTHER = 'not in classic_tv, universal_newsreels or prelinger, nor listed';
+test("it relays only items in classic_tv or one of its decades, universal_newsreels or prelinger that are marked public domain, those it lists, and owners' films under Creative Commons", async () => {
+  const OTHER = "not in classic_tv, universal_newsreels, prelinger or an owner's collection, nor listed";
   assert.equal(refusal(PD), null);
   assert.equal(refusal({ collection: 'classic_tv', licenseurl: 'http://creativecommons.org/publicdomain/mark/1.0/' }), null);
   assert.equal(refusal({ collection: ['classic_tv_1970s'], licenseurl: 'https://creativecommons.org/publicdomain/zero/1.0/' }), null);
@@ -68,6 +68,19 @@ test('it relays only items in classic_tv or one of its decades, universal_newsre
   for (const id of LISTED.keys()) assert.equal(refusal({ identifier: id, collection: ['silenthalloffame'] }), null, id);
   assert.equal(refusal({ identifier: 'SteamboatBillJr_2014', collection: ['silenthalloffame'] }), OTHER);
   assert.equal(refusal({ collection: ['opensource_movies'], licenseurl: PD.licenseurl }), OTHER, 'marked, but neither in those nor listed');
+  // An owner's own films, under any of Creative Commons' six licences (or marked public domain).
+  assert.equal(OWNERS.get('calacademyvideo'), 'California Academy of Sciences');
+  for (const licenseurl of ['http://creativecommons.org/licenses/by-nc-nd/4.0/', 'https://creativecommons.org/licenses/by/4.0/', 'http://creativecommons.org/licenses/by-nc-sa/3.0/us/', 'http://creativecommons.org/licenses/by-sa/2.0', 'http://creativecommons.org/licenses/by-nd/2.5/', PD.licenseurl]) {
+    assert.equal(refusal({ collection: ['calacademyvideo'], licenseurl }), null, `Science in Action: ${licenseurl}`);
+  }
+  const UNLICENSED = 'not under a Creative Commons licence, nor marked public domain';
+  assert.equal(refusal({ collection: ['calacademyvideo'] }), UNLICENSED, 'unmarked, as many of its films are');
+  for (const licenseurl of ['http://creativecommons.org/licenses/sampling+/1.0/', 'https://example.org/licenses/by/4.0/']) {
+    assert.equal(refusal({ collection: ['calacademyvideo'], licenseurl }), UNLICENSED, licenseurl);
+  }
+  // Anyone else's licence isn't trusted: an uploader's, on someone else's film.
+  assert.equal(refusal({ collection: ['opensource_movies'], licenseurl: 'http://creativecommons.org/licenses/by-nc-nd/3.0/' }), OTHER);
+  assert.equal(refusal({ collection: ['classic_tv'], licenseurl: 'https://creativecommons.org/licenses/by/4.0/' }), 'not marked public domain');
   assert.equal(refusal(undefined), 'no such item');
   const { fetch, asked } = archive({ items: { Bonanza_x: { collection: ['classic_tv'] } } });
   const items = new Map();

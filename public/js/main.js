@@ -23,7 +23,7 @@ import { buildFurniture } from './furniture.js';
 import { CoverAtlas, loadStills } from './covers.js';
 import { RoomPanel } from './roompanel.js';
 import { Player } from './player.js';
-import { clock, detailsUrl, episodeName, proxyOf, readCatalogue } from './catalogue.js';
+import { PUBLIC_DOMAIN_US, clock, detailsUrl, episodeName, proxyOf, readCatalogue, rightsLine } from './catalogue.js';
 import { buildRoom } from './scene.js';
 import { Controls } from './controls.js';
 import { Overlay } from './overlay.js';
@@ -462,6 +462,7 @@ const PICK = { store: 'Choose a tape to watch it', den: 'Choose a tape to watch 
 /** @type {import('./catalogue.js').Episode[]} */
 let episodes = [];
 let names = []; // episodeName of each, made once
+let rights = PUBLIC_DOMAIN_US; // under what they are shown, said with nothing chosen: some may be under their owners' licences
 let covers = null; // covers.js CoverAtlas, of every episode
 let stills = new Map();
 let furniture = null; // furniture.js, of the mode
@@ -609,9 +610,9 @@ function showShowing() {
   const status = player.status();
   const time = e ? `${clock(player.time)} / ${clock(player.duration)}` : '';
   shownSecond = Math.floor(player.time);
-  const state = { mode, shelving, name: e ? names[player.episode] : null, status: e ? status : PICK[mode], time, playing: player.playing, captions: player.captions, hasCaptions: !!e?.captions };
+  const state = { mode, shelving, name: e ? names[player.episode] : null, status: e ? status : PICK[mode], time, playing: player.playing, captions: player.captions, hasCaptions: !!e?.captions, rights: e ? rightsLine(e) : rights };
   roomPanel.set(state);
-  overlay.setShowing({ ...state, episode: player.episode, link: e ? detailsUrl(e) : null, status: e && !e.captions ? `${status}, no captions` : status, hint: CHOOSE[mode] });
+  overlay.setShowing({ ...state, episode: player.episode, link: e ? detailsUrl(e) : null, status: e && !e.captions ? `${status}, no captions` : status, hint: CHOOSE[mode], licence: e?.licence ?? null, credit: e?.credit ?? null });
   if (!furniture || !F) return;
   furniture.bar.set(state);
   const active = activeScreen();
@@ -701,6 +702,7 @@ async function loadCatalogue() {
     overlay.toast('The episodes could not be loaded: try again later', 6);
   }
   names = episodes.map(episodeName);
+  rights = episodes.some((e) => e.licence) ? `${PUBLIC_DOMAIN_US}, or under their owners’ licences` : PUBLIC_DOMAIN_US;
   player.episodes = episodes;
   overlay.setEpisodes(episodes);
   covers = new CoverAtlas(episodes, anisotropy);

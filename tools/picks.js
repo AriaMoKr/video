@@ -29,12 +29,18 @@
 // sound, as ffmpeg's volumedetect shows of one with a sound track at all: a score added since is
 // not the film's), and nothing burnt in over it.
 //
+// Films still under copyright may come from their owners' own collections, under the Creative
+// Commons licence the owner gave them (worker.js OWNERS: the California Academy of Sciences'), which
+// the room shows with whom to credit; never an upload's licence, which is only as good as the
+// uploader's right to give it.
+//
 // Each: the item's id, the show (or the star, studio or sponsor) and the episode's title as the
 // room shows them, its kind where it is not television (public/js/catalogue.js KINDS: 'silent' and
 // 'cartoon' for the films the proxy lists, 'film' for the Prelinger Archives', 'newsreel'), the
 // year it was first shown where it is known (else the decade alone), and, where the tool's own
 // choice is not the right one, `file` (the video) or `still` (the frame on its tape, in seconds),
-// and `captions: false` where archive.org's speech to text is no use. Each decade's in the kinds'
+// `captions: false` where archive.org's speech to text is no use, and `credit` where a licensed
+// film's is not its owner's (OWNERS). Each decade's in the kinds'
 // order, as its tapes stand on the shelves: its television, its silent films, cartoons and short
 // films, then its newsreels.
 

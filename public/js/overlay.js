@@ -17,7 +17,7 @@
 // (common's tv.js) the remote reaches only the card, so Wave is in it, and there is nothing to copy
 // a link to: the invite link is shown to type on another device. Fullscreen and Enter VR are not
 // offered there (main.js).
-import { DECADES, KINDS, KIND_ICONS, KIND_NAMES, episodeName } from './catalogue.js';
+import { DECADES, KINDS, KIND_ICONS, KIND_NAMES, PUBLIC_DOMAIN_US, episodeName, licenceName } from './catalogue.js';
 import { MODES, MODE_NAMES, SHELVINGS, SHELVING_NAMES } from './modes.js';
 
 function el(tag, attrs = {}, ...children) {
@@ -189,6 +189,8 @@ export class Overlay {
     this.shelvingChoices = shelvings.inputs;
     this.now = el('p', { class: 'now' });
     this._now = '';
+    // Under it, what the episode is shown under: its owner and licence, or public domain in the US.
+    this.rights = el('p', { class: 'rights', hidden: '' });
     const action = (name, label, attrs = {}) => {
       const b = el('button', { class: 'chip', type: 'button', ...attrs }, label);
       b.addEventListener('click', () => this.onPlayer(name));
@@ -214,6 +216,7 @@ export class Overlay {
       this.modes,
       this.shelving,
       this.now,
+      this.rights,
       el('div', { class: 'actions' }, this.play, this.next, this.captions, this.stop, this.episodesToggle),
       this.episodes);
     this.card = el('nav', { class: 'card', 'aria-label': room.title },
@@ -380,18 +383,26 @@ export class Overlay {
 
   /**
    * What is showing: the episode (its index, or -1), its name and its page on archive.org, how it
-   * is going (status, and the time as "3:12 / 24:00"), whether it plays, and the captions (on or
-   * off for every episode: the status says when one has none).
-   * @param {{ episode: number, name: string | null, link: string | null, status: string, time: string, playing: boolean, captions: boolean, hasCaptions: boolean, hint: string }} s
+   * is going (status, and the time as "3:12 / 24:00"), whether it plays, the captions (on or off
+   * for every episode: the status says when one has none), and what it is shown under: its owner's
+   * Creative Commons licence (its deed's address) and whom to credit, as catalogue.js rightsLine
+   * says them, the licence linked; or, with none, public domain in the US.
+   * @param {{ episode: number, name: string | null, link: string | null, status: string, time: string, playing: boolean, captions: boolean, hasCaptions: boolean, hint: string,
+   *   licence?: string | null, credit?: string | null }} s
    */
   setShowing(s) {
-    const key = [s.episode, s.status, s.time, s.hint].join('|');
+    const key = [s.episode, s.status, s.time, s.hint, s.licence, s.credit].join('|');
     if (key !== this._now) {
       this._now = key;
       if (s.name && s.link) {
         const a = el('a', { href: s.link, target: '_blank', rel: 'noopener' }, s.name);
         this.now.replaceChildren(a, ` · ${s.status}${s.time ? ` · ${s.time}` : ''}`);
       } else this.now.replaceChildren(s.hint);
+      const licence = licenceName(s.licence);
+      this.rights.replaceChildren(...(licence
+        ? [`© ${s.credit} · `, el('a', { href: s.licence, target: '_blank', rel: 'license noopener' }, licence)]
+        : [PUBLIC_DOMAIN_US]));
+      this.rights.hidden = !(s.name && s.link);
     }
     const play = s.playing ? 'Pause' : 'Play';
     if (this.play.textContent !== play) this.play.textContent = play;

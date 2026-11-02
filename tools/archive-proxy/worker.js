@@ -8,11 +8,13 @@
 // answer (206, the part), streamed through. Only the video files (.mp4, .webm, .ogv) of items in
 // archive.org's classic_tv collection (or one of its decades, classic_tv_1950s and so on), in its
 // universal_newsreels (which Universal gave to the public in 1976) or in the Prelinger Archives
-// that are marked public domain, and of the few items it names (LISTED: cartoons and silent
-// comedies that users uploaded, most of them unmarked, each checked by hand): each item's metadata
-// is read once and the answer kept for a while, and anything else is refused, so it relays nothing
-// else and goes nowhere else. The page uses it when config.js names it (ROOM.videoProxy, or
-// ?videoproxy=), and plays a video straight from archive.org, on the page, when it fails.
+// that are marked public domain, of the few items it names (LISTED: cartoons and silent comedies
+// that users uploaded, most of them unmarked, each checked by hand), and of the collections where a
+// film's owner put up its own films under a Creative Commons licence (OWNERS: the California
+// Academy of Sciences'): each item's metadata is read once and the answer kept for a while, and
+// anything else is refused, so it relays nothing else and goes nowhere else. The page uses it when
+// config.js names it (ROOM.videoProxy, or ?videoproxy=), and plays a video straight from
+// archive.org, on the page, when it fails.
 //
 // Only the pages of the sites in ALLOWED_ORIGINS (wrangler.toml) may use it: a browser names the
 // page's origin in every cross-origin request, so another site's page cannot spend this one's
@@ -33,10 +35,27 @@ export const ARCHIVE = 'https://archive.org';
 /** /download/<item>/<file>: an item's identifier, and a video file at its top. */
 const FILE_PATH = /^\/download\/([A-Za-z0-9._-]+)\/([^/]+\.(?:mp4|m4v|webm|ogv))$/i;
 const RANGE = /^bytes=(\d+)-(\d*)$/;
-/** The collections whose items it relays: classic_tv and its decades, Universal's newsreels, and the Prelinger Archives. */
+/** The collections whose items it relays when marked public domain: classic_tv and its decades, Universal's newsreels, and the Prelinger Archives. */
 const COLLECTION = /^(?:classic_tv(?:_\d{4}s)?|universal_newsreels|prelinger)$/;
 /** What marks an item public domain on archive.org (its licenseurl): Creative Commons' mark, CC0, or the old dedication. */
-const PUBLIC_DOMAIN = /^https?:\/\/creativecommons\.org\/(?:publicdomain\/(?:mark|zero)\/|licenses\/publicdomain\/?)/;
+export const PUBLIC_DOMAIN = /^https?:\/\/creativecommons\.org\/(?:publicdomain\/(?:mark|zero)\/|licenses\/publicdomain\/?)/;
+/**
+ * Creative Commons' six licences, any version (or a country's port of one): BY, BY-SA, BY-ND, BY-NC,
+ * BY-NC-SA and BY-NC-ND. All ask for the owner and the licence to be shown with the film (the room
+ * does: tools/catalogue.mjs licensing, catalogue.js rightsLine); the room shows each film whole and
+ * is free, no ads and nothing to pay, as NoDerivatives and NonCommercial ask.
+ */
+export const CREATIVE_COMMONS = /^https?:\/\/creativecommons\.org\/licenses\/by(?:-nc)?(?:-sa|-nd)?\/\d\.\d(?:\/[a-z]{2})?\/?$/;
+/**
+ * The collections where a film's owner put up its own films under a Creative Commons licence, and
+ * the owner to credit: their items are relayed when under one of its licences (CREATIVE_COMMONS) or
+ * marked public domain. Only an owner's: an upload's licence is only as good as the uploader's right
+ * to give it, and most of archive.org's are someone else's films.
+ */
+export const OWNERS = new Map([
+  // Its films, its 1950s and 60s television series Science in Action among them, which it put up itself: "Rights are owned by California Academy of Sciences."
+  ['calacademyvideo', 'California Academy of Sciences'],
+]);
 /**
  * The items it relays by name, though in none of those collections or not marked: copies of films
  * that are public domain in the US, the film alone (its own sound, or none: a silent film's score
@@ -93,15 +112,21 @@ export function allowOrigin(origin, allowed) {
 
 /**
  * Whether an item's metadata (archive.org's /metadata/<id>/metadata `result`) lets it be relayed:
- * listed (LISTED), or in classic_tv (or one of its decades), universal_newsreels or prelinger and
+ * listed (LISTED); in an owner's collection (OWNERS) and under a Creative Commons licence or marked
+ * public domain; or in classic_tv (or one of its decades), universal_newsreels or prelinger and
  * marked public domain. Returns null when it may, else why not.
  * @param {{ identifier?: string, collection?: string | string[], licenseurl?: string } | null | undefined} md
  */
 export function refusal(md) {
   if (!md || typeof md !== 'object') return 'no such item';
   if (LISTED.has(String(md.identifier))) return null;
-  if (![].concat(md.collection ?? []).some((c) => COLLECTION.test(String(c)))) return 'not in classic_tv, universal_newsreels or prelinger, nor listed';
-  if (!PUBLIC_DOMAIN.test(String(md.licenseurl ?? ''))) return 'not marked public domain';
+  const collections = [].concat(md.collection ?? []).map(String);
+  const licence = String(md.licenseurl ?? '');
+  if (collections.some((c) => OWNERS.has(c))) {
+    return PUBLIC_DOMAIN.test(licence) || CREATIVE_COMMONS.test(licence) ? null : 'not under a Creative Commons licence, nor marked public domain';
+  }
+  if (!collections.some((c) => COLLECTION.test(c))) return "not in classic_tv, universal_newsreels, prelinger or an owner's collection, nor listed";
+  if (!PUBLIC_DOMAIN.test(licence)) return 'not marked public domain';
   return null;
 }
 

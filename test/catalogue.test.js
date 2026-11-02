@@ -1,14 +1,15 @@
 // The catalogue (public/catalogue/, from tools/picks.js by tools/catalogue.mjs) and catalogue.js:
 // every pick in it with its still and captions, which of an item's files the tool takes, what the
-// page calls them, where it plays them from, and the captions read as the room shows them.
+// page calls them and under what it shows them, where it plays them from, and the captions read as
+// the room shows them.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { PICKS } from '../tools/picks.js';
 import { ROOM } from '../public/js/config.js';
-import { ARCHIVE, DECADES, KINDS, KIND_ICONS, KIND_NAMES, clock, cueAt, detailsUrl, episodeName, parseVtt, proxyOf, readCatalogue, videoUrl } from '../public/js/catalogue.js';
-import { refusal } from '../tools/archive-proxy/worker.js';
-import { chooseFiles } from '../tools/catalogue.mjs';
+import { ARCHIVE, DECADES, KINDS, KIND_ICONS, KIND_NAMES, PUBLIC_DOMAIN_US, clock, cueAt, detailsUrl, episodeName, licenceName, parseVtt, proxyOf, readCatalogue, rightsLine, videoUrl } from '../public/js/catalogue.js';
+import { LISTED, refusal } from '../tools/archive-proxy/worker.js';
+import { chooseFiles, kindsOf, licensing } from '../tools/catalogue.mjs';
 
 const PUBLIC = new URL('../public/', import.meta.url);
 const json = JSON.parse(readFileSync(new URL('catalogue/episodes.json', PUBLIC), 'utf8'));
@@ -26,6 +27,11 @@ test('every pick is in the catalogue, in order, and nothing else', () => {
     assert.equal(e.year, p.year ?? null);
     if (p.year) assert.equal(`${Math.floor(p.year / 10) * 10}s`, p.decade, p.id);
     assert.ok(e.minutes > 0, p.id);
+    // Each says what it is shown under: no licence (public domain in the US), or its owner's, with whom to credit.
+    assert.ok('licence' in json.episodes[i] && 'credit' in json.episodes[i], `${p.id}: run node tools/catalogue.mjs`);
+    if (e.licence) assert.ok(licenceName(e.licence) && e.credit, p.id);
+    else assert.equal(e.credit, null, p.id);
+    if (p.credit) assert.equal(e.credit, p.credit, p.id);
   }
   // Grouped by decade, as the shelves are, and in each decade by kind: its television first, its newsreels last.
   const order = episodes.map((e) => DECADES.indexOf(e.decade) * KINDS.length + KINDS.indexOf(e.kind));
@@ -90,6 +96,15 @@ test('readCatalogue keeps only what the page can show', () => {
   for (const bad of [{ id: '../x' }, { id: 'a/b' }, { file: 'x.mkv' }, { decade: '1980s' }, { show: 1 }, { still: null }]) {
     assert.equal(readCatalogue({ episodes: [{ ...good, ...bad }] }).length, 0, JSON.stringify(bad));
   }
+  // With no licence it is public domain in the US, and nobody is credited; a licence is kept only
+  // with whom to credit, and only one of Creative Commons'.
+  assert.deepEqual(['licence', 'credit'].map((k) => readCatalogue({ episodes: [good] })[0][k]), [null, null]);
+  assert.equal(readCatalogue({ episodes: [{ ...good, credit: 'Someone' }] })[0].credit, null);
+  const deed = 'https://creativecommons.org/licenses/by-nc-nd/4.0/';
+  assert.deepEqual(readCatalogue({ episodes: [{ ...good, licence: deed, credit: 'California Academy of Sciences' }] }).map((e) => [e.licence, e.credit]), [[deed, 'California Academy of Sciences']]);
+  for (const bad of [{ licence: deed }, { licence: deed, credit: ' ' }, { licence: 'https://example.org/licence', credit: 'X' }, { licence: 'http://creativecommons.org/licenses/by/4.0/', credit: 'X' }]) {
+    assert.equal(readCatalogue({ episodes: [{ ...good, ...bad }] }).length, 0, JSON.stringify(bad));
+  }
   assert.deepEqual(readCatalogue(null), []);
   assert.deepEqual(readCatalogue({ episodes: 'no' }), []);
 });
@@ -105,6 +120,39 @@ test('names, and where the video and its page are', () => {
   for (const ep of episodes) assert.match(new URL(videoUrl(ep, 'https://p.example/')).pathname, /^\/download\/[A-Za-z0-9._-]+\/[^/]+\.(?:mp4|m4v|webm|ogv)$/i);
   assert.equal(refusal({ collection: ['classic_tv'], licenseurl: 'http://creativecommons.org/publicdomain/mark/1.0/' }), null);
   assert.equal(refusal({ collection: ['universal_newsreels'], licenseurl: 'http://creativecommons.org/licenses/publicdomain/' }), null);
+});
+
+test('under what each is shown: public domain in the US, or its owner\'s Creative Commons licence and whom to credit', () => {
+  // The licence's name from its deed, a country's port too; nothing else is one.
+  assert.equal(licenceName('https://creativecommons.org/licenses/by-nc-nd/4.0/'), 'CC BY-NC-ND 4.0');
+  assert.equal(licenceName('https://creativecommons.org/licenses/by/2.0/'), 'CC BY 2.0');
+  assert.equal(licenceName('https://creativecommons.org/licenses/by-nc-sa/3.0/us/'), 'CC BY-NC-SA 3.0 US');
+  for (const no of [null, undefined, '', 'https://creativecommons.org/publicdomain/mark/1.0/', 'https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode', 'https://example.org/licenses/by/4.0/']) {
+    assert.equal(licenceName(no), null, String(no));
+  }
+  assert.equal(rightsLine({ licence: null, credit: null }), PUBLIC_DOMAIN_US);
+  assert.equal(rightsLine({ licence: 'https://creativecommons.org/licenses/by-nc-nd/4.0/', credit: 'California Academy of Sciences' }), '© California Academy of Sciences · CC BY-NC-ND 4.0');
+
+  // The tool: what the proxy lets through as public domain is shown as public domain in the US
+  // (whatever an uploader marked a film it lists); an owner's film under its licence, with the
+  // owner or the pick's credit; anything else is not shown.
+  const marked = { identifier: 'Mama1950', collection: ['classic_tv'], licenseurl: 'http://creativecommons.org/publicdomain/mark/1.0/' };
+  assert.deepEqual(licensing(marked), { licence: null, credit: null });
+  assert.deepEqual(licensing({ identifier: [...LISTED.keys()][0], collection: ['opensource_movies'], licenseurl: 'http://creativecommons.org/licenses/by/3.0/' }), { licence: null, credit: null });
+  const academy = { identifier: 'rar_sia523_breeding_salmon', collection: ['calacademyvideo', 'americana', 'californiarevealed'], licenseurl: 'http://creativecommons.org/licenses/by-nc-nd/4.0/' };
+  assert.deepEqual(licensing(academy), { licence: 'https://creativecommons.org/licenses/by-nc-nd/4.0/', credit: 'California Academy of Sciences' });
+  assert.deepEqual(licensing(academy, 'Someone Else'), { licence: 'https://creativecommons.org/licenses/by-nc-nd/4.0/', credit: 'Someone Else' });
+  assert.deepEqual(licensing({ ...academy, licenseurl: 'http://creativecommons.org/publicdomain/zero/1.0/' }), { licence: null, credit: null });
+  // Every licence the proxy takes from an owner comes out as a deed the page names.
+  for (const url of ['http://creativecommons.org/licenses/by-sa/2.0', 'http://creativecommons.org/licenses/by-nc-sa/3.0/us', 'https://creativecommons.org/licenses/by-nd/4.0/']) {
+    assert.equal(refusal({ ...academy, licenseurl: url }), null, url);
+    assert.ok(licenceName(licensing({ ...academy, licenseurl: url }).licence), url);
+  }
+  assert.throws(() => licensing({ ...academy, licenseurl: undefined }), /neither public domain nor/);
+  assert.throws(() => licensing({ ...academy, collection: ['opensource_movies'] }), /neither public domain nor/);
+  // An owner's films are television or short films.
+  assert.deepEqual(kindsOf(academy), ['tv', 'film']);
+  assert.deepEqual(kindsOf(marked), ['tv']);
 });
 
 test('the proxy: config.js, or ?videoproxy= to try another, or none', () => {

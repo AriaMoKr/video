@@ -1,6 +1,6 @@
 // The episodes the room shows (public/catalogue/episodes.json, written by tools/catalogue.mjs from
-// tools/picks.js), what to call them and each kind of them, where their video is, and their
-// captions. Pure, for the page and the tests.
+// tools/picks.js), what to call them and each kind of them, under what the room shows them, where
+// their video is, and their captions. Pure, for the page and the tests.
 
 /** @type {string[]} */
 export const DECADES = ['1920s', '1930s', '1940s', '1950s', '1960s', '1970s'];
@@ -42,15 +42,24 @@ export const KIND_ICONS = {
 };
 /** archive.org, where the videos are: through the archive proxy (config.js videoProxy), or straight. */
 export const ARCHIVE = 'https://archive.org/';
+/** What the room says of an episode with no licence: it is public domain in the US (README, "Rights"). */
+export const PUBLIC_DOMAIN_US = 'Public domain in the US';
+/** A Creative Commons licence's deed, as the catalogue has it: https://creativecommons.org/licenses/<by…>/<version>/, or a country's port of it. */
+const CC_DEED = /^https:\/\/creativecommons\.org\/licenses\/(by(?:-nc)?(?:-sa|-nd)?)\/(\d\.\d)\/(?:([a-z]{2})\/)?$/;
 
 /**
+ * An episode, as episodes.json has it. `licence` is the Creative Commons licence its owner put it
+ * under (its deed's address), and `credit` whom it is by, as the licence asks it be credited; with
+ * no licence (null) it is public domain in the US, and nobody need be.
  * @typedef {{ id: string, show: string, title: string, decade: string, kind: string, year: number | null, file: string,
- *   minutes: number, width: number | null, height: number | null, still: string, captions: string | null }} Episode
+ *   minutes: number, width: number | null, height: number | null, still: string, captions: string | null,
+ *   licence: string | null, credit: string | null }} Episode
  */
 
 /**
  * The episodes in episodes.json that can be shown: those with what the room needs, in its order,
- * each of a kind (KINDS: television, if it says none the room knows).
+ * each of a kind (KINDS: television, if it says none the room knows), and a licence only with whom
+ * to credit (none: public domain in the US).
  * @param {unknown} json
  * @returns {Episode[]}
  */
@@ -58,8 +67,31 @@ export function readCatalogue(json) {
   const list = /** @type {any} */ (json)?.episodes;
   if (!Array.isArray(list)) return [];
   return list.filter((e) => e && typeof e.id === 'string' && /^[A-Za-z0-9._-]+$/.test(e.id) && typeof e.file === 'string' && /\.(mp4|m4v|webm|ogv)$/i.test(e.file)
-    && typeof e.show === 'string' && typeof e.title === 'string' && DECADES.includes(e.decade) && typeof e.still === 'string')
-    .map((e) => (KINDS.includes(e.kind) ? e : { ...e, kind: 'tv' }));
+    && typeof e.show === 'string' && typeof e.title === 'string' && DECADES.includes(e.decade) && typeof e.still === 'string'
+    && (e.licence == null || (licenceName(e.licence) !== null && typeof e.credit === 'string' && e.credit.trim() !== '')))
+    .map((e) => ({ ...e, kind: KINDS.includes(e.kind) ? e.kind : 'tv', licence: e.licence ?? null, credit: e.licence ? e.credit : null }));
+}
+
+/**
+ * A Creative Commons licence's name from its deed's address: "CC BY-NC-ND 4.0", or a country's port
+ * "CC BY-SA 3.0 US"; null if it is not one.
+ * @param {string | null | undefined} url
+ * @returns {string | null}
+ */
+export function licenceName(url) {
+  const m = CC_DEED.exec(String(url ?? ''));
+  return m ? `CC ${m[1].toUpperCase()} ${m[2]}${m[3] ? ` ${m[3].toUpperCase()}` : ''}` : null;
+}
+
+/**
+ * Under what the room shows an episode, in a line: its owner and its licence, as Creative Commons
+ * asks a work be credited (with its title and where it is: episodeName, detailsUrl), "© California
+ * Academy of Sciences · CC BY-NC-ND 4.0"; else that it is public domain in the US.
+ * @param {Pick<Episode, 'licence' | 'credit'>} e
+ */
+export function rightsLine(e) {
+  const name = licenceName(e.licence);
+  return name ? `© ${e.credit} · ${name}` : PUBLIC_DOMAIN_US;
 }
 
 /**

@@ -274,9 +274,32 @@ films' copies have no sound at all: a score added since is not the film's, and m
 year, and where the tool would choose wrong, which of the item's videos, the frame for its tape, or
 no captions), and
 `node tools/catalogue.mjs` writes `public/catalogue/` from it and from archive.org's metadata: the
-page's `episodes.json`, a still of each (on its tape and its set), and its captions. These are
+page's `episodes.json` (with what each is shown under, below), a still of each (on its tape and its
+set), and its captions. These are
 committed (3.4 MB), so the page never searches archive.org. Only the videos come from archive.org,
 streamed as they play. Run the tool again after changing the picks.
+
+## Rights
+
+Each video is public domain in the US, checked as above, or a film whose owner put it on
+archive.org under a Creative Commons licence (none of the 132 yet). The card, under what is showing,
+and the room's panel say which: "Public domain in the US", or the owner and the licence, such as
+"© California Academy of Sciences · CC BY-NC-ND 4.0", the licence linked to its deed in the card.
+With the title beside it, which links to the film's page on archive.org, that is the credit the
+licences ask for.
+
+Only an owner's licence counts. The proxy relays a licensed film only from a collection where its
+owner put up its own films (`OWNERS` in `worker.js`): so far the California Academy of Sciences',
+where many episodes of Science in Action, its television series of the 1950s and 60s, are under
+CC BY-NC-ND 4.0. An upload's licence is only as good as the uploader's right to give it, and most
+of archive.org's licensed films from these decades are uploads of someone else's. The licences ask
+for more than credit: NonCommercial that nothing be charged for them or sold with them,
+NoDerivatives that they not be changed. The room is free, with no ads, and plays each video whole,
+so both hold while that does.
+
+Public domain in the US is not public domain everywhere. A film that lapsed here for want of a
+renewal, or that came out 95 years ago, may still be protected where a term runs from its makers'
+deaths instead: Chaplin's The Gold Rush is, in the UK and the EU, until the end of 2047.
 
 ## The archive proxy
 
@@ -289,9 +312,10 @@ day (a viewing takes a handful, one per seek). It relays only:
 
 - the video files of items in archive.org's `classic_tv` collection (or one of its decades), its
   `universal_newsreels` or its `prelinger` that are marked public domain, which it checks in each
-  item's metadata, and of the items it lists by name (`LISTED` in `worker.js`: the cartoons and
-  silent films, whose copies are users' uploads and mostly unmarked, each with why it is free),
-  and
+  item's metadata; of the items it lists by name (`LISTED` in `worker.js`: the cartoons and
+  silent films, whose copies are users' uploads and mostly unmarked, each with why it is free);
+  and of the items in an owner's own collection (`OWNERS`, above) under a Creative Commons
+  licence, and
 - for the pages of `ariamokr.github.io` and this machine (`ALLOWED_ORIGINS` in `wrangler.toml`).
 
 It logs each request without the visitor's address or user agent. To deploy it, with a Cloudflare
@@ -400,4 +424,4 @@ The archive proxy is not published with it: deploy it by hand when `tools/archiv
 
 ## License
 
-[MIT](LICENSE).
+[MIT](LICENSE), for the room itself. The videos are not the room's to license: see Rights, above.

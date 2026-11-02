@@ -195,8 +195,18 @@ test("every button of the room's panel and of the bars under the screens is a co
     assert.equal(o.now.children[0].textContent, 'A: One (1951)');
     assert.ok(o.now.textContent.includes(' · Playing · 0:10 / 25:00'));
     assert.equal(o.stop.hidden, false);
+    // Under it, what it is shown under: with no licence, public domain in the US; else its owner
+    // and its licence, linked to the licence's deed.
+    assert.equal(o.rights.hidden, false);
+    assert.equal(o.rights.textContent, 'Public domain in the US');
+    const deed = 'https://creativecommons.org/licenses/by-nc-nd/4.0/';
+    o.setShowing({ episode: 1, name: 'B: Two (1940s)', link: 'https://archive.org/details/b', status: 'Playing', time: '0:01 / 9:00', playing: true, captions: true, hasCaptions: true, hint: 'Choose', licence: deed, credit: 'California Academy of Sciences' });
+    assert.equal(o.rights.textContent, '© California Academy of Sciences · CC BY-NC-ND 4.0');
+    assert.equal(o.rights.children[0].getAttribute('href'), deed);
+    assert.equal(o.rights.children[0].getAttribute('rel'), 'license noopener');
     o.setShowing({ episode: -1, name: null, link: null, status: 'Stopped', time: '', playing: false, captions: false, hasCaptions: false, hint: 'Choose a tape' });
     assert.equal(o.now.textContent, 'Choose a tape');
+    assert.equal(o.rights.hidden, true);
     assert.equal(o.play.textContent, 'Play');
     assert.equal(o.stop.hidden, true);
     assert.equal(o.episodeButtons[0].getAttribute('aria-current'), null);

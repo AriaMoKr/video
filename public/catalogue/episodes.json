@@ -1,5 +1,5 @@
 {
- "about": "The episodes the room shows (tools/picks.js, written by tools/catalogue.mjs), from https://archive.org/details/classic_tv, https://archive.org/details/universal_newsreels, https://archive.org/details/prelinger and the films tools/archive-proxy/worker.js lists",
+ "about": "The episodes the room shows (tools/picks.js, written by tools/catalogue.mjs), from https://archive.org/details/classic_tv, https://archive.org/details/universal_newsreels, https://archive.org/details/prelinger, the films tools/archive-proxy/worker.js lists and its owners' collections; public domain in the US, or under the Creative Commons licence (licence) of their owner (credit)",
  "episodes": [
   {
    "id": "silent-safety-last",
@@ -13,7 +13,9 @@
    "width": 853,
    "height": 480,
    "still": "catalogue/stills/silent-safety-last.jpg",
-   "captions": null
+   "captions": null,
+   "licence": null,
+   "credit": null
   },
   {
    "id": "yorkmba99_hotmail_TA",
@@ -27,7 +29,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/yorkmba99_hotmail_TA.jpg",
-   "captions": null
+   "captions": null,
+   "licence": null,
+   "credit": null
   },
   {
    "id": "SteamboatBillJr_201411",
@@ -41,7 +45,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/SteamboatBillJr_201411.jpg",
-   "captions": null
+   "captions": null,
+   "licence": null,
+   "credit": null
   },
   {
    "id": "the-gold-rush-film-1925",
@@ -55,7 +61,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/the-gold-rush-film-1925.jpg",
-   "captions": null
+   "captions": null,
+   "licence": null,
+   "credit": null
   },
   {
    "id": "steamboat-willie-16mm-film-scan-4k-lossless",
@@ -69,7 +77,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/steamboat-willie-16mm-film-scan-4k-lossless.jpg",
-   "captions": null
+   "captions": null,
+   "licence": null,
+   "credit": null
   },
   {
    "id": "PlaneCrazy_201511",
@@ -83,7 +93,9 @@
    "width": 478,
    "height": 360,
    "still": "catalogue/stills/PlaneCrazy_201511.jpg",
-   "captions": null
+   "captions": null,
+   "licence": null,
+   "credit": null
   },
   {
    "id": "the-skeleton-dance-1929",
@@ -97,7 +109,9 @@
    "width": 650,
    "height": 480,
    "still": "catalogue/stills/the-skeleton-dance-1929.jpg",
-   "captions": null
+   "captions": null,
+   "licence": null,
+   "credit": null
   },
   {
    "id": "FindingH1929",
@@ -111,7 +125,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/FindingH1929.jpg",
-   "captions": "catalogue/captions/FindingH1929.vtt"
+   "captions": "catalogue/captions/FindingH1929.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Aroundth1937",
@@ -125,7 +141,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/Aroundth1937.jpg",
-   "captions": "catalogue/captions/Aroundth1937.vtt"
+   "captions": "catalogue/captions/Aroundth1937.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "RideforC1937",
@@ -139,7 +157,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/RideforC1937.jpg",
-   "captions": "catalogue/captions/RideforC1937.vtt"
+   "captions": "catalogue/captions/RideforC1937.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Breakfas1939",
@@ -153,7 +173,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/Breakfas1939.jpg",
-   "captions": "catalogue/captions/Breakfas1939.vtt"
+   "captions": "catalogue/captions/Breakfas1939.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1933-03-05_Extra_Special_Roosevelt_Inaugurated",
@@ -167,7 +189,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1933-03-05_Extra_Special_Roosevelt_Inaugurated.jpg",
-   "captions": "catalogue/captions/1933-03-05_Extra_Special_Roosevelt_Inaugurated.vtt"
+   "captions": "catalogue/captions/1933-03-05_Extra_Special_Roosevelt_Inaugurated.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1933-08-14_President_Visits_Foresters",
@@ -181,7 +205,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1933-08-14_President_Visits_Foresters.jpg",
-   "captions": "catalogue/captions/1933-08-14_President_Visits_Foresters.vtt"
+   "captions": "catalogue/captions/1933-08-14_President_Visits_Foresters.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1933-10-11_Farmer_Plays_Tune_With_Hands",
@@ -195,7 +221,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1933-10-11_Farmer_Plays_Tune_With_Hands.jpg",
-   "captions": "catalogue/captions/1933-10-11_Farmer_Plays_Tune_With_Hands.vtt"
+   "captions": "catalogue/captions/1933-10-11_Farmer_Plays_Tune_With_Hands.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1933-11-06_Ancient_Mexican_Dances_for_President",
@@ -209,7 +237,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1933-11-06_Ancient_Mexican_Dances_for_President.jpg",
-   "captions": "catalogue/captions/1933-11-06_Ancient_Mexican_Dances_for_President.vtt"
+   "captions": "catalogue/captions/1933-11-06_Ancient_Mexican_Dances_for_President.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1933-11_Ancient_Chinese_Field_Games",
@@ -223,7 +253,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1933-11_Ancient_Chinese_Field_Games.jpg",
-   "captions": "catalogue/captions/1933-11_Ancient_Chinese_Field_Games.vtt"
+   "captions": "catalogue/captions/1933-11_Ancient_Chinese_Field_Games.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1935-02-11_Roosevelt_Addresses_Boy_Scouts",
@@ -237,7 +269,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1935-02-11_Roosevelt_Addresses_Boy_Scouts.jpg",
-   "captions": "catalogue/captions/1935-02-11_Roosevelt_Addresses_Boy_Scouts.vtt"
+   "captions": "catalogue/captions/1935-02-11_Roosevelt_Addresses_Boy_Scouts.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1935-03-04_FDR_Buys_First_Baby_Bond",
@@ -251,7 +285,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1935-03-04_FDR_Buys_First_Baby_Bond.jpg",
-   "captions": "catalogue/captions/1935-03-04_FDR_Buys_First_Baby_Bond.vtt"
+   "captions": "catalogue/captions/1935-03-04_FDR_Buys_First_Baby_Bond.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1937-05-18_The_Coronation_of_King_George_VI",
@@ -265,7 +301,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1937-05-18_The_Coronation_of_King_George_VI.jpg",
-   "captions": "catalogue/captions/1937-05-18_The_Coronation_of_King_George_VI.vtt"
+   "captions": "catalogue/captions/1937-05-18_The_Coronation_of_King_George_VI.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1939-05-15_King_and_Queen_Leave_For_American_Tour",
@@ -279,7 +317,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1939-05-15_King_and_Queen_Leave_For_American_Tour.jpg",
-   "captions": "catalogue/captions/1939-05-15_King_and_Queen_Leave_For_American_Tour.vtt"
+   "captions": "catalogue/captions/1939-05-15_King_and_Queen_Leave_For_American_Tour.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "the-lone-ranger-1949-s-01-e-02-the-lone-ranger-fights-on",
@@ -293,7 +333,9 @@
    "width": 480,
    "height": 360,
    "still": "catalogue/stills/the-lone-ranger-1949-s-01-e-02-the-lone-ranger-fights-on.jpg",
-   "captions": null
+   "captions": null,
+   "licence": null,
+   "credit": null
   },
   {
    "id": "the-lone-ranger-1949-s-01-e-04-legion-of-old-timers",
@@ -307,7 +349,9 @@
    "width": 480,
    "height": 360,
    "still": "catalogue/stills/the-lone-ranger-1949-s-01-e-04-legion-of-old-timers.jpg",
-   "captions": null
+   "captions": null,
+   "licence": null,
+   "credit": null
   },
   {
    "id": "the-lone-ranger-1949-s-01-e-05-rustlers-hideout",
@@ -321,7 +365,9 @@
    "width": 490,
    "height": 360,
    "still": "catalogue/stills/the-lone-ranger-1949-s-01-e-05-rustlers-hideout.jpg",
-   "captions": null
+   "captions": null,
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1949NBC-Howdy_Doody_Uploaded-By-Jeice_The_Cuddly_Warrior",
@@ -335,7 +381,9 @@
    "width": 320,
    "height": 240,
    "still": "catalogue/stills/1949NBC-Howdy_Doody_Uploaded-By-Jeice_The_Cuddly_Warrior.jpg",
-   "captions": "catalogue/captions/1949NBC-Howdy_Doody_Uploaded-By-Jeice_The_Cuddly_Warrior.vtt"
+   "captions": "catalogue/captions/1949NBC-Howdy_Doody_Uploaded-By-Jeice_The_Cuddly_Warrior.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Howdy_Doody_4",
@@ -349,7 +397,9 @@
    "width": 320,
    "height": 240,
    "still": "catalogue/stills/Howdy_Doody_4.jpg",
-   "captions": "catalogue/captions/Howdy_Doody_4.vtt"
+   "captions": "catalogue/captions/Howdy_Doody_4.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "captainvideo",
@@ -363,7 +413,9 @@
    "width": 320,
    "height": 240,
    "still": "catalogue/stills/captainvideo.jpg",
-   "captions": "catalogue/captions/captainvideo.vtt"
+   "captions": "catalogue/captions/captainvideo.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "TheChristmasCarolastoldbyVincentPrice",
@@ -377,7 +429,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/TheChristmasCarolastoldbyVincentPrice.jpg",
-   "captions": "catalogue/captions/TheChristmasCarolastoldbyVincentPrice.vtt"
+   "captions": "catalogue/captions/TheChristmasCarolastoldbyVincentPrice.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "S1E01-Life_Of_Riley-10_04_49-Tonsils_824",
@@ -391,7 +445,9 @@
    "width": 320,
    "height": 240,
    "still": "catalogue/stills/S1E01-Life_Of_Riley-10_04_49-Tonsils_824.jpg",
-   "captions": "catalogue/captions/S1E01-Life_Of_Riley-10_04_49-Tonsils_824.vtt"
+   "captions": "catalogue/captions/S1E01-Life_Of_Riley-10_04_49-Tonsils_824.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "S1E03-Life_Of_Riley-10_18_1949_-_Egberts_Chemistry_Set",
@@ -405,7 +461,9 @@
    "width": 320,
    "height": 240,
    "still": "catalogue/stills/S1E03-Life_Of_Riley-10_18_1949_-_Egberts_Chemistry_Set.jpg",
-   "captions": "catalogue/captions/S1E03-Life_Of_Riley-10_18_1949_-_Egberts_Chemistry_Set.vtt"
+   "captions": "catalogue/captions/S1E03-Life_Of_Riley-10_18_1949_-_Egberts_Chemistry_Set.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "S1E12-Life_Of_Riley-12_20_1949_-_Juniors_Birthday_Party",
@@ -419,7 +477,9 @@
    "width": 320,
    "height": 240,
    "still": "catalogue/stills/S1E12-Life_Of_Riley-12_20_1949_-_Juniors_Birthday_Party.jpg",
-   "captions": "catalogue/captions/S1E12-Life_Of_Riley-12_20_1949_-_Juniors_Birthday_Party.vtt"
+   "captions": "catalogue/captions/S1E12-Life_Of_Riley-12_20_1949_-_Juniors_Birthday_Party.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Public_Prosecutor--Missing_Hour",
@@ -433,7 +493,9 @@
    "width": 427,
    "height": 320,
    "still": "catalogue/stills/Public_Prosecutor--Missing_Hour.jpg",
-   "captions": "catalogue/captions/Public_Prosecutor--Missing_Hour.vtt"
+   "captions": "catalogue/captions/Public_Prosecutor--Missing_Hour.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Public_Prosecutor--Dead_Mans_Voice",
@@ -447,7 +509,9 @@
    "width": 427,
    "height": 320,
    "still": "catalogue/stills/Public_Prosecutor--Dead_Mans_Voice.jpg",
-   "captions": "catalogue/captions/Public_Prosecutor--Dead_Mans_Voice.vtt"
+   "captions": "catalogue/captions/Public_Prosecutor--Dead_Mans_Voice.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "superman_mechanical_monsters",
@@ -461,7 +525,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/superman_mechanical_monsters.jpg",
-   "captions": null
+   "captions": null,
+   "licence": null,
+   "credit": null
   },
   {
    "id": "superman_arctic_giant",
@@ -475,7 +541,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/superman_arctic_giant.jpg",
-   "captions": null
+   "captions": null,
+   "licence": null,
+   "credit": null
   },
   {
    "id": "superman_bulleteers",
@@ -489,7 +557,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/superman_bulleteers.jpg",
-   "captions": null
+   "captions": null,
+   "licence": null,
+   "credit": null
   },
   {
    "id": "ToNewHor1940",
@@ -503,7 +573,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/ToNewHor1940.jpg",
-   "captions": "catalogue/captions/ToNewHor1940.vtt"
+   "captions": "catalogue/captions/ToNewHor1940.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "LeaveItt1940",
@@ -517,7 +589,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/LeaveItt1940.jpg",
-   "captions": "catalogue/captions/LeaveItt1940.vtt"
+   "captions": "catalogue/captions/LeaveItt1940.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1945-06-28_San_Francisco_Parley_Ends",
@@ -531,7 +605,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1945-06-28_San_Francisco_Parley_Ends.jpg",
-   "captions": "catalogue/captions/1945-06-28_San_Francisco_Parley_Ends.vtt"
+   "captions": "catalogue/captions/1945-06-28_San_Francisco_Parley_Ends.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1945-12-10_Christmas_Brings_Joy_To_Everyone",
@@ -545,7 +621,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1945-12-10_Christmas_Brings_Joy_To_Everyone.jpg",
-   "captions": "catalogue/captions/1945-12-10_Christmas_Brings_Joy_To_Everyone.vtt"
+   "captions": "catalogue/captions/1945-12-10_Christmas_Brings_Joy_To_Everyone.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1946-01-31_Radar_makes_Round_Trip_To_Moon",
@@ -559,7 +637,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1946-01-31_Radar_makes_Round_Trip_To_Moon.jpg",
-   "captions": "catalogue/captions/1946-01-31_Radar_makes_Round_Trip_To_Moon.vtt"
+   "captions": "catalogue/captions/1946-01-31_Radar_makes_Round_Trip_To_Moon.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1946-06-10_Allied_Victory_Parade",
@@ -573,7 +653,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1946-06-10_Allied_Victory_Parade.jpg",
-   "captions": "catalogue/captions/1946-06-10_Allied_Victory_Parade.vtt"
+   "captions": "catalogue/captions/1946-06-10_Allied_Victory_Parade.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1946-08-19_President_on_Vacation",
@@ -587,7 +669,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1946-08-19_President_on_Vacation.jpg",
-   "captions": "catalogue/captions/1946-08-19_President_on_Vacation.vtt"
+   "captions": "catalogue/captions/1946-08-19_President_on_Vacation.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1946-08-30_UN_Starts_Session_At_New_Home",
@@ -601,7 +685,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1946-08-30_UN_Starts_Session_At_New_Home.jpg",
-   "captions": "catalogue/captions/1946-08-30_UN_Starts_Session_At_New_Home.vtt"
+   "captions": "catalogue/captions/1946-08-30_UN_Starts_Session_At_New_Home.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1946-11-21_White_Sands_NM_V-2_rocket",
@@ -615,7 +701,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1946-11-21_White_Sands_NM_V-2_rocket.jpg",
-   "captions": "catalogue/captions/1946-11-21_White_Sands_NM_V-2_rocket.vtt"
+   "captions": "catalogue/captions/1946-11-21_White_Sands_NM_V-2_rocket.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Mama1950",
@@ -629,7 +717,9 @@
    "width": 320,
    "height": 240,
    "still": "catalogue/stills/Mama1950.jpg",
-   "captions": "catalogue/captions/Mama1950.vtt"
+   "captions": "catalogue/captions/Mama1950.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Cavalcade_Of_Stars",
@@ -643,7 +733,9 @@
    "width": 320,
    "height": 240,
    "still": "catalogue/stills/Cavalcade_Of_Stars.jpg",
-   "captions": "catalogue/captions/Cavalcade_Of_Stars.vtt"
+   "captions": "catalogue/captions/Cavalcade_Of_Stars.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Jack_Benny_11_04_1951",
@@ -657,7 +749,9 @@
    "width": 416,
    "height": 304,
    "still": "catalogue/stills/Jack_Benny_11_04_1951.jpg",
-   "captions": "catalogue/captions/Jack_Benny_11_04_1951.vtt"
+   "captions": "catalogue/captions/Jack_Benny_11_04_1951.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "SpacePatrolS01e43TheSpacePatrolCodeBelt",
@@ -671,7 +765,9 @@
    "width": 617,
    "height": 458,
    "still": "catalogue/stills/SpacePatrolS01e43TheSpacePatrolCodeBelt.jpg",
-   "captions": null
+   "captions": null,
+   "licence": null,
+   "credit": null
   },
   {
    "id": "RacketSquadTheSaltedMine1951",
@@ -685,7 +781,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/RacketSquadTheSaltedMine1951.jpg",
-   "captions": "catalogue/captions/RacketSquadTheSaltedMine1951.vtt"
+   "captions": "catalogue/captions/RacketSquadTheSaltedMine1951.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Burns-Allen-Show_S2E7_Christmas",
@@ -699,7 +797,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/Burns-Allen-Show_S2E7_Christmas.jpg",
-   "captions": "catalogue/captions/Burns-Allen-Show_S2E7_Christmas.vtt"
+   "captions": "catalogue/captions/Burns-Allen-Show_S2E7_Christmas.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Tales_Of_Tomorrow_-_The_Search_For_The_Flying_Saucer",
@@ -713,7 +813,9 @@
    "width": 512,
    "height": 384,
    "still": "catalogue/stills/Tales_Of_Tomorrow_-_The_Search_For_The_Flying_Saucer.jpg",
-   "captions": "catalogue/captions/Tales_Of_Tomorrow_-_The_Search_For_The_Flying_Saucer.vtt"
+   "captions": "catalogue/captions/Tales_Of_Tomorrow_-_The_Search_For_The_Flying_Saucer.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Tales_Of_Tomorrow_-_Ahead_Of_His_Time",
@@ -727,7 +829,9 @@
    "width": 528,
    "height": 400,
    "still": "catalogue/stills/Tales_Of_Tomorrow_-_Ahead_Of_His_Time.jpg",
-   "captions": "catalogue/captions/Tales_Of_Tomorrow_-_Ahead_Of_His_Time.vtt"
+   "captions": "catalogue/captions/Tales_Of_Tomorrow_-_Ahead_Of_His_Time.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "ColgateComedyHourWithAbbottAndCostelloAndErrolFlynn",
@@ -741,7 +845,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/ColgateComedyHourWithAbbottAndCostelloAndErrolFlynn.jpg",
-   "captions": "catalogue/captions/ColgateComedyHourWithAbbottAndCostelloAndErrolFlynn.vtt"
+   "captions": "catalogue/captions/ColgateComedyHourWithAbbottAndCostelloAndErrolFlynn.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "My_Little_Margie--Friend_for_Roberta",
@@ -755,7 +861,9 @@
    "width": 405,
    "height": 304,
    "still": "catalogue/stills/My_Little_Margie--Friend_for_Roberta.jpg",
-   "captions": "catalogue/captions/My_Little_Margie--Friend_for_Roberta.vtt"
+   "captions": "catalogue/captions/My_Little_Margie--Friend_for_Roberta.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "TheBigLittleJesus",
@@ -769,7 +877,9 @@
    "width": 320,
    "height": 240,
    "still": "catalogue/stills/TheBigLittleJesus.jpg",
-   "captions": "catalogue/captions/TheBigLittleJesus.vtt"
+   "captions": "catalogue/captions/TheBigLittleJesus.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "dingdongschool",
@@ -783,7 +893,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/dingdongschool.jpg",
-   "captions": "catalogue/captions/dingdongschool.vtt"
+   "captions": "catalogue/captions/dingdongschool.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "topper-s-01-e-01-topper-meets-the-ghosts-1953-10-09",
@@ -797,7 +909,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/topper-s-01-e-01-topper-meets-the-ghosts-1953-10-09.jpg",
-   "captions": null
+   "captions": null,
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Life_with_Elizabeth",
@@ -811,7 +925,9 @@
    "width": 320,
    "height": 240,
    "still": "catalogue/stills/Life_with_Elizabeth.jpg",
-   "captions": "catalogue/captions/Life_with_Elizabeth.vtt"
+   "captions": "catalogue/captions/Life_with_Elizabeth.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "SherlockHolmes-TheCaseofLadyBeryl",
@@ -825,7 +941,9 @@
    "width": 384,
    "height": 240,
    "still": "catalogue/stills/SherlockHolmes-TheCaseofLadyBeryl.jpg",
-   "captions": "catalogue/captions/SherlockHolmes-TheCaseofLadyBeryl.vtt"
+   "captions": "catalogue/captions/SherlockHolmes-TheCaseofLadyBeryl.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "SherlockHolmes-TheCaseoftheShyBallerina",
@@ -839,7 +957,9 @@
    "width": 384,
    "height": 240,
    "still": "catalogue/stills/SherlockHolmes-TheCaseoftheShyBallerina.jpg",
-   "captions": "catalogue/captions/SherlockHolmes-TheCaseoftheShyBallerina.vtt"
+   "captions": "catalogue/captions/SherlockHolmes-TheCaseoftheShyBallerina.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "AdventuresOfSupermanStampDayForSchoolChildren",
@@ -853,7 +973,9 @@
    "width": 650,
    "height": 480,
    "still": "catalogue/stills/AdventuresOfSupermanStampDayForSchoolChildren.jpg",
-   "captions": "catalogue/captions/AdventuresOfSupermanStampDayForSchoolChildren.vtt"
+   "captions": "catalogue/captions/AdventuresOfSupermanStampDayForSchoolChildren.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Pinky_Lee_Show",
@@ -867,7 +989,9 @@
    "width": 320,
    "height": 240,
    "still": "catalogue/stills/Pinky_Lee_Show.jpg",
-   "captions": "catalogue/captions/Pinky_Lee_Show.vtt"
+   "captions": "catalogue/captions/Pinky_Lee_Show.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Robin_Hood_01_The_Coming_Of_Robin_Hood",
@@ -881,7 +1005,9 @@
    "width": 448,
    "height": 336,
    "still": "catalogue/stills/Robin_Hood_01_The_Coming_Of_Robin_Hood.jpg",
-   "captions": "catalogue/captions/Robin_Hood_01_The_Coming_Of_Robin_Hood.vtt"
+   "captions": "catalogue/captions/Robin_Hood_01_The_Coming_Of_Robin_Hood.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "TheAdventuresOfFlashGordon",
@@ -895,7 +1021,9 @@
    "width": 720,
    "height": 480,
    "still": "catalogue/stills/TheAdventuresOfFlashGordon.jpg",
-   "captions": "catalogue/captions/TheAdventuresOfFlashGordon.vtt"
+   "captions": "catalogue/captions/TheAdventuresOfFlashGordon.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "OurMissBrooks-HomeCookedMeal",
@@ -909,7 +1037,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/OurMissBrooks-HomeCookedMeal.jpg",
-   "captions": "catalogue/captions/OurMissBrooks-HomeCookedMeal.vtt"
+   "captions": "catalogue/captions/OurMissBrooks-HomeCookedMeal.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Super-Circus_1956",
@@ -923,7 +1053,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/Super-Circus_1956.jpg",
-   "captions": "catalogue/captions/Super-Circus_1956.vtt"
+   "captions": "catalogue/captions/Super-Circus_1956.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Annie_Oakley_Sharp_Shootin_Annie",
@@ -937,7 +1069,9 @@
    "width": 464,
    "height": 352,
    "still": "catalogue/stills/Annie_Oakley_Sharp_Shootin_Annie.jpg",
-   "captions": "catalogue/captions/Annie_Oakley_Sharp_Shootin_Annie.vtt"
+   "captions": "catalogue/captions/Annie_Oakley_Sharp_Shootin_Annie.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Cisco_Kid_-_Buried_Treasure",
@@ -951,7 +1085,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/Cisco_Kid_-_Buried_Treasure.jpg",
-   "captions": "catalogue/captions/Cisco_Kid_-_Buried_Treasure.vtt"
+   "captions": "catalogue/captions/Cisco_Kid_-_Buried_Treasure.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "I_Married_Joan_EP79_Neighbors",
@@ -965,7 +1101,9 @@
    "width": 640,
    "height": 464,
    "still": "catalogue/stills/I_Married_Joan_EP79_Neighbors.jpg",
-   "captions": "catalogue/captions/I_Married_Joan_EP79_Neighbors.vtt"
+   "captions": "catalogue/captions/I_Married_Joan_EP79_Neighbors.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "OZZIE_AND_HARRIET_ep_Halloween_Party",
@@ -979,7 +1117,9 @@
    "width": 432,
    "height": 320,
    "still": "catalogue/stills/OZZIE_AND_HARRIET_ep_Halloween_Party.jpg",
-   "captions": "catalogue/captions/OZZIE_AND_HARRIET_ep_Halloween_Party.vtt"
+   "captions": "catalogue/captions/OZZIE_AND_HARRIET_ep_Halloween_Party.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "OzzieAndHarriet-BusyChristmas",
@@ -993,7 +1133,9 @@
    "width": 416,
    "height": 320,
    "still": "catalogue/stills/OzzieAndHarriet-BusyChristmas.jpg",
-   "captions": "catalogue/captions/OzzieAndHarriet-BusyChristmas.vtt"
+   "captions": "catalogue/captions/OzzieAndHarriet-BusyChristmas.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "You_Bet_Your_Life_Groucho",
@@ -1007,7 +1149,9 @@
    "width": 320,
    "height": 240,
    "still": "catalogue/stills/You_Bet_Your_Life_Groucho.jpg",
-   "captions": "catalogue/captions/You_Bet_Your_Life_Groucho.vtt"
+   "captions": "catalogue/captions/You_Bet_Your_Life_Groucho.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "OSB-02_Night_Of_April_14th",
@@ -1021,7 +1165,9 @@
    "width": 448,
    "height": 336,
    "still": "catalogue/stills/OSB-02_Night_Of_April_14th.jpg",
-   "captions": "catalogue/captions/OSB-02_Night_Of_April_14th.vtt"
+   "captions": "catalogue/captions/OSB-02_Night_Of_April_14th.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "DateWith1950",
@@ -1035,7 +1181,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/DateWith1950.jpg",
-   "captions": "catalogue/captions/DateWith1950.vtt"
+   "captions": "catalogue/captions/DateWith1950.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Designfo1956",
@@ -1049,7 +1197,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/Designfo1956.jpg",
-   "captions": "catalogue/captions/Designfo1956.vtt"
+   "captions": "catalogue/captions/Designfo1956.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "OnceUpon1956",
@@ -1063,7 +1213,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/OnceUpon1956.jpg",
-   "captions": "catalogue/captions/OnceUpon1956.vtt"
+   "captions": "catalogue/captions/OnceUpon1956.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1957-10-07_New_Moon",
@@ -1077,7 +1229,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1957-10-07_New_Moon.jpg",
-   "captions": "catalogue/captions/1957-10-07_New_Moon.vtt"
+   "captions": "catalogue/captions/1957-10-07_New_Moon.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1958-02-03_First_US_Satellite_Launched",
@@ -1091,7 +1245,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1958-02-03_First_US_Satellite_Launched.jpg",
-   "captions": "catalogue/captions/1958-02-03_First_US_Satellite_Launched.vtt"
+   "captions": "catalogue/captions/1958-02-03_First_US_Satellite_Launched.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1958-03-17_Brussels_Worlds_Fair",
@@ -1105,7 +1261,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1958-03-17_Brussels_Worlds_Fair.jpg",
-   "captions": "catalogue/captions/1958-03-17_Brussels_Worlds_Fair.vtt"
+   "captions": "catalogue/captions/1958-03-17_Brussels_Worlds_Fair.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1958-08-11_A-Sub_Epic",
@@ -1119,7 +1277,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1958-08-11_A-Sub_Epic.jpg",
-   "captions": "catalogue/captions/1958-08-11_A-Sub_Epic.vtt"
+   "captions": "catalogue/captions/1958-08-11_A-Sub_Epic.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1959-03-16_Aloha_Hawaii",
@@ -1133,7 +1293,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1959-03-16_Aloha_Hawaii.jpg",
-   "captions": "catalogue/captions/1959-03-16_Aloha_Hawaii.vtt"
+   "captions": "catalogue/captions/1959-03-16_Aloha_Hawaii.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1959-04-30_California",
@@ -1147,7 +1309,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1959-04-30_California.jpg",
-   "captions": "catalogue/captions/1959-04-30_California.vtt"
+   "captions": "catalogue/captions/1959-04-30_California.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1959-11-02_Good-Will_Swap",
@@ -1161,7 +1325,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1959-11-02_Good-Will_Swap.jpg",
-   "captions": "catalogue/captions/1959-11-02_Good-Will_Swap.vtt"
+   "captions": "catalogue/captions/1959-11-02_Good-Will_Swap.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Bonanza_pd",
@@ -1175,7 +1341,9 @@
    "width": 480,
    "height": 360,
    "still": "catalogue/stills/Bonanza_pd.jpg",
-   "captions": "catalogue/captions/Bonanza_pd.vtt"
+   "captions": "catalogue/captions/Bonanza_pd.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Bonanza-TheAbductionEp2x08",
@@ -1189,7 +1357,9 @@
    "width": 626,
    "height": 480,
    "still": "catalogue/stills/Bonanza-TheAbductionEp2x08.jpg",
-   "captions": "catalogue/captions/Bonanza-TheAbductionEp2x08.vtt"
+   "captions": "catalogue/captions/Bonanza-TheAbductionEp2x08.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "BarkingDog1961",
@@ -1203,7 +1373,9 @@
    "width": 320,
    "height": 240,
    "still": "catalogue/stills/BarkingDog1961.jpg",
-   "captions": "catalogue/captions/BarkingDog1961.vtt"
+   "captions": "catalogue/captions/BarkingDog1961.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "TheBigPicture516",
@@ -1217,7 +1389,9 @@
    "width": 474,
    "height": 360,
    "still": "catalogue/stills/TheBigPicture516.jpg",
-   "captions": "catalogue/captions/TheBigPicture516.vtt"
+   "captions": "catalogue/captions/TheBigPicture516.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Beverly_Hillbillies_Ep01_The_Clampetts_Strike_Oil",
@@ -1231,7 +1405,9 @@
    "width": 512,
    "height": 384,
    "still": "catalogue/stills/Beverly_Hillbillies_Ep01_The_Clampetts_Strike_Oil.jpg",
-   "captions": "catalogue/captions/Beverly_Hillbillies_Ep01_The_Clampetts_Strike_Oil.vtt"
+   "captions": "catalogue/captions/Beverly_Hillbillies_Ep01_The_Clampetts_Strike_Oil.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Beverly_Hillbillies_Ep02_Getting_Settled",
@@ -1245,7 +1421,9 @@
    "width": 512,
    "height": 384,
    "still": "catalogue/stills/Beverly_Hillbillies_Ep02_Getting_Settled.jpg",
-   "captions": "catalogue/captions/Beverly_Hillbillies_Ep02_Getting_Settled.vtt"
+   "captions": "catalogue/captions/Beverly_Hillbillies_Ep02_Getting_Settled.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Beverly_Hillbillies_Ep06_Trick_Or_Treat",
@@ -1259,7 +1437,9 @@
    "width": 496,
    "height": 368,
    "still": "catalogue/stills/Beverly_Hillbillies_Ep06_Trick_Or_Treat.jpg",
-   "captions": "catalogue/captions/Beverly_Hillbillies_Ep06_Trick_Or_Treat.vtt"
+   "captions": "catalogue/captions/Beverly_Hillbillies_Ep06_Trick_Or_Treat.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Beverly_Hillbillies_Ep13_Home_For_Christmas",
@@ -1273,7 +1453,9 @@
    "width": 496,
    "height": 368,
    "still": "catalogue/stills/Beverly_Hillbillies_Ep13_Home_For_Christmas.jpg",
-   "captions": "catalogue/captions/Beverly_Hillbillies_Ep13_Home_For_Christmas.vtt"
+   "captions": "catalogue/captions/Beverly_Hillbillies_Ep13_Home_For_Christmas.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Beverly_Hillbillies_Ep46_Turkey_Day",
@@ -1287,7 +1469,9 @@
    "width": 448,
    "height": 336,
    "still": "catalogue/stills/Beverly_Hillbillies_Ep46_Turkey_Day.jpg",
-   "captions": "catalogue/captions/Beverly_Hillbillies_Ep46_Turkey_Day.vtt"
+   "captions": "catalogue/captions/Beverly_Hillbillies_Ep46_Turkey_Day.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Beverly_Hillbillies_Ep52_The_Giant_JackRabbit",
@@ -1301,7 +1485,9 @@
    "width": 512,
    "height": 384,
    "still": "catalogue/stills/Beverly_Hillbillies_Ep52_The_Giant_JackRabbit.jpg",
-   "captions": "catalogue/captions/Beverly_Hillbillies_Ep52_The_Giant_JackRabbit.vtt"
+   "captions": "catalogue/captions/Beverly_Hillbillies_Ep52_The_Giant_JackRabbit.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Beverly_Hillbillies_Ep53_The_Girl_From_Home",
@@ -1315,7 +1501,9 @@
    "width": 512,
    "height": 384,
    "still": "catalogue/stills/Beverly_Hillbillies_Ep53_The_Girl_From_Home.jpg",
-   "captions": "catalogue/captions/Beverly_Hillbillies_Ep53_The_Girl_From_Home.vtt"
+   "captions": "catalogue/captions/Beverly_Hillbillies_Ep53_The_Girl_From_Home.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Beverly_Hillbillies_Ep55_The_Race_For_The_Queen",
@@ -1329,7 +1517,9 @@
    "width": 512,
    "height": 384,
    "still": "catalogue/stills/Beverly_Hillbillies_Ep55_The_Race_For_The_Queen.jpg",
-   "captions": "catalogue/captions/Beverly_Hillbillies_Ep55_The_Race_For_The_Queen.vtt"
+   "captions": "catalogue/captions/Beverly_Hillbillies_Ep55_The_Race_For_The_Queen.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "dick_van_dyke_show_39_the_night_the_roof_fell_in",
@@ -1343,7 +1533,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/dick_van_dyke_show_39_the_night_the_roof_fell_in.jpg",
-   "captions": "catalogue/captions/dick_van_dyke_show_39_the_night_the_roof_fell_in.vtt"
+   "captions": "catalogue/captions/dick_van_dyke_show_39_the_night_the_roof_fell_in.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "jack_benny_03_04_62",
@@ -1357,7 +1549,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/jack_benny_03_04_62.jpg",
-   "captions": "catalogue/captions/jack_benny_03_04_62.vtt"
+   "captions": "catalogue/captions/jack_benny_03_04_62.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "TLS_Lucy_The_Babysitter",
@@ -1371,7 +1565,9 @@
    "width": 400,
    "height": 304,
    "still": "catalogue/stills/TLS_Lucy_The_Babysitter.jpg",
-   "captions": "catalogue/captions/TLS_Lucy_The_Babysitter.vtt"
+   "captions": "catalogue/captions/TLS_Lucy_The_Babysitter.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "TLS_Lucy_And_Viv_Put_In_A_Shower",
@@ -1385,7 +1581,9 @@
    "width": 432,
    "height": 320,
    "still": "catalogue/stills/TLS_Lucy_And_Viv_Put_In_A_Shower.jpg",
-   "captions": "catalogue/captions/TLS_Lucy_And_Viv_Put_In_A_Shower.vtt"
+   "captions": "catalogue/captions/TLS_Lucy_And_Viv_Put_In_A_Shower.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "TLS_Lucys_Barbershop_Quartet",
@@ -1399,7 +1597,9 @@
    "width": 400,
    "height": 304,
    "still": "catalogue/stills/TLS_Lucys_Barbershop_Quartet.jpg",
-   "captions": "catalogue/captions/TLS_Lucys_Barbershop_Quartet.vtt"
+   "captions": "catalogue/captions/TLS_Lucys_Barbershop_Quartet.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Andy_Griffith_Opie_and_the_Spoiled_Kid",
@@ -1413,7 +1613,9 @@
    "width": 304,
    "height": 228,
    "still": "catalogue/stills/Andy_Griffith_Opie_and_the_Spoiled_Kid.jpg",
-   "captions": "catalogue/captions/Andy_Griffith_Opie_and_the_Spoiled_Kid.vtt"
+   "captions": "catalogue/captions/Andy_Griffith_Opie_and_the_Spoiled_Kid.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Andy-Griffith-Show_Andy-Discovers-America",
@@ -1427,7 +1629,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/Andy-Griffith-Show_Andy-Discovers-America.jpg",
-   "captions": "catalogue/captions/Andy-Griffith-Show_Andy-Discovers-America.vtt"
+   "captions": "catalogue/captions/Andy-Griffith-Show_Andy-Discovers-America.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Andy_Griffith_The_Loaded_Goat",
@@ -1441,7 +1645,9 @@
    "width": 560,
    "height": 416,
    "still": "catalogue/stills/Andy_Griffith_The_Loaded_Goat.jpg",
-   "captions": "catalogue/captions/Andy_Griffith_The_Loaded_Goat.vtt"
+   "captions": "catalogue/captions/Andy_Griffith_The_Loaded_Goat.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Andy_Griffith_A_Wife_For_Andy",
@@ -1455,7 +1661,9 @@
    "width": 304,
    "height": 228,
    "still": "catalogue/stills/Andy_Griffith_A_Wife_For_Andy.jpg",
-   "captions": "catalogue/captions/Andy_Griffith_A_Wife_For_Andy.vtt"
+   "captions": "catalogue/captions/Andy_Griffith_A_Wife_For_Andy.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Wacky_Wizardry",
@@ -1469,7 +1677,9 @@
    "width": 320,
    "height": 240,
    "still": "catalogue/stills/Wacky_Wizardry.jpg",
-   "captions": "catalogue/captions/Wacky_Wizardry.vtt"
+   "captions": "catalogue/captions/Wacky_Wizardry.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Mack_and_Myer_For_Hire_Dueling_Fools",
@@ -1483,7 +1693,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/Mack_and_Myer_For_Hire_Dueling_Fools.jpg",
-   "captions": "catalogue/captions/Mack_and_Myer_For_Hire_Dueling_Fools.vtt"
+   "captions": "catalogue/captions/Mack_and_Myer_For_Hire_Dueling_Fools.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "PetticoatJunction",
@@ -1497,7 +1709,9 @@
    "width": 720,
    "height": 480,
    "still": "catalogue/stills/PetticoatJunction.jpg",
-   "captions": "catalogue/captions/PetticoatJunction.vtt"
+   "captions": "catalogue/captions/PetticoatJunction.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "PetticoatJunction_678",
@@ -1511,7 +1725,9 @@
    "width": 720,
    "height": 480,
    "still": "catalogue/stills/PetticoatJunction_678.jpg",
-   "captions": "catalogue/captions/PetticoatJunction_678.vtt"
+   "captions": "catalogue/captions/PetticoatJunction_678.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "TheCobraStrikes",
@@ -1525,7 +1741,9 @@
    "width": 600,
    "height": 480,
    "still": "catalogue/stills/TheCobraStrikes.jpg",
-   "captions": "catalogue/captions/TheCobraStrikes.vtt"
+   "captions": "catalogue/captions/TheCobraStrikes.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "OurHeritage_",
@@ -1539,7 +1757,9 @@
    "width": 600,
    "height": 480,
    "still": "catalogue/stills/OurHeritage_.jpg",
-   "captions": null
+   "captions": null,
+   "licence": null,
+   "credit": null
   },
   {
    "id": "TheBigPicture723",
@@ -1553,7 +1773,9 @@
    "width": 316,
    "height": 240,
    "still": "catalogue/stills/TheBigPicture723.jpg",
-   "captions": "catalogue/captions/TheBigPicture723.vtt"
+   "captions": "catalogue/captions/TheBigPicture723.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "DDayAnniversary",
@@ -1567,7 +1789,9 @@
    "width": 1024,
    "height": 768,
    "still": "catalogue/stills/DDayAnniversary.jpg",
-   "captions": "catalogue/captions/DDayAnniversary.vtt"
+   "captions": "catalogue/captions/DDayAnniversary.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1960-07-21_missile_milestone",
@@ -1581,7 +1805,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1960-07-21_missile_milestone.jpg",
-   "captions": "catalogue/captions/1960-07-21_missile_milestone.vtt"
+   "captions": "catalogue/captions/1960-07-21_missile_milestone.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1960-10-31_Satchmo_Swings_In_Congo",
@@ -1595,7 +1821,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1960-10-31_Satchmo_Swings_In_Congo.jpg",
-   "captions": "catalogue/captions/1960-10-31_Satchmo_Swings_In_Congo.vtt"
+   "captions": "catalogue/captions/1960-10-31_Satchmo_Swings_In_Congo.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1961-03-13_Peace_Corps",
@@ -1609,7 +1837,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1961-03-13_Peace_Corps.jpg",
-   "captions": "catalogue/captions/1961-03-13_Peace_Corps.vtt"
+   "captions": "catalogue/captions/1961-03-13_Peace_Corps.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1962-07-23_First_Lady_At_Play",
@@ -1623,7 +1853,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1962-07-23_First_Lady_At_Play.jpg",
-   "captions": "catalogue/captions/1962-07-23_First_Lady_At_Play.vtt"
+   "captions": "catalogue/captions/1962-07-23_First_Lady_At_Play.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1962-09-13_Kennedy_Tour",
@@ -1637,7 +1869,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1962-09-13_Kennedy_Tour.jpg",
-   "captions": "catalogue/captions/1962-09-13_Kennedy_Tour.vtt"
+   "captions": "catalogue/captions/1962-09-13_Kennedy_Tour.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1963-03-18_Suspense_Story",
@@ -1651,7 +1885,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1963-03-18_Suspense_Story.jpg",
-   "captions": "catalogue/captions/1963-03-18_Suspense_Story.vtt"
+   "captions": "catalogue/captions/1963-03-18_Suspense_Story.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1963-11-14_Space_Movie",
@@ -1665,7 +1901,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1963-11-14_Space_Movie.jpg",
-   "captions": "catalogue/captions/1963-11-14_Space_Movie.vtt"
+   "captions": "catalogue/captions/1963-11-14_Space_Movie.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1964-03-02_New_York_Worlds_Fair",
@@ -1679,7 +1917,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1964-03-02_New_York_Worlds_Fair.jpg",
-   "captions": "catalogue/captions/1964-03-02_New_York_Worlds_Fair.vtt"
+   "captions": "catalogue/captions/1964-03-02_New_York_Worlds_Fair.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1964-10-19_The_Olympics",
@@ -1693,7 +1933,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1964-10-19_The_Olympics.jpg",
-   "captions": "catalogue/captions/1964-10-19_The_Olympics.vtt"
+   "captions": "catalogue/captions/1964-10-19_The_Olympics.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1964-10-26_Olympics_End",
@@ -1707,7 +1949,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1964-10-26_Olympics_End.jpg",
-   "captions": "catalogue/captions/1964-10-26_Olympics_End.vtt"
+   "captions": "catalogue/captions/1964-10-26_Olympics_End.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "1964-10-26_Fashions",
@@ -1721,7 +1965,9 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/1964-10-26_Fashions.jpg",
-   "captions": "catalogue/captions/1964-10-26_Fashions.vtt"
+   "captions": "catalogue/captions/1964-10-26_Fashions.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "TheBigPicture-USArmyinSpaceandUndertheSea",
@@ -1735,7 +1981,9 @@
    "width": 624,
    "height": 480,
    "still": "catalogue/stills/TheBigPicture-USArmyinSpaceandUndertheSea.jpg",
-   "captions": "catalogue/captions/TheBigPicture-USArmyinSpaceandUndertheSea.vtt"
+   "captions": "catalogue/captions/TheBigPicture-USArmyinSpaceandUndertheSea.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "FortBliss",
@@ -1749,7 +1997,9 @@
    "width": 600,
    "height": 480,
    "still": "catalogue/stills/FortBliss.jpg",
-   "captions": "catalogue/captions/FortBliss.vtt"
+   "captions": "catalogue/captions/FortBliss.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Dustys_Trail_2",
@@ -1763,7 +2013,9 @@
    "width": 320,
    "height": 240,
    "still": "catalogue/stills/Dustys_Trail_2.jpg",
-   "captions": "catalogue/captions/Dustys_Trail_2.vtt"
+   "captions": "catalogue/captions/Dustys_Trail_2.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Dustys_Trail_3",
@@ -1777,7 +2029,9 @@
    "width": 320,
    "height": 240,
    "still": "catalogue/stills/Dustys_Trail_3.jpg",
-   "captions": "catalogue/captions/Dustys_Trail_3.vtt"
+   "captions": "catalogue/captions/Dustys_Trail_3.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Dustys_Trail_4",
@@ -1791,7 +2045,9 @@
    "width": 320,
    "height": 240,
    "still": "catalogue/stills/Dustys_Trail_4.jpg",
-   "captions": "catalogue/captions/Dustys_Trail_4.vtt"
+   "captions": "catalogue/captions/Dustys_Trail_4.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Dusty_5",
@@ -1805,7 +2061,9 @@
    "width": 320,
    "height": 240,
    "still": "catalogue/stills/Dusty_5.jpg",
-   "captions": "catalogue/captions/Dusty_5.vtt"
+   "captions": "catalogue/captions/Dusty_5.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "DustysTrail5",
@@ -1819,7 +2077,9 @@
    "width": 320,
    "height": 240,
    "still": "catalogue/stills/DustysTrail5.jpg",
-   "captions": "catalogue/captions/DustysTrail5.vtt"
+   "captions": "catalogue/captions/DustysTrail5.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "Dustys_Trail_Bear",
@@ -1833,7 +2093,9 @@
    "width": 320,
    "height": 240,
    "still": "catalogue/stills/Dustys_Trail_Bear.jpg",
-   "captions": "catalogue/captions/Dustys_Trail_Bear.vtt"
+   "captions": "catalogue/captions/Dustys_Trail_Bear.vtt",
+   "licence": null,
+   "credit": null
   },
   {
    "id": "306-v-20",
@@ -1847,7 +2109,9 @@
    "width": 1920,
    "height": 1080,
    "still": "catalogue/stills/306-v-20.jpg",
-   "captions": null
+   "captions": null,
+   "licence": null,
+   "credit": null
   }
  ]
 }

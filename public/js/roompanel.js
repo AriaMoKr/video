@@ -19,11 +19,12 @@ const ABOUT = {
 
 /**
  * What the panel and the bar show: the room's mode and how its tapes are shelved (modes.js
- * SHELVINGS), the episode chosen (its name, or null), how it is going (status), and whether it
- * plays and the captions are on.
- * @typedef {{ mode: string, shelving: string, name: string | null, status: string, time: string, playing: boolean, captions: boolean, hasCaptions: boolean }} Showing
+ * SHELVINGS), the episode chosen (its name, or null), how it is going (status), whether it plays
+ * and the captions are on, and what it is shown under (catalogue.js rightsLine; with nothing
+ * chosen, what the room's are).
+ * @typedef {{ mode: string, shelving: string, name: string | null, status: string, time: string, playing: boolean, captions: boolean, hasCaptions: boolean, rights: string }} Showing
  */
-const KEYS = ['mode', 'shelving', 'name', 'status', 'time', 'playing', 'captions', 'hasCaptions'];
+const KEYS = ['mode', 'shelving', 'name', 'status', 'time', 'playing', 'captions', 'hasCaptions', 'rights'];
 
 /** A button as the control panel draws its own. */
 function button(g, [x0, y0, x1, y1], label, { selected = false, hover = false, disabled = false, size = 26 } = {}) {
@@ -67,7 +68,7 @@ class CanvasPanel {
     this.canvas.height = px.height;
     this.ctx = this.canvas.getContext('2d');
     /** @type {Showing} */
-    this.state = { mode: 'store', shelving: 'decade', name: null, status: '', time: '', playing: false, captions: false, hasCaptions: false };
+    this.state = { mode: 'store', shelving: 'decade', name: null, status: '', time: '', playing: false, captions: false, hasCaptions: false, rights: '' };
     this.hover = null;
     this.texture = null;
   }
@@ -157,8 +158,10 @@ export class RoomPanel extends CanvasPanel {
     g.fillStyle = 'rgba(224,187,114,0.35)';
     g.fillRect(32, 618, W - 64, 2);
     g.fillStyle = '#b9a98d';
+    // Under what the episode chosen is shown (its owner and licence, as they ask to be credited
+    // with it), or with none what the room's are.
     /** @type {[string, number][]} */
-    const about = [['Classic TV, newsreels and films from archive.org', 650], ['Public domain, streamed from the Internet Archive', 678], ['Captions are archive.org’s speech to text', 706]];
+    const about = [['Classic TV, newsreels and films, streamed from archive.org', 650], [s.rights, 678], ['Captions are archive.org’s speech to text', 706]];
     for (const [text, y] of about) {
       fitFont(g, text, W - 64, 18);
       g.fillText(text, W / 2, y);

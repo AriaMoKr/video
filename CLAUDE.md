@@ -102,15 +102,19 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   front page), its kind, year and length along its foot; a sign (`SignAtlas`, of modes.js's signs)
   with its decade's colour either side, or its kind's icon (`KIND_ICONS`, a `Path2D`). `roompanel.js`: the room panel (`RoomPanel`, at -x beside
   the doorway, across it from the control panel: the modes, Shelves by decade or by category, drawn
-  disabled in the gallery, and the player) and a screen's bar (`ScreenBar`), redrawn only on a change.
+  disabled in the gallery, the player, and at its foot the rights of what is showing, `rights`:
+  catalogue.js `rightsLine`, else main.js's line for them all) and a screen's bar (`ScreenBar`),
+  redrawn only on a change.
 - `player.js`: one `<video crossorigin>` through the archive proxy into a `VideoTexture`, with
   captions (`cueAt`); where that fails, out of VR it plays the direct archive.org URL on the page
   (`section.player`, `<video controls>` and a `<track>`), in VR it says so; a blocked autoplay waits
   for Play. `catalogue.js` (pure, strict): `DECADES`, `KINDS` (tv, silent, cartoon, film, newsreel: their order in
   a decade), `KIND_NAMES` (one, all) and `KIND_ICONS` (an SVG path each on a 16 × 16 grid, the
   card's and the signs'), `readCatalogue` of `public/catalogue/episodes.json` (a kind
-  it doesn't know is tv), `proxyOf` (`?videoproxy=`, `none`), `videoUrl`, `detailsUrl`, `parseVtt`,
-  `cueAt`, `clock`.
+  it doesn't know is tv; a `licence` kept only if Creative Commons' and with a `credit`, none being
+  public domain in the US), `licenceName` ("CC BY-NC-ND 4.0" from the deed's address), `rightsLine`
+  ("© owner · licence", else `PUBLIC_DOMAIN_US`), `proxyOf` (`?videoproxy=`, `none`), `videoUrl`,
+  `detailsUrl`, `parseVtt`, `cueAt`, `clock`.
 - `scene.js` builds the room as a few merged meshes with light baked into vertex colours (`bake.js`
   and `builder.js`, the hallway's): the lamps, the window's daylight and the doorway's glow. The
   window's glass is common's `sky.js` (`skyMaterial`, turned by `skyYaw`); the doorway is common's
@@ -147,7 +151,8 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   each piece leads, `pieceHref`, else a button, `onPiece`), Start / Leave shared session, in
   a session its status and the visitor's name (`onName`), and Settings with the panel's choices as
   radio buttons and checkboxes; before them, in the room, the modes and Shelves (by decade or by
-  category, the fieldset disabled in the gallery) as radios, what is showing,
+  category, the fieldset disabled in the gallery) as radios, what is showing and under it what it is
+  shown under (`rights`: the owner and the licence, linked, else public domain in the US),
   Play, Next, Captions, Stop and the episodes grouped as the shelves are, by decade and in each by
   kind, or by kind and in each by decade, a kind under its name and its
   icon (catalogue.js `KIND_ICONS`, drawn as its tapes are, `aria-hidden`; made again, `_list`
@@ -189,17 +194,24 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   checked as its opening says, and fit for the family, a
   newsreel's every story, not only its first; the silent films' copies with no sound; a pick's `file`
   for one of an item's several episodes, with that file's own thumbs and captions, `still` where
-  the tool's own frame was not right, and `captions: false` where archive.org's are no use) and
+  the tool's own frame was not right, `captions: false` where archive.org's are no use, and
+  `credit` where a licensed film's is not its owner's) and
   committed; the page never searches archive.org. A video's captions (`chooseFiles`) are its own,
   else its 512Kb copy's (all the newsreels have), else the older pass of speech to text that the
   Prelinger's films have instead (`<id>.asr.vtt`), and the test wants four cues a minute, with
-  words. Imported, the tool only exports (the test checks `chooseFiles`).
+  words. Each entry's `licence` and `credit` (`licensing`): null and null for public domain in the
+  US (listed, or marked so), else the owner's Creative Commons licence (its deed, https) and whom
+  to credit (README, "Rights"); all 132 are public domain so far. Imported, the tool only exports
+  (the test checks `chooseFiles`, `kindsOf` and `licensing`).
 - `tools/archive-proxy/`: `worker.js`, the Cloudflare Worker `video-archive-proxy` on vrlbry's
   account (https://video-archive-proxy.vrlbry.workers.dev/, beside vrlbry-zim-proxy, sharing the
   free plan's 100,000 requests a day): Range GETs of video files of classic_tv and
-  universal_newsreels and prelinger items marked public domain, and of the items it lists by name
-  (`LISTED`, each with why it is free: the cartoons and silent films, users' uploads, mostly
-  unmarked), for `ALLOWED_ORIGINS` (wrangler.toml) only, with CORS. `serve.mjs` runs it locally. Deploy it by hand when it changes.
+  universal_newsreels and prelinger items marked public domain (`PUBLIC_DOMAIN`), of the items it
+  lists by name (`LISTED`, each with why it is free: the cartoons and silent films, users' uploads,
+  mostly unmarked), and of the items in an owner's own collection (`OWNERS`: calacademyvideo, the
+  California Academy of Sciences') under one of Creative Commons' six licences (`CREATIVE_COMMONS`)
+  or marked public domain, never an uploader's licence elsewhere; for `ALLOWED_ORIGINS`
+  (wrangler.toml) only, with CORS. `serve.mjs` runs it locally. Deploy it by hand when it changes.
 - `style.css`: the page over the view, and the 10-foot view under `html.tv` (the hallway's: 960 × 540
   at a pixel ratio of 2, 18 px text, 4 px focus rings, the TV's safe margins, the hint and toasts
   beside the card).
