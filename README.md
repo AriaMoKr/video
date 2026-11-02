@@ -62,8 +62,8 @@ sees the same shelves.
   Captions, Stop. The room's panel and the card have the same.
 - **Sit down** on a seat (the couch, the sofa, a seat in the screening room) the same way: you sit
   at a seated height, facing the screen. Walking stands you up again beside it.
-- **Captions** come from archive.org's speech to text, where an item has it (106 of the 132
-  episodes, none of the films among them), drawn under the screen. They are off until you turn them on, and the choice is kept
+- **Captions** come from archive.org's speech to text, where an item has it (115 of the 132
+  episodes: all but the cartoons, the silent films and seven of the shows), drawn under the screen. They are off until you turn them on, and the choice is kept
   with the room's (an episode without them says so).
 - **If the video can't reach the screen** (the archive proxy, below, can't be reached), it plays on
   the page in a box with its own controls and captions instead, straight from archive.org. That
@@ -260,7 +260,9 @@ that has them.
 The films are of two kinds. Nine are from the [Prelinger Archives](https://archive.org/details/prelinger),
 films companies made to show and sell, shelved under their sponsors, from Western Electric's
 Finding His Voice (1929), a cartoon about how sound gets onto film, to General Motors' Design for
-Dreaming (1956): only the Prelinger's own copies, which it marks public domain. The other ten are
+Dreaming (1956): only the Prelinger's own copies, which it marks public domain. Their captions are
+an older pass of archive.org's speech to text, which the Prelinger's films have instead of the
+newer one. The other ten are
 cartoons and silent comedies whose copies are archive.org users' uploads, mostly unmarked, which
 the proxy relays by name: Harold Lloyd's Safety Last!, Buster Keaton's Three Ages and Steamboat
 Bill, Jr., Charlie Chaplin's The Gold Rush as it first came out, silent, and Disney's Steamboat

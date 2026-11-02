@@ -190,8 +190,10 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   newsreel's every story, not only its first; the silent films' copies with no sound; a pick's `file`
   for one of an item's several episodes, with that file's own thumbs and captions, `still` where
   the tool's own frame was not right, and `captions: false` where archive.org's are no use) and
-  committed; the page never searches archive.org. A video's captions are its own, else its 512Kb
-  copy's (all the newsreels have), and the test wants four cues a minute, with words.
+  committed; the page never searches archive.org. A video's captions (`chooseFiles`) are its own,
+  else its 512Kb copy's (all the newsreels have), else the older pass of speech to text that the
+  Prelinger's films have instead (`<id>.asr.vtt`), and the test wants four cues a minute, with
+  words. Imported, the tool only exports (the test checks `chooseFiles`).
 - `tools/archive-proxy/`: `worker.js`, the Cloudflare Worker `video-archive-proxy` on vrlbry's
   account (https://video-archive-proxy.vrlbry.workers.dev/, beside vrlbry-zim-proxy, sharing the
   free plan's 100,000 requests a day): Range GETs of video files of classic_tv and

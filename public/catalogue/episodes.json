@@ -111,7 +111,7 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/FindingH1929.jpg",
-   "captions": null
+   "captions": "catalogue/captions/FindingH1929.vtt"
   },
   {
    "id": "Aroundth1937",
@@ -125,7 +125,7 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/Aroundth1937.jpg",
-   "captions": null
+   "captions": "catalogue/captions/Aroundth1937.vtt"
   },
   {
    "id": "RideforC1937",
@@ -139,7 +139,7 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/RideforC1937.jpg",
-   "captions": null
+   "captions": "catalogue/captions/RideforC1937.vtt"
   },
   {
    "id": "Breakfas1939",
@@ -153,7 +153,7 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/Breakfas1939.jpg",
-   "captions": null
+   "captions": "catalogue/captions/Breakfas1939.vtt"
   },
   {
    "id": "1933-03-05_Extra_Special_Roosevelt_Inaugurated",
@@ -503,7 +503,7 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/ToNewHor1940.jpg",
-   "captions": null
+   "captions": "catalogue/captions/ToNewHor1940.vtt"
   },
   {
    "id": "LeaveItt1940",
@@ -517,7 +517,7 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/LeaveItt1940.jpg",
-   "captions": null
+   "captions": "catalogue/captions/LeaveItt1940.vtt"
   },
   {
    "id": "1945-06-28_San_Francisco_Parley_Ends",
@@ -1035,7 +1035,7 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/DateWith1950.jpg",
-   "captions": null
+   "captions": "catalogue/captions/DateWith1950.vtt"
   },
   {
    "id": "Designfo1956",
@@ -1049,7 +1049,7 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/Designfo1956.jpg",
-   "captions": null
+   "captions": "catalogue/captions/Designfo1956.vtt"
   },
   {
    "id": "OnceUpon1956",
@@ -1063,7 +1063,7 @@
    "width": 640,
    "height": 480,
    "still": "catalogue/stills/OnceUpon1956.jpg",
-   "captions": null
+   "captions": "catalogue/captions/OnceUpon1956.vtt"
   },
   {
    "id": "1957-10-07_New_Moon",
