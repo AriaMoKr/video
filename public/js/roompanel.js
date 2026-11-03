@@ -161,7 +161,7 @@ export class RoomPanel extends CanvasPanel {
     // Under what the episode chosen is shown (its owner and licence, as they ask to be credited
     // with it), or with none what the room's are.
     /** @type {[string, number][]} */
-    const about = [['Classic TV, newsreels and films, streamed from archive.org', 650], [s.rights, 678], ['Captions are archive.org’s speech to text', 706]];
+    const about = [['Shows, newsreels, cartoons and films, streamed from archive.org', 650], [s.rights, 678], ['Captions are archive.org’s speech to text', 706]];
     for (const [text, y] of about) {
       fitFont(g, text, W - 64, 18);
       g.fillText(text, W / 2, y);

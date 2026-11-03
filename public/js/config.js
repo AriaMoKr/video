@@ -18,7 +18,7 @@ export const ROOM = {
   /** Its name: the page's <title> and the card's heading. */
   title: 'video',
   /** The page's <meta name="description">, word for word: the Hallway's plaque by its door shows it. */
-  description: "Watch old TV together: public-domain shows from archive.org's Classic TV, in a video store, a den, a screening room or a gallery of sets. In VR, on a desktop or on a phone.",
+  description: 'Watch old TV together: public-domain shows, newsreels, cartoons and films from archive.org, in a video store, a den, a screening room or a gallery of sets. In VR, on a desktop or on a phone.',
   /** What kind of place it is, on the sign over its door in the Hallway. */
   sign: 'Screening Room',
   /** Where it is published, on GitHub Pages: https://ariamokr.github.io/<repository>/. */

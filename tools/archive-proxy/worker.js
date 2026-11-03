@@ -1,20 +1,23 @@
-// The archive proxy: a Cloudflare Worker that relays the classic TV episodes, the newsreels and the
-// films the room plays from archive.org, with the CORS headers archive.org's video servers don't
-// send, so the page may draw a video into WebGL (a THREE.VideoTexture on the room's screens, in VR
-// too). Without them a video plays only as itself on the page: its frames taint WebGL, and with
-// crossOrigin it doesn't load. vrlbry's tools/zim-proxy/worker.js, for video.
+// The archive proxy: a Cloudflare Worker that relays the classic TV episodes, the newsreels, the
+// cartoons and the films the room plays from archive.org, with the CORS headers archive.org's video
+// servers don't send, so the page may draw a video into WebGL (a THREE.VideoTexture on the room's
+// screens, in VR too). Without them a video plays only as itself on the page: its frames taint
+// WebGL, and with crossOrigin it doesn't load. vrlbry's tools/zim-proxy/worker.js, for video.
 //
 // GET /download/<item>/<file> with a Range header, as a <video crossorigin> asks: archive.org's
-// answer (206, the part), streamed through. Only the video files (.mp4, .webm, .ogv) of items in
-// archive.org's classic_tv collection (or one of its decades, classic_tv_1950s and so on), in its
-// universal_newsreels (which Universal gave to the public in 1976) or in the Prelinger Archives
-// that are marked public domain, of the few items it names (LISTED: cartoons and silent comedies
-// that users uploaded, most of them unmarked, each checked by hand), and of the collections where a
-// film's owner put up its own films under a Creative Commons licence (OWNERS: the California
-// Academy of Sciences'): each item's metadata is read once and the answer kept for a while, and
-// anything else is refused, so it relays nothing else and goes nowhere else. The page uses it when
-// config.js names it (ROOM.videoProxy, or ?videoproxy=), and plays a video straight from
-// archive.org, on the page, when it fails.
+// answer (206, the part), streamed through. Only the video files (.mp4, .webm, .ogv) of the room's
+// own picks (tools/picks.js PICKS, which wrangler bundles in: deploy it again after changing them),
+// each checked by hand, and archive.org's mark alone is not enough (Bonanza's 1959 episodes are
+// marked public domain, and were renewed). Any other item is refused before archive.org is asked
+// about it. A pick, as well, must be in archive.org's classic_tv collection (or one of its decades,
+// classic_tv_1950s and so on), in its universal_newsreels (which Universal gave to the public in
+// 1976) or in the Prelinger Archives and marked public domain, one of the few items it names
+// (LISTED: cartoons and silent comedies that users uploaded, most of them unmarked), or in a
+// collection where a film's owner put up its own films under a Creative Commons licence (OWNERS:
+// the California Academy of Sciences'): each pick's metadata is read once and the answer kept for a
+// while. So it relays nothing else and goes nowhere else. The page uses it when config.js names it
+// (ROOM.videoProxy, or ?videoproxy=), and plays a video straight from archive.org, on the page, when
+// it fails.
 //
 // Only the pages of the sites in ALLOWED_ORIGINS (wrangler.toml) may use it: a browser names the
 // page's origin in every cross-origin request, so another site's page cannot spend this one's
@@ -29,13 +32,18 @@
 //
 // Deploy: `npx wrangler deploy` in this folder (wrangler.toml), with a Cloudflare account.
 
+import { PICKS } from '../picks.js';
+
 /** Where the files are: archive.org's download path redirects to the server that holds the item. */
 export const ARCHIVE = 'https://archive.org';
 
 /** /download/<item>/<file>: an item's identifier, and a video file at its top. */
 const FILE_PATH = /^\/download\/([A-Za-z0-9._-]+)\/([^/]+\.(?:mp4|m4v|webm|ogv))$/i;
 const RANGE = /^bytes=(\d+)-(\d*)$/;
-/** The collections whose items it relays when marked public domain: classic_tv and its decades, Universal's newsreels, and the Prelinger Archives. */
+/** The items the room shows (tools/picks.js), the only ones it relays, and why any other is refused. */
+const PICKED = new Set(PICKS.map((p) => p.id));
+const NOT_PICKED = "not one of the room's picks";
+/** The collections whose picks it relays when marked public domain: classic_tv and its decades, Universal's newsreels, and the Prelinger Archives. */
 const COLLECTION = /^(?:classic_tv(?:_\d{4}s)?|universal_newsreels|prelinger)$/;
 /** What marks an item public domain on archive.org (its licenseurl): Creative Commons' mark, CC0, or the old dedication. */
 export const PUBLIC_DOMAIN = /^https?:\/\/creativecommons\.org\/(?:publicdomain\/(?:mark|zero)\/|licenses\/publicdomain\/?)/;
@@ -112,13 +120,15 @@ export function allowOrigin(origin, allowed) {
 
 /**
  * Whether an item's metadata (archive.org's /metadata/<id>/metadata `result`) lets it be relayed:
- * listed (LISTED); in an owner's collection (OWNERS) and under a Creative Commons licence or marked
- * public domain; or in classic_tv (or one of its decades), universal_newsreels or prelinger and
- * marked public domain. Returns null when it may, else why not.
+ * one of the room's picks (PICKS), and of those listed (LISTED); in an owner's collection (OWNERS)
+ * and under a Creative Commons licence or marked public domain; or in classic_tv (or one of its
+ * decades), universal_newsreels or prelinger and marked public domain. Returns null when it may,
+ * else why not.
  * @param {{ identifier?: string, collection?: string | string[], licenseurl?: string } | null | undefined} md
  */
 export function refusal(md) {
   if (!md || typeof md !== 'object') return 'no such item';
+  if (!PICKED.has(String(md.identifier))) return NOT_PICKED;
   if (LISTED.has(String(md.identifier))) return null;
   const collections = [].concat(md.collection ?? []).map(String);
   const licence = String(md.licenseurl ?? '');
@@ -199,6 +209,8 @@ export async function handle(request, {
   } catch {
     return done(answer(404, 'a file name that is not one', CORS), { refused: 'path' });
   }
+  // Any item but a pick is refused first, however it is asked for, and archive.org is not asked.
+  if (!PICKED.has(id)) return done(answer(403, `${id}: ${NOT_PICKED}`, CORS), { refused: 'item', why: NOT_PICKED });
   const range = request.headers.get('range');
   const r = RANGE.exec(range ?? '');
   if (r) entry.from = Number(r[1]);
@@ -206,6 +218,7 @@ export async function handle(request, {
     if (!r) return done(answer(416, 'a Range header is needed: bytes=<start>- (as a video asks)', CORS), { refused: 'range' });
     if (r[2] && Number(r[2]) < Number(r[1])) return done(answer(416, 'a range that ends before it starts', CORS), { refused: 'range' });
   }
+  // A pick's verdict, from its metadata.
   const v = await verdict(id, { fetchImpl, items, now, timeoutMs });
   if (!v.ok) {
     const status = v.why.startsWith('metadata:') ? 502 : 403;

@@ -1,6 +1,7 @@
-# The archive proxy (worker.js): archive.org's classic TV, newsreels and films, with CORS, for the
-# room's screens. Deploy with a Cloudflare account: `npx wrangler login`, then `npx wrangler deploy` in
-# this folder. It answers at https://video-archive-proxy.<your workers.dev subdomain>.workers.dev/
+# The archive proxy (worker.js): the room's picks (../picks.js, bundled in) of archive.org's classic
+# TV, newsreels, cartoons and films, with CORS, for the room's screens. Deploy with a Cloudflare
+# account: `npx wrangler login`, then `npx wrangler deploy` in this folder, and again whenever the
+# picks change. It answers at https://video-archive-proxy.<your workers.dev subdomain>.workers.dev/
 # (here vrlbry's: https://video-archive-proxy.vrlbry.workers.dev/), which config.js names.
 name = "video-archive-proxy"
 main = "worker.js"

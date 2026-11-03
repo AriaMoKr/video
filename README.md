@@ -6,8 +6,8 @@ A room behind one of the [Hallway](https://ariamokr.github.io/hallway/)'s doors 
 alone or together: public-domain shows from archive.org's
 [Classic TV](https://archive.org/details/classic_tv) collection, newsreels from its
 [Universal Newsreels](https://archive.org/details/universal_newsreels), films from the
-[Prelinger Archives](https://archive.org/details/prelinger), and cartoons and silent comedies of
-the 1920s, on tapes on the shelves, played on the room's screens. The room can be a video store, a den, a screening room or a gallery
+[Prelinger Archives](https://archive.org/details/prelinger), and silent comedies of the 1920s and
+cartoons of the 1920s and 1940s, on tapes on the shelves, played on the room's screens. The room can be a video store, a den, a screening room or a gallery
 of TV sets. Watch in VR on a Meta Quest, on a desktop or on a phone. There is nothing to install.
 
 ![The video store as one comes in through the door](public/hallway-preview.jpg)
@@ -62,8 +62,8 @@ sees the same shelves.
   Captions, Stop. The room's panel and the card have the same.
 - **Sit down** on a seat (the couch, the sofa, a seat in the screening room) the same way: you sit
   at a seated height, facing the screen. Walking stands you up again beside it.
-- **Captions** come from archive.org's speech to text, where an item has it (115 of the 132
-  episodes: all but the cartoons, the silent films and seven of the shows), drawn under the screen. They are off until you turn them on, and the choice is kept
+- **Captions** come from archive.org's speech to text, where an item has it (98 of the 114
+  episodes: all but the cartoons, the silent films and six of the TV episodes), drawn under the screen. They are off until you turn them on, and the choice is kept
   with the room's (an episode without them says so).
 - **If the video can't reach the screen** (the archive proxy, below, can't be reached), it plays on
   the page in a box with its own controls and captions instead, straight from archive.org. That
@@ -231,7 +231,7 @@ A room made from this template keeps the remote working if:
 
 ## The shows
 
-132 episodes from the 1920s to the 1970s: 79 of 42 shows chosen by hand from
+114 episodes from the 1920s to the 1970s: 61 of 35 shows chosen by hand from
 [Classic TV](https://archive.org/details/classic_tv), 34 newsreels and 19 films (below). Classic
 TV's users upload its items, so the room takes only those marked public domain, and of those only
 shows known to have lapsed into it and fit for the whole family. That is why the decades stop at the
@@ -239,12 +239,17 @@ shows known to have lapsed into it and fit for the whole family. That is why the
 marked public domain from the 1980s and 1990s is not.
 
 Not everything marked public domain from before then is, either: NBC renewed Bonanza's 1959
-episodes, so only its 1960 ones are here. So each is checked before it goes on the shelves. The
-year that counts is the one in the copyright notice in its credits, not its air date. A show from
-1950 to 1963 is free only if it was never renewed in its 28th year, which the
-[Copyright Office's records](https://publicrecords.copyright.gov/) show. From 1964 renewal was
-automatic, so a later show is free only if it carried no notice, or if the US government made it
-(The Big Picture, the Army's, and Vision USA, the US Information Agency's).
+episodes, so only its 1960 ones are here, and Irving Brecher renewed The Life of Riley's of 1949.
+So each is checked before it goes on the shelves, and what its check found is written down with it
+in `tools/picks.js`. The year that counts is the one in the copyright notice in its credits, not
+its air date. A show from before 1964 is free if it carried no notice, or if nobody renewed it in
+its 28th year: from 1978 the [Copyright Office's records](https://publicrecords.copyright.gov/)
+show it, searched by the show, the episode and its owner (an owner's renewals may not name the
+show), and before then its Catalog of Copyright Entries, whose volumes archive.org has. From 1964
+renewal was automatic, so a later show is free only if it carried no notice, or if the US
+government made it (The Big Picture, the Army's, and Vision USA, the US Information Agency's). A
+show made abroad is out, its US copyright restored in 1996 (The Adventures of Robin Hood, British),
+and so is a copy whose notice can't be read, unless the records settle it whichever year it is.
 
 The newsreels are Universal's, which it gave to the public in 1976 with their film to the National
 Archives, from archive.org's [Universal Newsreels](https://archive.org/details/universal_newsreels).
@@ -271,18 +276,20 @@ three of Fleischer's Superman cartoons of 1941 and 1942, whose copyrights were n
 films' copies have no sound at all: a score added since is not the film's, and may not be free.
 
 `tools/picks.js` lists them (the item, the show, the episode's title, its kind if it is not TV, the
-year, and where the tool would choose wrong, which of the item's videos, the frame for its tape, or
-no captions), and
+year, where the tool would choose wrong, which of the item's videos, the frame for its tape, or no
+captions, and its check: the notice in its credits, or that it has none, and the renewal search, or
+why else it is free; the films the proxy lists by name have the reason it lists them for), and
 `node tools/catalogue.mjs` writes `public/catalogue/` from it and from archive.org's metadata: the
 page's `episodes.json` (with what each is shown under, below), a still of each (on its tape and its
 set), and its captions. These are
-committed (3.4 MB), so the page never searches archive.org. Only the videos come from archive.org,
-streamed as they play. Run the tool again after changing the picks.
+committed (about 3 MB), so the page never searches archive.org. Only the videos come from archive.org,
+streamed as they play. Run the tool again after changing the picks, and deploy the archive proxy
+again (below), which relays only them.
 
 ## Rights
 
 Each video is public domain in the US, checked as above, or a film whose owner put it on
-archive.org under a Creative Commons licence (none of the 132 yet). The card, under what is showing,
+archive.org under a Creative Commons licence (none of the 114 yet). The card, under what is showing,
 and the room's panel say which: "Public domain in the US", or the owner and the licence, such as
 "© California Academy of Sciences · CC BY-NC-ND 4.0", the licence linked to its deed in the card.
 With the title beside it, which links to the film's page on archive.org, that is the credit the
@@ -310,16 +317,18 @@ at https://video-archive-proxy.vrlbry.workers.dev/ (`config.js`'s `videoProxy`).
 same Cloudflare account as vrlbry's zim proxy, and they share its free plan's 100,000 requests a
 day (a viewing takes a handful, one per seek). It relays only:
 
-- the video files of items in archive.org's `classic_tv` collection (or one of its decades), its
-  `universal_newsreels` or its `prelinger` that are marked public domain, which it checks in each
-  item's metadata; of the items it lists by name (`LISTED` in `worker.js`: the cartoons and
-  silent films, whose copies are users' uploads and mostly unmarked, each with why it is free);
-  and of the items in an owner's own collection (`OWNERS`, above) under a Creative Commons
-  licence, and
+- the video files of the room's own picks (`tools/picks.js`, which wrangler bundles into it). Any
+  other item is refused without asking archive.org, whatever archive.org marks it: it marks
+  Bonanza's 1959 episodes public domain too, and NBC renewed them. A pick, as well, must be in
+  archive.org's `classic_tv` collection (or one of its decades), its `universal_newsreels` or its
+  `prelinger` and marked public domain, which it checks in the pick's metadata; one of the items
+  it lists by name (`LISTED` in `worker.js`: the cartoons and silent films, whose copies are
+  users' uploads and mostly unmarked, each with why it is free); or in an owner's own collection
+  (`OWNERS`, above) under a Creative Commons licence; and
 - for the pages of `ariamokr.github.io` and this machine (`ALLOWED_ORIGINS` in `wrangler.toml`).
 
 It logs each request without the visitor's address or user agent. To deploy it, with a Cloudflare
-account (`npx wrangler login` once):
+account (`npx wrangler login` once), and again whenever the picks change:
 
 ```bash
 cd tools/archive-proxy && npx wrangler deploy
@@ -390,7 +399,7 @@ for word.
 {
   id: 'video',
   title: 'video',
-  subtitle: "Watch old TV together: public-domain shows from archive.org's Classic TV, in a video store, a den, a screening room or a gallery of sets. In VR, on a desktop or on a phone.",
+  subtitle: 'Watch old TV together: public-domain shows, newsreels, cartoons and films from archive.org, in a video store, a den, a screening room or a gallery of sets. In VR, on a desktop or on a phone.',
   sign: 'Screening Room',
   url: 'https://ariamokr.github.io/video/',
   preview: 'https://ariamokr.github.io/video/hallway-preview.jpg',

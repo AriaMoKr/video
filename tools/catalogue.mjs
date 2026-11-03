@@ -7,15 +7,16 @@
 //   captions/<id>.vtt  its captions, archive.org's speech to text (the Prelinger Archives' films an
 //                      older pass of it), where the item has them (and its pick doesn't say they are
 //                      no use)
-// Each item is checked as the archive proxy checks it (worker.js refusal: in classic_tv or one of
-// its decades, universal_newsreels or prelinger and marked public domain, listed by name, or in an
-// owner's collection under a Creative Commons licence), its pick's kind against where it is
+// Each item is checked as the archive proxy checks it (worker.js refusal: a pick, and in classic_tv
+// or one of its decades, universal_newsreels or prelinger and marked public domain, listed by name,
+// or in an owner's collection under a Creative Commons licence), its pick's kind against where it is
 // (kindsOf), what it is shown under (licensing: public domain in the US, or its owner's licence and
 // whom to credit), and its video chosen: an mp4 that browsers play (h.264, or the upload itself), the one its captions
 // were made from where there is one. Only the video itself is not copied: the page streams it from
 // archive.org through the proxy.
 //   node tools/catalogue.mjs [--only <id>]
-// Run it again after changing tools/picks.js. Imported (test/catalogue.test.js), it only exports.
+// Run it again after changing tools/picks.js, and deploy the archive proxy again, which relays only
+// the picks. Imported (test/catalogue.test.js), it only exports.
 import { mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';

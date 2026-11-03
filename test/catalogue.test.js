@@ -1,7 +1,7 @@
 // The catalogue (public/catalogue/, from tools/picks.js by tools/catalogue.mjs) and catalogue.js:
-// every pick in it with its still and captions, which of an item's files the tool takes, what the
-// page calls them and under what it shows them, where it plays them from, and the captions read as
-// the room shows them.
+// every pick in it with its still and captions, and with why it is free; which of an item's files
+// the tool takes, what the page calls them and under what it shows them, where it plays them from,
+// and the captions read as the room shows them.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
@@ -44,6 +44,28 @@ test('every pick is in the catalogue, in order, and nothing else', () => {
     for (const n of KIND_ICONS[kind].match(/\d+(\.\d+)?/g)) assert.ok(Number(n) <= 16, `${kind}: ${n} on its 16 × 16 grid`);
   }
   assert.deepEqual(KINDS.filter((k) => episodes.some((e) => e.kind === k)), KINDS);
+});
+
+test('every pick has its check, as the top of tools/picks.js says, or the reason the proxy lists it for', () => {
+  const ROMAN = { M: 1000, D: 500, C: 100, L: 50, X: 10, V: 5, I: 1 };
+  const roman = (s) => [...s].reduce((n, c, i) => n + (ROMAN[c] < (ROMAN[s[i + 1]] ?? 0) ? -ROMAN[c] : ROMAN[c]), 0);
+  assert.equal(roman('MCMLXIII'), 1963);
+  const entry = new Map(json.episodes.map((e) => [e.id, e]));
+  for (const p of PICKS) {
+    if (LISTED.has(p.id)) {
+      assert.equal(p.check, undefined, `${p.id}: the proxy's reason for listing it is its check`);
+      continue;
+    }
+    assert.ok(typeof p.check === 'string' && p.check.trim().length >= 20, `${p.id}: no check`);
+    // Its owner's licence; Universal's gift; a Prelinger Archives copy; a film of the government's;
+    // else a show's notice, or that it has none, and for one with a notice the renewal search.
+    if (entry.get(p.id)?.licence) assert.match(p.check, /licence/, p.id);
+    else if (p.kind === 'newsreel') assert.match(p.check, /^Universal's.*1976/, p.id);
+    else if (p.kind === 'film') assert.match(p.check, /^A Prelinger Archives copy/, p.id);
+    else if (!/a film of the US government's\.$/.test(p.check) && !/^No notice/.test(p.check)) assert.match(p.check, /renew/, `${p.id}: no renewal search`);
+    // A notice from 1964 on was renewed of itself.
+    for (const [, y] of p.check.matchAll(/© (M[CDLXVI]+|\d{4})\b/g)) assert.ok((/^\d/.test(y) ? Number(y) : roman(y)) < 1964, `${p.id}: © ${y}`);
+  }
 });
 
 test('each episode has its still and, where it has captions, them; and nothing left over', () => {
@@ -116,10 +138,12 @@ test('names, and where the video and its page are', () => {
   assert.equal(videoUrl(e, 'https://p.example/'), 'https://p.example/download/Mama1950/Mama%201950.mp4');
   assert.equal(videoUrl(e, null), `${ARCHIVE}download/Mama1950/Mama%201950.mp4`);
   assert.equal(detailsUrl(e), 'https://archive.org/details/Mama1950');
-  // Every episode's video is one the proxy relays (its path matches, and its item is allowed).
-  for (const ep of episodes) assert.match(new URL(videoUrl(ep, 'https://p.example/')).pathname, /^\/download\/[A-Za-z0-9._-]+\/[^/]+\.(?:mp4|m4v|webm|ogv)$/i);
-  assert.equal(refusal({ collection: ['classic_tv'], licenseurl: 'http://creativecommons.org/publicdomain/mark/1.0/' }), null);
-  assert.equal(refusal({ collection: ['universal_newsreels'], licenseurl: 'http://creativecommons.org/licenses/publicdomain/' }), null);
+  // Every episode's video is one the proxy relays: its path matches, and its item is a pick (whose
+  // metadata the tool checked as the proxy does).
+  for (const ep of episodes) {
+    assert.match(new URL(videoUrl(ep, 'https://p.example/')).pathname, /^\/download\/[A-Za-z0-9._-]+\/[^/]+\.(?:mp4|m4v|webm|ogv)$/i);
+    assert.equal(refusal({ identifier: ep.id, collection: ['classic_tv'], licenseurl: 'http://creativecommons.org/publicdomain/mark/1.0/' }), null, ep.id);
+  }
 });
 
 test('under what each is shown: public domain in the US, or its owner\'s Creative Commons licence and whom to credit', () => {
@@ -143,9 +167,9 @@ test('under what each is shown: public domain in the US, or its owner\'s Creativ
   assert.deepEqual(licensing(academy), { licence: 'https://creativecommons.org/licenses/by-nc-nd/4.0/', credit: 'California Academy of Sciences' });
   assert.deepEqual(licensing(academy, 'Someone Else'), { licence: 'https://creativecommons.org/licenses/by-nc-nd/4.0/', credit: 'Someone Else' });
   assert.deepEqual(licensing({ ...academy, licenseurl: 'http://creativecommons.org/publicdomain/zero/1.0/' }), { licence: null, credit: null });
-  // Every licence the proxy takes from an owner comes out as a deed the page names.
+  // Every licence the proxy takes from an owner, on a pick, comes out as a deed the page names.
   for (const url of ['http://creativecommons.org/licenses/by-sa/2.0', 'http://creativecommons.org/licenses/by-nc-sa/3.0/us', 'https://creativecommons.org/licenses/by-nd/4.0/']) {
-    assert.equal(refusal({ ...academy, licenseurl: url }), null, url);
+    assert.equal(refusal({ ...academy, identifier: PICKS[0].id, licenseurl: url }), null, url);
     assert.ok(licenceName(licensing({ ...academy, licenseurl: url }).licence), url);
   }
   assert.throws(() => licensing({ ...academy, licenseurl: undefined }), /neither public domain nor/);
