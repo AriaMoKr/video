@@ -58,11 +58,13 @@ test('every pick has its check, as the top of tools/picks.js says, or the reason
     }
     assert.ok(typeof p.check === 'string' && p.check.trim().length >= 20, `${p.id}: no check`);
     // Its owner's licence; Universal's gift; a Prelinger Archives copy; a film of the government's;
-    // else a show's notice, or that it has none, and for one with a notice the renewal search.
+    // else a show's notice and the renewal search, or that it has none and how it was published:
+    // sold to stations, in syndication, a network's broadcast being no publication.
     if (entry.get(p.id)?.licence) assert.match(p.check, /licence/, p.id);
     else if (p.kind === 'newsreel') assert.match(p.check, /^Universal's.*1976/, p.id);
     else if (p.kind === 'film') assert.match(p.check, /^A Prelinger Archives copy/, p.id);
-    else if (!/a film of the US government's\.$/.test(p.check) && !/^No notice/.test(p.check)) assert.match(p.check, /renew/, `${p.id}: no renewal search`);
+    else if (/^No notice/.test(p.check)) assert.match(p.check, /\bpublished\b[^.]*\b(?:syndication|sold to stations)\b/i, `${p.id}: no notice, and not how it was published`);
+    else if (!/a film of the US government's\.$/.test(p.check)) assert.match(p.check, /renew/, `${p.id}: no renewal search`);
     // A notice from 1964 on was renewed of itself.
     for (const [, y] of p.check.matchAll(/© (M[CDLXVI]+|\d{4})\b/g)) assert.ok((/^\d/.test(y) ? Number(y) : roman(y)) < 1964, `${p.id}: © ${y}`);
   }
@@ -132,12 +134,12 @@ test('readCatalogue keeps only what the page can show', () => {
 });
 
 test('names, and where the video and its page are', () => {
-  const e = { id: 'Mama1950', show: 'Mama', title: "Mama's Bad Day", decade: '1950s', year: 1950, file: 'Mama 1950.mp4' };
-  assert.equal(episodeName(e), "Mama: Mama's Bad Day (1950)");
-  assert.equal(episodeName({ ...e, year: null }), "Mama: Mama's Bad Day (1950s)");
-  assert.equal(videoUrl(e, 'https://p.example/'), 'https://p.example/download/Mama1950/Mama%201950.mp4');
-  assert.equal(videoUrl(e, null), `${ARCHIVE}download/Mama1950/Mama%201950.mp4`);
-  assert.equal(detailsUrl(e), 'https://archive.org/details/Mama1950');
+  const e = { id: 'Bonanza_pd', show: 'Bonanza', title: 'San Francisco', decade: '1960s', year: 1960, file: 'Bonanza s01e28.mp4' };
+  assert.equal(episodeName(e), 'Bonanza: San Francisco (1960)');
+  assert.equal(episodeName({ ...e, year: null }), 'Bonanza: San Francisco (1960s)');
+  assert.equal(videoUrl(e, 'https://p.example/'), 'https://p.example/download/Bonanza_pd/Bonanza%20s01e28.mp4');
+  assert.equal(videoUrl(e, null), `${ARCHIVE}download/Bonanza_pd/Bonanza%20s01e28.mp4`);
+  assert.equal(detailsUrl(e), 'https://archive.org/details/Bonanza_pd');
   // Every episode's video is one the proxy relays: its path matches, and its item is a pick (whose
   // metadata the tool checked as the proxy does).
   for (const ep of episodes) {
@@ -160,7 +162,7 @@ test('under what each is shown: public domain in the US, or its owner\'s Creativ
   // The tool: what the proxy lets through as public domain is shown as public domain in the US
   // (whatever an uploader marked a film it lists); an owner's film under its licence, with the
   // owner or the pick's credit; anything else is not shown.
-  const marked = { identifier: 'Mama1950', collection: ['classic_tv'], licenseurl: 'http://creativecommons.org/publicdomain/mark/1.0/' };
+  const marked = { identifier: 'TheBigLittleJesus', collection: ['classic_tv'], licenseurl: 'http://creativecommons.org/publicdomain/mark/1.0/' };
   assert.deepEqual(licensing(marked), { licence: null, credit: null });
   assert.deepEqual(licensing({ identifier: [...LISTED.keys()][0], collection: ['opensource_movies'], licenseurl: 'http://creativecommons.org/licenses/by/3.0/' }), { licence: null, credit: null });
   const academy = { identifier: 'rar_sia523_breeding_salmon', collection: ['calacademyvideo', 'americana', 'californiarevealed'], licenseurl: 'http://creativecommons.org/licenses/by-nc-nd/4.0/' };

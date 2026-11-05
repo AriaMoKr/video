@@ -5,8 +5,8 @@ Guidance for Claude Code in this repository.
 ## What this is
 
 video: a WebXR room behind one of the Hallway's doors to watch old TV in, alone or in a shared
-session (three.js 0.186, plain ES modules, no bundler or build step): 114 public-domain episodes
-from the 1920s to the 1970s, 61 from archive.org's Classic TV (https://archive.org/details/classic_tv),
+session (three.js 0.186, plain ES modules, no bundler or build step): 99 public-domain episodes
+from the 1920s to the 1970s, 46 from archive.org's Classic TV (https://archive.org/details/classic_tv),
 34 of Universal's newsreels (https://archive.org/details/universal_newsreels), 9 films of the
 Prelinger Archives (https://archive.org/details/prelinger) and 10 cartoons and silent comedies that
 the archive proxy relays by name, on tapes, played on the room's screens, in four modes (video
@@ -73,17 +73,17 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   'decade' and 'kind', `SHELVING_NAMES` "By decade" and "By category", `DEFAULT_SHELVING`
   'decade'), a bay to a kind, its decades in order; `F.tapes` in the order one reads them, which
   Next follows, and a sign's face's id its bay's decade or kind. In the
-  store and the den down the left wall, as many rows as it takes (four to eight, six now; by kind
-  five in the store, six in the den) to end 0.3 short of the back wall, room for about seventy more
-  (by kind 59 more TV in the store, 51 in the den); in the screening room nine rows, closer
+  store and the den down the left wall, as many rows as it takes (four to eight, five now, by decade
+  or by kind) to end 0.3 short of the back wall, room for about eighty more in the store and 75 in
+  the den (by kind 74 more TV in the store, 66 in the den); in the screening room nine rows, closer
   together (`rowH`): the 1920s and 1930s on the doorway's wall beside the room panel, the 1940s and
   1950s down the left wall from past the front of those (nearer the corner their end would hide
   the first tapes) to before the seats, and the 1960s and 1970s on the right short of the window's
   curtains (`CURTAINS`: how far past the window furniture.js hangs them and their rail), with room
-  for one more 1920s, six more 1930s, 33 more 1940s, 29 more 1950s, 45 more 1960s and 51 more
+  for one more 1920s, six more 1930s, 45 more 1940s, 50 more 1950s, 45 more 1960s and 51 more
   1970s, as the catalogue stands; by kind the silent films and cartoons on the doorway's wall, the
   television down the left and the short films and newsreels on the right, with room for 14 more
-  silent films, 12 cartoons, 38 TV, 45 short films and 47 newsreels (`test/modes.test.js`, each
+  silent films, 12 cartoons, 53 TV, 45 short films and 47 newsreels (`test/modes.test.js`, each
   mode by decade and by kind, fails when one runs past: a tape hidden, out
   of reach or in the way, or shelves running into each other). A bay's sign stays under the ceiling.
   The room panel's and a screen bar's buttons (`ROOM_PANEL_BUTTONS`, `roomPanelButtonAt`: the
@@ -188,7 +188,7 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   show shared in a session (`video:show`: mode, shelving, episode, playing, where, when; `shareShow`,
   `takeShow`, which keeps its own shelves for a show without them), and the frame loop.
 - `public/catalogue/`: `episodes.json`, `stills/<id>.jpg` and `captions/<id>.vtt`, written by
-  `tools/catalogue.mjs` from `tools/picks.js` (114 picks, 1920s–1970s, each decade's in the kinds'
+  `tools/catalogue.mjs` from `tools/picks.js` (99 picks, 1920s–1970s, each decade's in the kinds'
   order, its television, silent films, cartoons, short films, then newsreels, a pick's `kind` said
   where it is not tv and checked by the tool against where its item is (`kindsOf`): public domain,
   checked as its opening says, and fit for the family, a
@@ -196,15 +196,17 @@ on `localhost` only: open http://localhost:8098/, not 127.0.0.1 (or pass `--host
   for one of an item's several episodes, with that file's own thumbs and captions, `still` where
   the tool's own frame was not right, `captions: false` where archive.org's are no use,
   `credit` where a licensed film's is not its owner's, and its `check`, what its check found, written
-  down as the opening says: the notice, or none, and the renewal search, or why else it is free;
-  none for one in worker.js `LISTED`, whose reason is its check, and test/catalogue.test.js wants
-  one of the two, a renewal search for a show with a notice and no notice from 1964 on) and
+  down as the opening says: the notice and the renewal search, or none and how it was published
+  (sold to stations, in syndication: a network's broadcast was no publication, so a network show
+  with no notice is still under copyright), or why else it is free; none for one in worker.js
+  `LISTED`, whose reason is its check, and test/catalogue.test.js wants one of the two, a renewal
+  search for a show with a notice, for one with none its syndication, and no notice from 1964 on) and
   committed; the page never searches archive.org. A video's captions (`chooseFiles`) are its own,
   else its 512Kb copy's (all the newsreels have), else the older pass of speech to text that the
   Prelinger's films have instead (`<id>.asr.vtt`), and the test wants four cues a minute, with
   words. Each entry's `licence` and `credit` (`licensing`): null and null for public domain in the
   US (listed, or marked so), else the owner's Creative Commons licence (its deed, https) and whom
-  to credit (README, "Rights"); all 114 are public domain so far. Imported, the tool only exports
+  to credit (README, "Rights"); all 99 are public domain so far. Imported, the tool only exports
   (the test checks `chooseFiles`, `kindsOf` and `licensing`).
 - `tools/archive-proxy/`: `worker.js`, the Cloudflare Worker `video-archive-proxy` on vrlbry's
   account (https://video-archive-proxy.vrlbry.workers.dev/, beside vrlbry-zim-proxy, sharing the

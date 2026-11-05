@@ -62,8 +62,8 @@ sees the same shelves.
   Captions, Stop. The room's panel and the card have the same.
 - **Sit down** on a seat (the couch, the sofa, a seat in the screening room) the same way: you sit
   at a seated height, facing the screen. Walking stands you up again beside it.
-- **Captions** come from archive.org's speech to text, where an item has it (98 of the 114
-  episodes: all but the cartoons, the silent films and six of the TV episodes), drawn under the screen. They are off until you turn them on, and the choice is kept
+- **Captions** come from archive.org's speech to text, where an item has it (84 of the 99
+  episodes: all but the cartoons, the silent films and five of the TV episodes), drawn under the screen. They are off until you turn them on, and the choice is kept
   with the room's (an episode without them says so).
 - **If the video can't reach the screen** (the archive proxy, below, can't be reached), it plays on
   the page in a box with its own controls and captions instead, straight from archive.org. That
@@ -231,7 +231,7 @@ A room made from this template keeps the remote working if:
 
 ## The shows
 
-114 episodes from the 1920s to the 1970s: 61 of 35 shows chosen by hand from
+99 episodes from the 1920s to the 1970s: 46 of 22 shows chosen by hand from
 [Classic TV](https://archive.org/details/classic_tv), 34 newsreels and 19 films (below). Classic
 TV's users upload its items, so the room takes only those marked public domain, and of those only
 shows known to have lapsed into it and fit for the whole family. That is why the decades stop at the
@@ -242,12 +242,18 @@ Not everything marked public domain from before then is, either: NBC renewed Bon
 episodes, so only its 1960 ones are here, and Irving Brecher renewed The Life of Riley's of 1949.
 So each is checked before it goes on the shelves, and what its check found is written down with it
 in `tools/picks.js`. The year that counts is the one in the copyright notice in its credits, not
-its air date. A show from before 1964 is free if it carried no notice, or if nobody renewed it in
-its 28th year: from 1978 the [Copyright Office's records](https://publicrecords.copyright.gov/)
+its air date. A show from before 1964 is free if it was published without a notice, or if nobody
+renewed it in its 28th year: from 1978 the [Copyright Office's records](https://publicrecords.copyright.gov/)
 show it, searched by the show, the episode and its owner (an owner's renewals may not name the
-show), and before then its Catalog of Copyright Entries, whose volumes archive.org has. From 1964
-renewal was automatic, so a later show is free only if it carried no notice, or if the US
-government made it (The Big Picture, the Army's, and Vision USA, the US Information Agency's). A
+show), and before then its Catalog of Copyright Entries, whose volumes archive.org has. A show was
+published when it was sold to stations, in syndication, as the Copyright Office then counted it
+and the shows' owners registered them; not when it was broadcast, live or on the network's own
+film, nor by the kinescopes and prints a network sent its stations (NBC v. Sonneborn, 1985). So a
+network show with no notice was never published, and is still under copyright, for 120 years from
+when it was made: Howdy Doody, Space Patrol and Tales of Tomorrow, among others, were taken out for
+it. From 1964 renewal was automatic, so a later show is free only if it was published with no
+notice, or if the US government made it (The Big Picture, the Army's, and Vision USA, the US
+Information Agency's). A
 show made abroad is out, its US copyright restored in 1996 (The Adventures of Robin Hood, British),
 and so is a copy whose notice can't be read, unless the records settle it whichever year it is.
 
@@ -277,8 +283,8 @@ films' copies have no sound at all: a score added since is not the film's, and m
 
 `tools/picks.js` lists them (the item, the show, the episode's title, its kind if it is not TV, the
 year, where the tool would choose wrong, which of the item's videos, the frame for its tape, or no
-captions, and its check: the notice in its credits, or that it has none, and the renewal search, or
-why else it is free; the films the proxy lists by name have the reason it lists them for), and
+captions, and its check: the notice in its credits and the renewal search, or that it has none and
+how it was published, or why else it is free; the films the proxy lists by name have the reason it lists them for), and
 `node tools/catalogue.mjs` writes `public/catalogue/` from it and from archive.org's metadata: the
 page's `episodes.json` (with what each is shown under, below), a still of each (on its tape and its
 set), and its captions. These are
@@ -289,7 +295,7 @@ again (below), which relays only them.
 ## Rights
 
 Each video is public domain in the US, checked as above, or a film whose owner put it on
-archive.org under a Creative Commons licence (none of the 114 yet). The card, under what is showing,
+archive.org under a Creative Commons licence (none of the 99 yet). The card, under what is showing,
 and the room's panel say which: "Public domain in the US", or the owner and the licence, such as
 "© California Academy of Sciences · CC BY-NC-ND 4.0", the licence linked to its deed in the card.
 With the title beside it, which links to the film's page on archive.org, that is the credit the

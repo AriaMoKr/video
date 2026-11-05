@@ -131,8 +131,8 @@ test("a pick must also be in classic_tv or one of its decades, universal_newsree
   const res = await handle(get(FILE, { range: 'bytes=0-' }), { fetch, items });
   assert.equal(res.status, 403);
   assert.match(await res.text(), /not marked public domain/);
-  assert.equal((await handle(get('https://proxy.example/download/Mama1950/x.mp4', { range: 'bytes=0-' }), { fetch, items })).status, 403);
-  assert.deepEqual(asked, ['/metadata/TheBigLittleJesus/metadata', '/metadata/Mama1950/metadata'], 'no file was asked for');
+  assert.equal((await handle(get('https://proxy.example/download/Life_with_Elizabeth/x.mp4', { range: 'bytes=0-' }), { fetch, items })).status, 403);
+  assert.deepEqual(asked, ['/metadata/TheBigLittleJesus/metadata', '/metadata/Life_with_Elizabeth/metadata'], 'no file was asked for');
 });
 
 test('it relays the part with CORS headers, asking about an item once for a while', async () => {

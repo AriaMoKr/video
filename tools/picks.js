@@ -7,27 +7,34 @@
 // (NBC renewed Bonanza's 1959 episodes in 1987, Irving Brecher The Life of Riley's of 1949 in 1977,
 // and Dusty's Trail has its notice of 1973), so each is checked before it is added. The year that
 // counts is the one in the notice in its credits, not its air date. A show from before 1964 is free
-// if it came out without one, or if nobody renewed it in its 28th year: from 1978 in the Copyright
-// Office's records (https://publicrecords.copyright.gov/), searched by the show, the episode and its
-// owner, whose renewals may not name the show; before that in its Catalog of Copyright Entries,
-// whose volumes archive.org has. From 1964 renewal was automatic, so only a show with no notice will
-// do, or a film of the US government's (The Big Picture, Vision USA). Nor a show made abroad, whose
-// US copyright the URAA restored in 1996 unless it came out here within 30 days, which an episode
-// can't show (The Adventures of Robin Hood, British). A copy whose credits stop before the notice
-// will do where the records settle it (an episode that first aired early in 1963 has a notice of
-// 1962 or 1963, and neither was renewed); one whose notice can't be read where they don't will not
-// (Mack and Myer for Hire ran into 1964), and nor will one that shows a later episode than it says.
-// Take out a pick that fails, whatever archive.org marks it. tools/catalogue.mjs reads each one's
-// metadata and writes public/catalogue/ from it.
+// if it was published without one, or if nobody renewed it in its 28th year: from 1978 in the
+// Copyright Office's records (https://publicrecords.copyright.gov/), searched by the show, the
+// episode and its owner, whose renewals may not name the show; before that in its Catalog of
+// Copyright Entries, whose volumes archive.org has. A show was published when it was sold to
+// stations, in syndication, as the Copyright Office then counted it and the shows' owners registered
+// them, not when it was broadcast, live or on the network's own film, nor by the kinescopes and
+// prints a network sent its stations (NBC v. Sonneborn, 1985): so a network show with no notice
+// was never published, and is still under copyright, 120 years from when it was made (Wade Williams
+// registered his Space Patrol episodes as unpublished in 1988). From 1964 renewal was automatic,
+// so only a show published with no notice will do, or a film of the US government's (The Big
+// Picture, Vision USA). Nor a show made abroad, whose US copyright the URAA restored in 1996 unless
+// it came out here within 30 days, which an episode can't show (The Adventures of Robin Hood,
+// British). A copy whose credits stop before the notice will do where the records settle it (an
+// episode that first aired early in 1963 has a notice of 1962 or 1963, and neither was renewed);
+// one whose notice can't be read where they don't will not (Mack and Myer for Hire ran into 1964),
+// and nor will one that shows a later episode than it says. Take out a pick that fails, whatever
+// archive.org marks it. tools/catalogue.mjs reads each one's metadata and writes public/catalogue/
+// from it.
 //
 // What each check found is written down with it, `check`, for anyone to check again: for a show,
 // the notice as its credits have it (© MCMLXII Filmways TV Productions, Inc.), or that it has none
-// (and whose credits they are), or that the copy's credits end before it; then for a show from
-// before 1964 with a notice, the renewal search (that year's renewals of the show or its owner, and
-// that this one is not among them). Else why else it is free: a film of the US government's,
-// Universal's gift of 1976, a Prelinger Archives copy marked public domain, 95 years since it came
-// out, or its owner's licence (worker.js OWNERS). The cartoons and silent comedies the proxy lists
-// by name (worker.js LISTED) have none: the reason it lists each for is its check.
+// (and whose credits they are) and how it was published, or that the copy's credits end before
+// it; then for a show from before 1964 with a notice, the renewal search (that year's renewals of
+// the show or its owner, and that this one is not among them). Else why else it is free: a film of
+// the US government's, Universal's gift of 1976, a Prelinger Archives copy marked public domain,
+// 95 years since it came out, or its owner's licence (worker.js OWNERS). The cartoons and silent
+// comedies the proxy lists by name (worker.js LISTED) have none: the reason it lists each for is
+// its check.
 //
 // After each decade's shows and films, newsreels from archive.org's universal_newsreels
 // (https://archive.org/details/universal_newsreels): Universal gave its newsreels to the public in
@@ -74,6 +81,7 @@ const DESILU_1962 = '© MCMLXII Desilu Productions, Inc., on its last card. Not 
 const MAYBERRY_1963 = '© 1963 Mayberry Enterprises on its last card. Not renewed in 1991: Mayberry Enterprises\' renewals of that year, 21 episodes, are not of it.';
 const MAYBERRY_CUT = 'The copy\'s credits end before the notice; it first aired early in 1963, so its notice is of 1962 or 1963. Not renewed: Mayberry Enterprises\' renewals, 21 episodes in 1991, are not of it, nor any of 1990.';
 const NO_OZZIE = 'Not renewed: none of the show\'s episodes ever was.';
+const SHERLOCK = 'No notice on its titles or closing credits (Sheldon Reynolds\' Motion Pictures for Television, filmed in France for American television). Published in syndication, sold to stations from October 1954, which the Copyright Office then counted as publication. Nothing of it renewed.';
 
 /** @type {Pick[]} */
 export const PICKS = [
@@ -102,10 +110,7 @@ export const PICKS = [
   { id: 'the-lone-ranger-1949-s-01-e-02-the-lone-ranger-fights-on', show: 'The Lone Ranger', title: 'The Lone Ranger Fights On', decade: '1940s', year: 1949, check: 'The copy ends before its notice. The Lone Ranger, Inc. registered it, © 22 September 1949 (Catalog of Copyright Entries, January–June 1950), and did not renew it: it is not in the Catalog\'s renewals of 1976 or 1977.' },
   { id: 'the-lone-ranger-1949-s-01-e-04-legion-of-old-timers', show: 'The Lone Ranger', title: 'Legion of Old Timers', decade: '1940s', year: 1949, check: 'The copy ends before its notice. The Lone Ranger, Inc. registered it, © 6 October 1949 (Catalog of Copyright Entries, January–June 1950), and did not renew it: it is not in the Catalog\'s renewals of 1976 or 1977.' },
   { id: 'the-lone-ranger-1949-s-01-e-05-rustlers-hideout', show: 'The Lone Ranger', title: "Rustlers' Hideout", decade: '1940s', year: 1949, check: '© MCMXLIX The Lone Ranger, Inc., in its closing credits (registered 13 October 1949). Not renewed: it is not in the Catalog of Copyright Entries\' renewals of 1976 or 1977.' },
-  { id: '1949NBC-Howdy_Doody_Uploaded-By-Jeice_The_Cuddly_Warrior', show: 'Howdy Doody', title: 'An episode from 1949', decade: '1940s', year: 1949, check: 'No notice in its credits: "this has been an NBC Television presentation".' },
-  { id: 'Howdy_Doody_4', show: 'Howdy Doody', title: 'From August 3, 1949', decade: '1940s', year: 1949, still: 120, check: 'No notice in its credits: "this has been an NBC Television presentation".' },
-  { id: 'captainvideo', show: 'Captain Video', title: 'An episode from 1949', decade: '1940s', year: 1949, check: 'No notice in its credits ("A DuMont Production"). Columbia\'s renewals of 1979 are of its serial of 1951, not this show.' },
-  { id: 'TheChristmasCarolastoldbyVincentPrice', show: 'The Christmas Carol', title: 'Told by Vincent Price', decade: '1940s', year: 1949, check: 'No notice on its titles, its producer\'s card or its end ("Supervisor for J. F., Inc."), and not renewed: it is not in the Catalog of Copyright Entries\' renewals of 1976 or 1977.' },
+  { id: 'TheChristmasCarolastoldbyVincentPrice', show: 'The Christmas Carol', title: 'Told by Vincent Price', decade: '1940s', year: 1949, check: 'No notice on its titles, its producer\'s card or its end ("Supervisor for J. F., Inc."). Published in syndication: Jerry Fairbanks sold it to 22 stations for Christmas Day 1949, and Consolidated Television Sales to more from 1952, which the Copyright Office then counted as publication. Nor renewed: it is not in the Catalog of Copyright Entries\' renewals of 1976 or 1977.' },
   { id: 'Public_Prosecutor--Missing_Hour', show: 'Public Prosecutor', title: 'The Case of the Missing Hour', decade: '1940s', year: 1947, check: '© MCMXLVIII National Broadcasting Company, Inc., on its title card (made by Jerry Fairbanks, Inc.). Not renewed: it is not in the Catalog of Copyright Entries\' renewals of 1975 or 1976.' },
   { id: 'Public_Prosecutor--Dead_Mans_Voice', show: 'Public Prosecutor', title: "The Case of the Dead Man's Voice", decade: '1940s', year: 1948, check: '© MCMXLVIII National Broadcasting Company, Inc., on its title card (made by Jerry Fairbanks, Inc.). Not renewed: it is not in the Catalog of Copyright Entries\' renewals of 1975 or 1976.' },
   { id: 'superman_mechanical_monsters', show: 'Superman', title: 'The Mechanical Monsters', decade: '1940s', kind: 'cartoon', year: 1941 },
@@ -121,29 +126,17 @@ export const PICKS = [
   { id: '1946-08-30_UN_Starts_Session_At_New_Home', show: 'Universal Newsreel', title: 'UN Starts Session at New Home', decade: '1940s', kind: 'newsreel', year: 1946, still: 25, check: UNIVERSAL },
   { id: '1946-11-21_White_Sands_NM_V-2_rocket', show: 'Universal Newsreel', title: 'V-2 Rocket Films the Earth', decade: '1940s', kind: 'newsreel', year: 1946, still: 60, check: UNIVERSAL },
 
-  { id: 'Mama1950', show: 'Mama', title: "Mama's Bad Day", decade: '1950s', year: 1950, check: 'No notice in its credits (produced for CBS by Carol Irwin, for Maxwell House), and nothing of it renewed.' },
-  { id: 'Cavalcade_Of_Stars', show: 'Cavalcade of Stars', title: 'Jackie Gleason and the Honeymooners', decade: '1950s', year: 1951, check: 'The copy is the Honeymooners sketch alone, with no credits or notice; nothing of Cavalcade of Stars was ever renewed, nor any Honeymooners of 1951.' },
-  { id: 'Jack_Benny_11_04_1951', show: 'The Jack Benny Program', title: 'With Dorothy Shay', decade: '1950s', year: 1951, check: 'No notice on its opening card; the copy cuts its closing credits. Not renewed: J & M Productions\' renewals of the show start in 1983, with its filmed shows of 1955.' },
-  { id: 'SpacePatrolS01e43TheSpacePatrolCodeBelt', show: 'Space Patrol', title: 'The Space Patrol Code Belt', decade: '1950s', year: 1951, check: 'No notice in its credits (Mike Moser, for ABC). Not renewed: Wade Williams renewed 133 of the show\'s episodes in 1986, those registered in 1958, not this one.' },
-  { id: 'RacketSquadTheSaltedMine1951', show: 'Racket Squad', title: 'The Salted Mine', decade: '1950s', year: 1951, check: 'No notice in its credits (a Showcase production, at Hal Roach Studios), and nothing of the show renewed.' },
-  { id: 'Burns-Allen-Show_S2E7_Christmas', show: 'Burns and Allen', title: 'The Christmas Episode', decade: '1950s', year: 1951, check: 'No notice in its credits ("a CBS Television Network Production", live, before the show was filmed). Not renewed: McCadden\'s renewals start with its first filmed show, of 1952.' },
-  { id: 'Tales_Of_Tomorrow_-_The_Search_For_The_Flying_Saucer', show: 'Tales of Tomorrow', title: 'The Search for the Flying Saucer', decade: '1950s', year: 1951, check: 'No notice in its credits (George F. Foley, for ABC), and nothing of it renewed.' },
-  { id: 'Tales_Of_Tomorrow_-_Ahead_Of_His_Time', show: 'Tales of Tomorrow', title: 'Ahead of His Time', decade: '1950s', year: 1952, check: 'No notice in its credits (a George F. Foley production, released by the Tee Vee Co.), and nothing of it renewed.' },
-  { id: 'ColgateComedyHourWithAbbottAndCostelloAndErrolFlynn', show: 'The Colgate Comedy Hour', title: 'Abbott and Costello, with Errol Flynn', decade: '1950s', year: 1952, still: 294, check: 'No notice in its opening billboards, and the copy has no closing credits; nothing of The Colgate Comedy Hour was ever renewed.' },
+  { id: 'RacketSquadTheSaltedMine1951', show: 'Racket Squad', title: 'The Salted Mine', decade: '1950s', year: 1951, check: 'No notice in its credits (a Showcase production, at Hal Roach Studios). First shown on CBS, on 15 November 1951; published when the show was sold to stations in reruns, as Captain Braddock (on WABD, New York, in 1957), which the Copyright Office then counted as publication. Nothing of the show renewed.' },
   { id: 'TheBigLittleJesus', show: 'Dragnet', title: 'The Big Little Jesus', decade: '1950s', year: 1953, check: '© MCMLIII Mark VII Ltd. in its closing credits. Not renewed in 1981: Mark VII\'s renewals are of its songs and its feature films, none of the show\'s episodes.' },
-  { id: 'dingdongschool', show: 'Ding Dong School', title: 'An episode from 1953', decade: '1950s', year: 1953, check: 'No notice in its credits (Reinald Werrenrath, Jr., for NBC).' },
   { id: 'Life_with_Elizabeth', show: 'Life with Elizabeth', title: 'An episode from 1953', decade: '1950s', year: 1953, check: '© 1953 Bandy Productions in its closing credits (a Guild Films production, with Don Fedderson). Not renewed in 1981: nothing of it under the show, Bandy Productions or Guild Films.' },
-  { id: 'SherlockHolmes-TheCaseofLadyBeryl', show: 'Sherlock Holmes', title: 'The Case of Lady Beryl', decade: '1950s', year: 1954, check: 'No notice on its titles or closing credits (Sheldon Reynolds\' Motion Pictures for Television, filmed in France for American television), and nothing of it renewed.' },
-  { id: 'SherlockHolmes-TheCaseoftheShyBallerina', show: 'Sherlock Holmes', title: 'The Case of the Shy Ballerina', decade: '1950s', year: 1954, check: 'No notice on its titles or closing credits (Sheldon Reynolds\' Motion Pictures for Television, filmed in France for American television), and nothing of it renewed.' },
+  { id: 'SherlockHolmes-TheCaseofLadyBeryl', show: 'Sherlock Holmes', title: 'The Case of Lady Beryl', decade: '1950s', year: 1954, check: SHERLOCK },
+  { id: 'SherlockHolmes-TheCaseoftheShyBallerina', show: 'Sherlock Holmes', title: 'The Case of the Shy Ballerina', decade: '1950s', year: 1954, check: SHERLOCK },
   { id: 'AdventuresOfSupermanStampDayForSchoolChildren', show: 'Stamp Day for Superman', title: 'With George Reeves', decade: '1950s', year: 1954, still: 1050, check: '© MCMLIV National Comics Publications, Inc., on its title card, a film Superman, Inc. gave the Treasury Department. Not renewed in 1982: none of the Superman renewals of 1981 or 1982 is of it.' },
-  { id: 'Pinky_Lee_Show', show: 'The Pinky Lee Show', title: 'An episode from 1954', decade: '1950s', year: 1954, check: 'No notice in its credits (a Lawrence White production, for NBC): the one after them, of 2008, is Alpha Video\'s, on its DVD.' },
-  { id: 'TheAdventuresOfFlashGordon', show: 'Flash Gordon', title: 'An episode from 1955', decade: '1950s', year: 1955, check: 'No notice in its credits (an Interwest Film Luedecke production, made in West Berlin for American television under Inter-Continental Television Films, and shown here first), and nothing of it renewed.' },
-  { id: 'Super-Circus_1956', show: 'Super Circus', title: 'An episode from 1956', decade: '1950s', year: 1956, still: 1380, check: 'No notice in its credits (an ABC production), and nothing of it renewed.' },
-  { id: 'Annie_Oakley_Sharp_Shootin_Annie', show: 'Annie Oakley', title: "Sharp Shootin' Annie", decade: '1950s', check: 'No notice in its credits (Annie Oakley Productions, Inc.). Not renewed: Flying A Productions\' renewals, 13 films of 1955 in 1983, are not of it.' },
+  { id: 'TheAdventuresOfFlashGordon', show: 'Flash Gordon', title: 'An episode from 1955', decade: '1950s', year: 1955, check: 'No notice in its credits (an Interwest Film Luedecke production, made in West Berlin for American television under Inter-Continental Television Films, and shown here first). Published in syndication, sold to stations across most of the country from October 1954 (and shown on DuMont in the East), which the Copyright Office then counted as publication. Nothing of it renewed.' },
+  { id: 'Annie_Oakley_Sharp_Shootin_Annie', show: 'Annie Oakley', title: "Sharp Shootin' Annie", decade: '1950s', year: 1954, check: 'No notice in its credits (Annie Oakley Productions, Inc.). Published in syndication, first shown on 12 June 1954, as Flying A registered the show\'s films, as published (Dynamite, LP0000005307, 1955). Not renewed: Flying A Productions\' renewals, 13 films of 1955 in 1983, are not of it.' },
   { id: 'Cisco_Kid_-_Buried_Treasure', show: 'The Cisco Kid', title: 'Buried Treasure', decade: '1950s', check: '© MCMLII Ziv Television Programs, Inc., in its closing credits. Not renewed in 1980: Rhodes Enterprises renewed 79 of Ziv\'s Cisco Kid episodes in 1980–83, not this one.' },
-  { id: 'I_Married_Joan_EP79_Neighbors', show: 'I Married Joan', title: 'Neighbors', decade: '1950s', check: 'No notice in its credits (filmed by Volcano Pictures). Not renewed: Martin S. Colbert renewed 41 of the show\'s episodes in 1982, not this one.' },
+  { id: 'I_Married_Joan_EP79_Neighbors', show: 'I Married Joan', title: 'Neighbors', decade: '1950s', check: 'No notice in its credits (filmed by Volcano Pictures). Published in syndication, on 6 May 1956, as Joan Davis Enterprises registered 46 of the show\'s episodes (in 1981–82, with notices of 1953 to 1955); this one is not among them. Not renewed: Martin S. Colbert renewed 41 of those in 1982, not this one.' },
   { id: 'OZZIE_AND_HARRIET_ep_Halloween_Party', show: 'Ozzie and Harriet', title: 'Halloween Party', decade: '1950s', check: `© MCMLII Ozzie Nelson in its closing credits. ${NO_OZZIE}` },
-  { id: 'You_Bet_Your_Life_Groucho', show: 'You Bet Your Life', title: 'With Groucho Marx', decade: '1950s', check: 'No notice on its titles or credits (John Guedel\'s, filmed by Filmcraft Productions, with DeSoto\'s commercials). Not renewed: nothing of the show in 1978–85; NBC\'s renewals of 1989 are of The Best of Groucho, its shows recut for syndication in 1961.' },
   { id: 'OSB-02_Night_Of_April_14th', show: 'One Step Beyond', title: 'Night of April 14th', decade: '1950s', year: 1959, check: '© MCMLIX World Television Programming, Inc., in its closing credits. Not renewed in 1987: World Television\'s renewals, of 1989, are of 13 episodes of 1961.' },
   { id: 'DateWith1950', show: 'Simmel-Meservey', title: 'A Date with Your Family', decade: '1950s', kind: 'film', year: 1950, check: PRELINGER },
   { id: 'Designfo1956', show: 'General Motors', title: 'Design for Dreaming', decade: '1950s', kind: 'film', year: 1956, check: PRELINGER },
